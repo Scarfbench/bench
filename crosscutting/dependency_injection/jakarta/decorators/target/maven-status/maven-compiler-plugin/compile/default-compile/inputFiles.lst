@@ -1,0 +1,6 @@
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/decorators/src/main/java/jakarta/tutorial/decorators/CoderBean.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/decorators/src/main/java/jakarta/tutorial/decorators/CoderImpl.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/decorators/src/main/java/jakarta/tutorial/decorators/CoderDecorator.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/decorators/src/main/java/jakarta/tutorial/decorators/LoggedInterceptor.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/decorators/src/main/java/jakarta/tutorial/decorators/Coder.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/decorators/src/main/java/jakarta/tutorial/decorators/Logged.java

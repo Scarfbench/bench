@@ -1,0 +1,7 @@
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/listener/PaymentHandler.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/payment/Debit.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/payment/PaymentBean.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/payment/Credit.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/interceptor/Logged.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/event/PaymentEvent.java
+/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/jakarta/dependency_injection/billpayment/src/main/java/jakarta/tutorial/billpayment/interceptor/LoggedInterceptor.java
