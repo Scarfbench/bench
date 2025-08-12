@@ -1,0 +1,47 @@
+# Bill Payment Spring Boot Application Justfile
+
+# Default recipe
+default:
+    @just --list
+
+# Clean and compile the application
+build:
+    mvn clean compile
+
+# Run the application
+run:
+    mvn spring-boot:run
+
+# Package the application
+package:
+    mvn clean package
+
+# Run tests
+test:
+    mvn test
+
+# Clean build artifacts
+clean:
+    mvn clean
+
+# Build Docker image
+docker-build:
+    mvn clean package
+    docker build -t billpayment-spring .
+
+# Run with Docker Compose
+docker-run:
+    just docker-build
+    docker-compose up
+
+# Stop Docker containers
+docker-stop:
+    docker-compose down
+
+# Show application logs
+logs:
+    docker-compose logs -f billpayment-spring
+
+# Development mode with auto-reload
+dev:
+    mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=dev"

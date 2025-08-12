@@ -1,0 +1,5 @@
+jakarta/tutorial/producerfields/ejb/RequestBean.class
+jakarta/tutorial/producerfields/entity/ToDo.class
+jakarta/tutorial/producerfields/web/ListBean.class
+jakarta/tutorial/producerfields/db/UserDatabaseEntityManager.class
+jakarta/tutorial/producerfields/db/UserDatabase.class

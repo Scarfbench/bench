@@ -1,6 +1,6 @@
-# 🧣 SCARFBENCH: Self-Contained Application Refactoring Benchmark
+# Benchmark Applications
 
-The SCARFBENCH repository provides a collection of self-contained applications designed for benchmarking agent driven application refactoring focusing on enterprise java modernization and migration. Each application is structured to be easily deployable and modifiable, allowing for comprehensive testing of refactoring strategies.
+This repository provides a collection of self-contained applications designed for benchmarking agent driven application refactoring focusing on enterprise java modernization and migration. Each application is structured to be easily deployable and modifiable, allowing for comprehensive testing of refactoring strategies.
 
 ## Prerequisites
 Install / enable the following before running any examples.
@@ -42,4 +42,29 @@ Install / enable the following before running any examples.
    - Verify: `java -version`
 
 # Benchmark Structure
-To be added ... 
+
+
+# Transformation Matrix (arranged by benchmark folder structure)
+
+## 1. Whole Applications (`/whole_applications/`)
+
+| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
+|-------------|---------|---------|-----------|---------|---------|
+| cargotracker | . | ✓ | . | . | . |
+| coffeeshop | . | . | . | ✓ | . |
+| daytrader | . | ✓ | . | . | . |
+| realworld | ✓ | . | ✓ | . | . |
+| petclinic | ✓ | . | . | ✓ | . |
+| mailreader2 | . | . | . | . | ✓ |
+
+## 2. Dependency Injection (`/dependency_injection/`)
+
+| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
+|-------------|---------|---------|-----------|---------|---------|
+| billpayment | ✓ | ✓ | . | . | ✓ |
+| decorators | . | ✓ | . | . | . |
+| encoder | . | ✓ | . | . | . |
+| guessnumber | . | ✓ | . | . | . |
+| producerfields | . | ✓ | . | . | . |
+| producermethods | . | ✓ | . | . | . |
+| simplegreeting | . | ✓ | . | . | . |

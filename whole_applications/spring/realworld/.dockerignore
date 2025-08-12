@@ -1,0 +1,43 @@
+# Ignore files and directories that shouldn't be copied to Docker context
+
+# Build outputs
+build/
+target/
+*.jar
+*.war
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+doc/
+
+# Test reports
+.gradle/
+.gradletasknamecache
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Docker files (we don't need to copy these)
+Dockerfile
+.dockerignore
+docker-compose.yml

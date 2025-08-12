@@ -1,0 +1,136 @@
+# Jakarta EE Producer Methods Project Justfile
+# Run `just` to see available recipes
+
+# Set shell
+set shell := ["bash", "-c"]
+
+# Default recipe - shows available commands
+default:
+    @just --list
+
+# Build the WAR file using Maven
+build:
+    @echo "Building the producermethods WAR file..."
+    ./mvnw clean package
+
+# Clean build artifacts
+clean:
+    @echo "Cleaning build artifacts..."
+    ./mvnw clean
+
+# Compile without packaging
+compile:
+    @echo "Compiling Java sources..."
+    ./mvnw compile
+
+# Run tests
+test:
+    @echo "Running tests..."
+    ./mvnw test
+
+# Build Docker image
+docker-build:
+    @echo "Building Docker image..."
+    just build
+    docker build -t producermethods-glassfish7:latest .
+
+# Run Docker container directly (no docker compose)
+run:
+    @echo "Running Docker container..."
+    docker run -d -p 8080:8080 -p 4848:4848 --name producermethods-container producermethods-glassfish7:latest
+
+# Stop Docker container
+stop:
+    @echo "Stopping Docker container..."
+    docker stop producermethods-container || echo "Container not running"
+    docker rm producermethods-container || echo "Container not found"
+
+# View Docker container logs
+logs:
+    @echo "Viewing application logs..."
+    docker logs -f producermethods-container
+
+# Restart Docker container
+restart: stop run
+    @echo "Container restarted!"
+
+# Build and deploy (build + docker-build + run)
+deploy: build docker-build run
+    @echo "Application deployed successfully!"
+    @echo ""
+    @echo "Access the application at: http://localhost:8085/producermethods/"
+    @echo "Access GlassFish admin console at: http://localhost:4853/"
+
+# Show application status
+status:
+    @echo "Docker container status:"
+    docker ps | grep producermethods || echo "Container not running"
+    @echo ""
+    @echo "Docker images:"
+    docker images | grep producermethods
+
+# View application in browser (requires xdg-open)
+open:
+    @echo "Opening application in browser..."
+    xdg-open http://localhost:8085/producermethods/ || echo "Please open http://localhost:8085/producermethods/ manually"
+
+# Complete dedeployment - stops containers, removes images, and frees all resources
+dedeploy:
+    @echo "dedeploying application..."
+    @echo "Stopping all containers..."
+    docker compose down -v || echo "No containers to stop"
+    @echo "Removing Docker image..."
+    docker rmi producermethods-glassfish7:latest || echo "Image not found"
+    @echo "Removing stopped containers and freeing ports..."
+    docker container prune -f
+    @echo "Cleaning up networks..."
+    docker network prune -f
+    @echo "dedeployment complete - all ports released!"
+
+# Clean Docker resources
+docker-clean:
+    @echo "Cleaning Docker resources..."
+    docker stop producermethods-container || echo "Container not running"
+    docker rm producermethods-container || echo "Container not found"
+    docker rmi producermethods-glassfish7:latest || echo "Image not found"
+    docker system prune -f
+
+# Development workflow - clean, build, and deploy
+dev: clean build docker-build run
+    @echo "Development environment ready!"
+    @echo "Application: http://localhost:8080/producermethods/"
+    @echo "Admin console: http://localhost:4848/"
+
+# Show project information
+info:
+    @echo "Jakarta EE Producer Methods Project Information"
+    @echo "================================================="
+    @echo "Project: producermethods (Jakarta EE CDI Example)"
+    @echo "Version: 10-SNAPSHOT"
+    @echo "Java Version: 11"
+    @echo "Application Server: GlassFish 7"
+    @echo ""
+    @echo "URLs when running:"
+    @echo "  Application: http://localhost:8087/producermethods/"
+    @echo "  Admin Console: http://localhost:4854/"
+    @echo ""
+    @echo "Key files:"
+    @echo "  WAR file: target/producermethods.war"
+    @echo "  Source: src/main/java/jakarta/"
+    @echo "  Web content: src/main/webapp/"
+
+# Check if Docker is running
+check-docker:
+    @echo "Checking Docker status..."
+    docker --version
+    docker ps
+
+# Follow application logs in real-time
+tail-logs:
+    @echo "Following application logs (Ctrl+C to stop)..."
+    docker logs -f producermethods-container
+
+# Execute bash shell in running container
+shell:
+    @echo "Opening shell in running container..."
+    docker exec -it producermethods-container bash

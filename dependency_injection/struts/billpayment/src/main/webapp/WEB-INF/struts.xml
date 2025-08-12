@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN" "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <!-- Development mode for better error reporting -->
+    <constant name="struts.devMode" value="true" />
+
+    <!-- Enable Spring integration -->
+    <constant name="struts.objectFactory" value="spring" />
+
+    <!-- Enable validation -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+
+    <!-- Package configuration -->
+    <package name="billpayment" extends="struts-default">
+
+        <!-- Interceptor stack with logging -->
+        <interceptors>
+            <interceptor name="logging"
+                class="struts.tutorial.billpayment.interceptor.LoggingInterceptor" />
+            <interceptor-stack name="loggingStack">
+                <interceptor-ref name="logging" />
+                <interceptor-ref name="defaultStack" />
+            </interceptor-stack>
+        </interceptors>
+
+        <!-- Set default interceptor stack -->
+        <default-interceptor-ref name="loggingStack" />
+
+        <!-- Payment action configuration -->
+        <action name="payment" class="paymentAction">
+            <interceptor-ref name="loggingStack" />
+            <result name="input">/index.jsp</result>
+            <result name="success">/response.jsp</result>
+            <result name="error">/index.jsp</result>
+        </action>
+
+        <!-- Payment reset action -->
+        <action name="reset" class="paymentAction" method="reset">
+            <interceptor-ref name="loggingStack" />
+            <result name="input">/index.jsp</result>
+        </action>
+
+        <!-- Default action for root -->
+        <action name="index" class="paymentAction" method="input">
+            <result name="input">/index.jsp</result>
+        </action>
+
+    </package>
+
+</struts>
