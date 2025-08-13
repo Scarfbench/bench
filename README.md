@@ -50,21 +50,58 @@ Install / enable the following before running any examples.
 
 | Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
 |-------------|---------|---------|-----------|---------|---------|
-| cargotracker | . | ✓ | . | . | . |
-| coffeeshop | . | . | . | ✓ | . |
-| daytrader | . | ✓ | . | . | . |
-| realworld | ✓ | . | ✓ | . | . |
-| petclinic | ✓ | . | . | ✓ | . |
-| mailreader2 | . | . | . | . | ✓ |
+| cargotracker | . | 🛑 | . | . | . |
+| coffeeshop | . | . | . | 🛑 | . |
+| daytrader | . | 🛑 | . | . | . |
+| realworld | 🛑 | . | 🛑 | . | . |
+| petclinic | 🛑 | . | . | 🛑 | . |
+| mailreader2 | . | . | . | . | 🛑 |
+
+🛑: Start
+
+✅: Complete
+
+.: Not Started
 
 ## 2. Dependency Injection (`/dependency_injection/`)
 
 | Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
 |-------------|---------|---------|-----------|---------|---------|
-| billpayment | ✓ | ✓ | . | . | ✓ |
-| decorators | . | ✓ | . | . | . |
-| encoder | . | ✓ | . | . | . |
-| guessnumber | . | ✓ | . | . | . |
-| producerfields | . | ✓ | . | . | . |
-| producermethods | . | ✓ | . | . | . |
-| simplegreeting | . | ✓ | . | . | . |
+| billpayment | 🛑 | 🛑 | . | . | 🛑 |
+| decorators | . | 🛑 | . | . | . |
+| encoder | . | 🛑 | . | . | . |
+| guessnumber | . | 🛑 | . | . | . |
+| producerfields | . | 🛑 | . | . | . |
+| producermethods | . | 🛑 | . | . | . |
+| simplegreeting | . | 🛑 | . | . | . |
+
+## 3. Persistence (`/persistence/`)
+
+| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
+|-------------|---------|---------|-----------|---------|---------|
+| address-book | . | 🛑 | . | . | . |
+| order | . | 🛑 | . | . | . |
+| roster | . | 🛑 | . | . | . |
+
+## 4. Presentation (`/presentation/`)
+
+| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
+|-------------|---------|---------|-----------|---------|---------|
+| dukeetf | . | 🛑 | . | . | . |
+| dukeetf2 | . | 🛑 | . | . | . |
+| fileupload | . | 🛑 | . | . | . |
+| hello-servlet | . | 🛑 | . | . | . |
+| mood | . | 🛑 | . | . | . |
+| websocketbot | . | 🛑 | . | . | . |
+
+## 5. Business Domain (`/business_domain/`)
+
+| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
+|-------------|---------|---------|-----------|---------|---------|
+| *No applications yet* | . | . | . | . | . |
+
+## 6. Integration (`/integration/`)
+
+| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
+|-------------|---------|---------|-----------|---------|---------|
+| *No applications yet* | . | . | . | . | . |

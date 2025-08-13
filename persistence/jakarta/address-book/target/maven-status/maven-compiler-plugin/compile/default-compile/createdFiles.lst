@@ -1,0 +1,8 @@
+jakarta/tutorial/addressbook/ejb/ContactFacade.class
+jakarta/tutorial/addressbook/web/ContactController.class
+jakarta/tutorial/addressbook/web/ContactController$1.class
+jakarta/tutorial/addressbook/entity/Contact.class
+jakarta/tutorial/addressbook/web/util/JsfUtil.class
+jakarta/tutorial/addressbook/ejb/AbstractFacade.class
+jakarta/tutorial/addressbook/web/ContactController$ContactControllerConverter.class
+jakarta/tutorial/addressbook/web/util/PaginationHelper.class

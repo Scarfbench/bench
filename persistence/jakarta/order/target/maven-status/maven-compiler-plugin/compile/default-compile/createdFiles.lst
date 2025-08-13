@@ -1,0 +1,10 @@
+jakarta/tutorial/order/entity/Part.class
+jakarta/tutorial/order/entity/Vendor.class
+jakarta/tutorial/order/entity/LineItemKey.class
+jakarta/tutorial/order/ejb/RequestBean.class
+jakarta/tutorial/order/ejb/ConfigBean.class
+jakarta/tutorial/order/entity/PartKey.class
+jakarta/tutorial/order/entity/VendorPart.class
+jakarta/tutorial/order/entity/LineItem.class
+jakarta/tutorial/order/web/OrderManager.class
+jakarta/tutorial/order/entity/CustomerOrder.class
