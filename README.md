@@ -52,16 +52,19 @@ Install / enable the following before running any examples.
 |-------------|---------|---------|-----------|---------|---------|
 | cargotracker | . | 🛑 | . | . | . |
 | coffeeshop | . | . | . | 🛑 | . |
-| daytrader | . | 🛑 | . | . | . |
-| realworld | 🛑 | . | 🛑 | . | . |
-| petclinic | 🛑 | . | . | 🛑 | . |
+| daytrader | 🏗️ (@rahlk) | 🛑 | . | . | . |
+| realworld | 🛑 | 🛑 | 🛑 | 🛑 | . |
+| petclinic   | 🛑 | . | . | 🛑 | . |
 | mailreader2 | . | . | . | . | 🛑 |
 
 🛑: Start
 
 ✅: Complete
 
+🏗️: In progress
 .: Not Started
+
+NOTE: RECORD TIME AND EFFORT
 
 ## 2. Dependency Injection (`/dependency_injection/`)
 

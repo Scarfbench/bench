@@ -8,7 +8,8 @@ Minimal Quarkus 2.14.x application using:
 
 ## Prerequisites
 - JDK 17
-- Docker + Docker Compose
+- Docker
+- Docker Compose
 - [`just`](https://just.systems) (optional, simplifies commands)
 
 ## Quick Start (All Services)

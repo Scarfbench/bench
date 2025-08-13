@@ -2,7 +2,6 @@
 FROM maven:3.8.8-eclipse-temurin-17 AS build
 WORKDIR /workspace
 
-# Copy only POM first so dependency download is cached
 COPY pom.xml ./
 RUN mvn -B -ntp -DskipTests dependency:go-offline
 
