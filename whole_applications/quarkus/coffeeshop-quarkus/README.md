@@ -8,7 +8,7 @@ Minimal Quarkus 2.14.x application using:
 
 ## Prerequisites
 - JDK 17
-- Docker + Docker Compose
+- Docker and Docker Compose
 - [`just`](https://just.systems) (optional, simplifies commands)
 
 ## Quick Start (All Services)
@@ -50,7 +50,7 @@ docker compose up -d coffeeshop-db redpanda
 ```
 ./mvnw quarkus:dev
 ```
-This serves on http://localhost:8080/ (different from containerized port 8081).
+This serves on http://localhost:8080/ (different from containerized port 9080).
 
 ## Postgres Init
 Schemas and baseline objects are created from: `infra/postgres/init/*.sql` (mounted at container start).
@@ -58,7 +58,7 @@ Schemas and baseline objects are created from: `infra/postgres/init/*.sql` (moun
 ## Ports
 | Service         | Host Port |
 | --------------- | --------- |
-| App (container) | 8081      |
+| App (container) | 9080      |
 | App (dev mode)  | 8080      |
 | PostgreSQL      | 5432      |
 | Redpanda Kafka  | 19092     |

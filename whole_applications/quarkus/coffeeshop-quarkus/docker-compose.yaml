@@ -98,9 +98,6 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
     ports:
       - "${PGADMIN_PORT:-5050}:80"
-    volumes:
-      # Optional: preconfigure servers
-      - ./servers.json:/pgadmin4/servers.json
     depends_on:
       - coffeeshop-db
 
