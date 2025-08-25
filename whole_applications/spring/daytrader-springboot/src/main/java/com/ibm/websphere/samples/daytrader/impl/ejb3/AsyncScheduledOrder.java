@@ -15,43 +15,46 @@
  */
 package com.ibm.websphere.samples.daytrader.impl.ejb3;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 import com.ibm.websphere.samples.daytrader.util.TradeRunTimeModeLiteral;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@Dependent
+@Component
+@Scope("prototype")
 public class AsyncScheduledOrder implements Runnable {
 
-  TradeServices tradeService;
+    TradeServices tradeService;
 
-  Integer orderID;
-  boolean twoPhase;
+    Integer orderID;
+    boolean twoPhase;
 
-  @Inject
-  public AsyncScheduledOrder(@Any Instance<TradeServices> services) {
-    tradeService = services
-        .select(new TradeRunTimeModeLiteral(TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()])).get();
-  }
-
-  public void setProperties(Integer orderID, boolean twoPhase) {
-    this.orderID = orderID;
-    this.twoPhase = twoPhase;
-  }
-
-  @Override
-  public void run() {
-
-    try {
-      tradeService.completeOrder(orderID, twoPhase);
-
-    } catch (Exception e) {
-
-      e.printStackTrace();
+    @Inject
+    public AsyncScheduledOrder(@Any Instance<TradeServices> services) {
+        tradeService = services
+            .select(
+                new TradeRunTimeModeLiteral(
+                    TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()]
+                )
+            )
+            .get();
     }
-  }
+
+    public void setProperties(Integer orderID, boolean twoPhase) {
+        this.orderID = orderID;
+        this.twoPhase = twoPhase;
+    }
+
+    @Override
+    public void run() {
+        try {
+            tradeService.completeOrder(orderID, twoPhase);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

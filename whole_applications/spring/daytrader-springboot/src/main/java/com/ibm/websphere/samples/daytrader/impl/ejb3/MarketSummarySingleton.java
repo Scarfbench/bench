@@ -15,6 +15,18 @@
  */
 package com.ibm.websphere.samples.daytrader.impl.ejb3;
 
+import com.ibm.websphere.samples.daytrader.beans.MarketSummaryDataBean;
+import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
+import com.ibm.websphere.samples.daytrader.events.MarketSummaryUpdateEvent;
+import com.ibm.websphere.samples.daytrader.util.FinancialUtils;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -22,125 +34,139 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
-
-import jakarta.annotation.Resource;
-import jakarta.enterprise.event.NotificationOptions;
-import jakarta.inject.Inject;
-import jakarta.json.JsonObject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
-import org.springframework.web.context.WebApplicationContext;
-
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.ibm.websphere.samples.daytrader.beans.MarketSummaryDataBean;
-import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
-import com.ibm.websphere.samples.daytrader.interfaces.MarketSummaryUpdate;
-import com.ibm.websphere.samples.daytrader.util.FinancialUtils;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+import org.springframework.web.context.WebApplicationContext;
 
 @Service
 @Scope(WebApplicationContext.SCOPE_SESSION)
 public class MarketSummarySingleton {
 
-  private MarketSummaryDataBean marketSummaryDataBean;
-  private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
-  private final ReadLock readLock = rwLock.readLock();
-  private final WriteLock writeLock = rwLock.writeLock();
+    private MarketSummaryDataBean marketSummaryDataBean;
+    private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private final ReadLock readLock = rwLock.readLock();
+    private final WriteLock writeLock = rwLock.writeLock();
 
-  @PersistenceContext
-  private EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-  @Inject
-  @MarketSummaryUpdate
-  Event<String> mkSummaryUpdateEvent;
+    @Autowired
+    ApplicationEventPublisher publisher;
 
-  @Resource
-  private ManagedExecutorService mes;
+    /* Update Market Summary every 20 seconds */
+    @Scheduled(cron = "*/20 * * * * *")
+    @Transactional(readOnly = true)
+    private void updateMarketSummary() {
+        Log.trace(
+            "MarketSummarySingleton:updateMarketSummary -- updating market summary"
+        );
 
-  /* Update Market Summary every 20 seconds */
-  @Scheduled(cron = "*/20 * * * * *")
-  @Transactional(readOnly = true)
-  private void updateMarketSummary() {
+        if (TradeConfig.getRunTimeMode() != TradeConfig.EJB3) {
+            Log.trace(
+                "MarketSummarySingleton:updateMarketSummary -- Not EJB3 Mode, so not updating"
+            );
+            return; // Only do the actual work if in EJB3 Mode
+        }
 
-    Log.trace("MarketSummarySingleton:updateMarketSummary -- updating market summary");
+        List<QuoteDataBean> quotes;
 
-    if (TradeConfig.getRunTimeMode() != TradeConfig.EJB3) {
-      Log.trace("MarketSummarySingleton:updateMarketSummary -- Not EJB3 Mode, so not updating");
-      return; // Only do the actual work if in EJB3 Mode
+        try {
+            // Find Trade Stock Index Quotes (Top 100 quotes) ordered by their change in
+            // value
+            CriteriaBuilder criteriaBuilder =
+                entityManager.getCriteriaBuilder();
+            CriteriaQuery<QuoteDataBean> criteriaQuery =
+                criteriaBuilder.createQuery(QuoteDataBean.class);
+            Root<QuoteDataBean> quoteRoot = criteriaQuery.from(
+                QuoteDataBean.class
+            );
+            criteriaQuery.orderBy(
+                criteriaBuilder.desc(quoteRoot.get("change1"))
+            );
+            criteriaQuery.select(quoteRoot);
+            TypedQuery<QuoteDataBean> q = entityManager.createQuery(
+                criteriaQuery
+            );
+            quotes = q.getResultList();
+        } catch (Exception e) {
+            Log.debug(
+                "Warning: The database has not been configured. If this is the first time the application has been started, please create and populate the database tables. Then restart the server."
+            );
+            return;
+        }
+
+        QuoteDataBean[] quoteArray = quotes.toArray(QuoteDataBean[]::new);
+        ArrayList<QuoteDataBean> topGainers = new ArrayList<>(5);
+        ArrayList<QuoteDataBean> topLosers = new ArrayList<>(5);
+        BigDecimal TSIA = FinancialUtils.ZERO;
+        BigDecimal openTSIA = FinancialUtils.ZERO;
+        double totalVolume = 0.0;
+
+        if (quoteArray.length > 5) {
+            for (int i = 0; i < 5; i++) {
+                topGainers.add(quoteArray[i]);
+            }
+            for (
+                int i = quoteArray.length - 1;
+                i >= quoteArray.length - 5;
+                i--
+            ) {
+                topLosers.add(quoteArray[i]);
+            }
+
+            for (QuoteDataBean quote : quoteArray) {
+                BigDecimal price = quote.getPrice();
+                BigDecimal open = quote.getOpen();
+                double volume = quote.getVolume();
+                TSIA = TSIA.add(price);
+                openTSIA = openTSIA.add(open);
+                totalVolume += volume;
+                TSIA = TSIA.divide(
+                    new BigDecimal(quoteArray.length),
+                    RoundingMode.HALF_UP
+                );
+                openTSIA = openTSIA.divide(
+                    new BigDecimal(quoteArray.length),
+                    RoundingMode.HALF_UP
+                );
+                openTSIA = openTSIA.divide(
+                    new BigDecimal(quoteArray.length),
+                    RoundingMode.HALF_UP
+                );
+            }
+
+            setMarketSummaryDataBean(
+                new MarketSummaryDataBean(
+                    TSIA,
+                    openTSIA,
+                    totalVolume,
+                    topGainers,
+                    topLosers
+                )
+            );
+            publisher.publishEvent(
+                new MarketSummaryUpdateEvent("MarketSummaryUpdate")
+            );
+        }
     }
 
-    List<QuoteDataBean> quotes;
+    public MarketSummaryDataBean getMarketSummaryDataBean() {
+        readLock.lock();
+        if (marketSummaryDataBean == null) {
+            updateMarketSummary();
+        }
 
-    try {
-      // Find Trade Stock Index Quotes (Top 100 quotes) ordered by their change in
-      // value
-      CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-      CriteriaQuery<QuoteDataBean> criteriaQuery = criteriaBuilder.createQuery(QuoteDataBean.class);
-      Root<QuoteDataBean> quoteRoot = criteriaQuery.from(QuoteDataBean.class);
-      criteriaQuery.orderBy(criteriaBuilder.desc(quoteRoot.get("change1")));
-      criteriaQuery.select(quoteRoot);
-      TypedQuery<QuoteDataBean> q = entityManager.createQuery(criteriaQuery);
-      quotes = q.getResultList();
-    } catch (Exception e) {
-      Log.debug(
-          "Warning: The database has not been configured. If this is the first time the application has been started, please create and populate the database tables. Then restart the server.");
-      return;
+        return marketSummaryDataBean;
     }
 
-    QuoteDataBean[] quoteArray = quotes.toArray(QuoteDataBean[]::new);
-    ArrayList<QuoteDataBean> topGainers = new ArrayList<>(5);
-    ArrayList<QuoteDataBean> topLosers = new ArrayList<>(5);
-    BigDecimal TSIA = FinancialUtils.ZERO;
-    BigDecimal openTSIA = FinancialUtils.ZERO;
-    double totalVolume = 0.0;
-
-    if (quoteArray.length > 5) {
-      for (int i = 0; i < 5; i++) {
-        topGainers.add(quoteArray[i]);
-      }
-      for (int i = quoteArray.length - 1; i >= quoteArray.length - 5; i--) {
-        topLosers.add(quoteArray[i]);
-      }
-
-      for (QuoteDataBean quote : quoteArray) {
-        BigDecimal price = quote.getPrice();
-        BigDecimal open = quote.getOpen();
-        double volume = quote.getVolume();
-        TSIA = TSIA.add(price);
-        openTSIA = openTSIA.add(open);
-        totalVolume += volume;
-        TSIA = TSIA.divide(new BigDecimal(quoteArray.length), RoundingMode.HALF_UP);
-        openTSIA = openTSIA.divide(new BigDecimal(quoteArray.length), RoundingMode.HALF_UP);
-        openTSIA = openTSIA.divide(new BigDecimal(quoteArray.length), RoundingMode.HALF_UP);
-      }
-
-      setMarketSummaryDataBean(new MarketSummaryDataBean(TSIA, openTSIA, totalVolume, topGainers, topLosers));
-      mkSummaryUpdateEvent.fireAsync("MarketSummaryUpdate", NotificationOptions.builder().setExecutor(mes).build());
+    public void setMarketSummaryDataBean(
+        MarketSummaryDataBean marketSummaryDataBean
+    ) {
+        writeLock.lock();
+        this.marketSummaryDataBean = marketSummaryDataBean;
     }
-  }
-
-  public MarketSummaryDataBean getMarketSummaryDataBean() {
-    readLock.lock();
-    if (marketSummaryDataBean == null) {
-      updateMarketSummary();
-    }
-
-    return marketSummaryDataBean;
-  }
-
-  public void setMarketSummaryDataBean(MarketSummaryDataBean marketSummaryDataBean) {
-    writeLock.lock();
-    this.marketSummaryDataBean = marketSummaryDataBean;
-  }
-
 }
