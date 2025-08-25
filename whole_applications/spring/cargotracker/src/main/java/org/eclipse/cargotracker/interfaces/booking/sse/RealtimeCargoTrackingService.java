@@ -40,7 +40,7 @@ public class RealtimeCargoTrackingService {
 
   @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter tracking() {
-    SseEmitter emitter = new SseEmitter();
+    SseEmitter emitter = new SseEmitter(0L); // disable timeout
     emitters.add(emitter);
 
     emitter.onCompletion(() -> emitters.remove(emitter));

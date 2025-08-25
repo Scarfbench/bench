@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import jakarta.enterprise.context.SessionScoped;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.SelectEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
 
 @Component
-@SessionScoped
+@SessionScope
 public class ChangeArrivalDeadlineDialog implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -34,7 +34,8 @@ public class ChangeArrivalDeadlineDialog implements Serializable {
         .openDynamic("/admin/dialogs/change_arrival_deadline.xhtml", options, params);
   }
 
-  public void handleReturn(@SuppressWarnings("rawtypes") SelectEvent event) {}
+  public void handleReturn(@SuppressWarnings("rawtypes") SelectEvent event) {
+  }
 
   public void cancel() {
     // just kill the dialog

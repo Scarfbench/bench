@@ -1,10 +1,10 @@
 package org.eclipse.cargotracker.interfaces;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.annotation.FacesConfig;
+import org.springframework.stereotype.Component;
 
 /** Jakarta Faces configuration. * */
 @FacesConfig
-@ApplicationScoped
+@Component
 public class FacesConfiguration {
 }
