@@ -17,10 +17,9 @@ package com.ibm.websphere.samples.daytrader.impl.ejb3;
 
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import com.ibm.websphere.samples.daytrader.util.TradeRunTimeModeLiteral;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -28,21 +27,11 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class AsyncScheduledOrder implements Runnable {
 
-    TradeServices tradeService;
+    @Autowired
+    private Map<String, TradeServices> tradeService;
 
     Integer orderID;
     boolean twoPhase;
-
-    @Inject
-    public AsyncScheduledOrder(@Any Instance<TradeServices> services) {
-        tradeService = services
-            .select(
-                new TradeRunTimeModeLiteral(
-                    TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()]
-                )
-            )
-            .get();
-    }
 
     public void setProperties(Integer orderID, boolean twoPhase) {
         this.orderID = orderID;
@@ -52,7 +41,11 @@ public class AsyncScheduledOrder implements Runnable {
     @Override
     public void run() {
         try {
-            tradeService.completeOrder(orderID, twoPhase);
+            tradeService
+                .get(
+                    TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()]
+                )
+                .completeOrder(orderID, twoPhase);
         } catch (Exception e) {
             e.printStackTrace();
         }
