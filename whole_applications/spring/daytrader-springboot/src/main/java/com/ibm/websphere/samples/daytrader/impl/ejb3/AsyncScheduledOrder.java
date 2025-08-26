@@ -17,7 +17,6 @@ package com.ibm.websphere.samples.daytrader.impl.ejb3;
 
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import jakarta.inject.Inject;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

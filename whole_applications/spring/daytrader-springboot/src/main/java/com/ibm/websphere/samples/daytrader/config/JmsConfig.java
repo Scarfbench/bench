@@ -19,7 +19,8 @@ public class JmsConfig {
 			ConnectionFactory cf) {
 		DefaultJmsListenerContainerFactory f = new DefaultJmsListenerContainerFactory();
 		f.setConnectionFactory(cf);
-		f.setPubSubDomain(false); // queue
+		f.setPubSubDomain(false);
+		f.setSessionTransacted(true);
 		return f;
 	}
 
@@ -28,7 +29,7 @@ public class JmsConfig {
 			ConnectionFactory cf) {
 		DefaultJmsListenerContainerFactory f = new DefaultJmsListenerContainerFactory();
 		f.setConnectionFactory(cf);
-		f.setPubSubDomain(true); // topic (pub-sub)
+		f.setPubSubDomain(true);
 		return f;
 	}
 }

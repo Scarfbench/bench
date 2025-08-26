@@ -1,9 +1,7 @@
 package com.ibm.websphere.samples.daytrader.config;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 import org.springframework.context.annotation.*;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -22,9 +20,9 @@ public class AsyncConfig {
     }
 
     @Bean(name = "ManagedScheduledTaskExecutor")
-    public ScheduledExecutorService taskScheduler() {
-        ScheduledExecutorService threadPoolTaskExecutor =
-            new ScheduledExecutorService();
+    public ThreadPoolTaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler threadPoolTaskExecutor =
+            new ThreadPoolTaskScheduler();
         threadPoolTaskExecutor.setThreadNamePrefix("mstex-");
         threadPoolTaskExecutor.initialize();
         return threadPoolTaskExecutor;

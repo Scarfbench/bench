@@ -28,26 +28,28 @@ import com.ibm.websphere.samples.daytrader.util.FinancialUtils;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.RecentQuotePriceChangeList;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import jakarta.annotation.Resource;
-import jakarta.inject.Inject;
-import jakarta.jms.JMSContext;
-import jakarta.jms.QueueConnectionFactory;
-import jakarta.jms.TopicConnectionFactory;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.TextMessage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import jakarta.transaction.RollbackException;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Date;
 import java.util.concurrent.Future;
-import org.apache.activemq.artemis.spi.core.remoting.SessionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service("Full EJB3")
@@ -56,43 +58,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TradeSLSBBean implements TradeServices {
 
-    // For Wildfly - add java:/ to these resource names.
-    @Resource(
-        name = "jms/QueueConnectionFactory",
-        authenticationType = javax.annotation.Resource.AuthenticationType.APPLICATION
-    )
-    // @Resource(name = "java:/jms/QueueConnectionFactory", authenticationType =
-    // javax.annotation.Resource.AuthenticationType.APPLICATION)
-    private QueueConnectionFactory queueConnectionFactory;
-
-    @Resource(
-        name = "jms/TopicConnectionFactory",
-        authenticationType = javax.annotation.Resource.AuthenticationType.APPLICATION
-    )
-    // @Resource(name = "java:/jms/TopicConnectionFactory", authenticationType =
-    // javax.annotation.Resource.AuthenticationType.APPLICATION)
-    private TopicConnectionFactory topicConnectionFactory;
-
-    @Resource(lookup = "jms/TradeStreamerTopic")
-    // @Resource(lookup = "java:/jms/TradeStreamerTopic")
-    private Topic tradeStreamerTopic;
-
-    @Resource(lookup = "jms/TradeBrokerQueue")
-    // @Resource(lookup = "java:/jms/TradeBrokerQueue")
-    private Queue tradeBrokerQueue;
+    @Autowired
+    private ConnectionFactory connectionFactory;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Resource
-    private SessionContext context;
+    // Not needed
+    // @Resource
+    // private SessionContext context;
 
-    private final MarketSummarySingleton marketSummarySingleton;
+    @Autowired
+    private MarketSummarySingleton marketSummarySingleton;
 
-    @Inject
+    @Autowired
     AsyncScheduledOrderSubmitter asyncEJBOrderSubmitter;
 
-    @Inject
+    @Autowired
     RecentQuotePriceChangeList recentQuotePriceChangeList;
 
     @Override
@@ -101,25 +83,21 @@ public class TradeSLSBBean implements TradeServices {
     }
 
     @Override
-    @NotNull
     public OrderDataBean buy(
-        String userID,
-        String symbol,
-        double quantity,
-        int orderProcessingMode
-    ) {
+            String userID,
+            String symbol,
+            double quantity,
+            int orderProcessingMode) {
         OrderDataBean order = null;
         BigDecimal total;
         try {
             AccountProfileDataBean profile = entityManager.find(
-                AccountProfileDataBean.class,
-                userID
-            );
+                    AccountProfileDataBean.class,
+                    userID);
             AccountDataBean account = profile.getAccount();
             QuoteDataBean quote = entityManager.find(
-                QuoteDataBean.class,
-                symbol
-            );
+                    QuoteDataBean.class,
+                    symbol);
             HoldingDataBean holding = null; // The holding will be created by
             // this buy order
 
@@ -142,52 +120,46 @@ public class TradeSLSBBean implements TradeServices {
             }
         } catch (Exception e) {
             Log.error(
-                "TradeSLSBBean:buy(" +
-                userID +
-                "," +
-                symbol +
-                "," +
-                quantity +
-                ") --> failed",
-                e
-            );
+                    "TradeSLSBBean:buy(" +
+                            userID +
+                            "," +
+                            symbol +
+                            "," +
+                            quantity +
+                            ") --> failed",
+                    e);
             /* On exception - cancel the order */
             // TODO figure out how to do this with JPA
             // if (order != null) order.cancel();
-            throw new EJBException(e);
+            throw new RuntimeException(e);
         }
         return order;
     }
 
     @Override
-    @NotNull
     public OrderDataBean sell(
-        final String userID,
-        final Integer holdingID,
-        int orderProcessingMode
-    ) {
+            final String userID,
+            final Integer holdingID,
+            int orderProcessingMode) {
         OrderDataBean order = null;
         BigDecimal total;
         try {
             AccountProfileDataBean profile = entityManager.find(
-                AccountProfileDataBean.class,
-                userID
-            );
+                    AccountProfileDataBean.class,
+                    userID);
             AccountDataBean account = profile.getAccount();
 
             HoldingDataBean holding = entityManager.find(
-                HoldingDataBean.class,
-                holdingID
-            );
+                    HoldingDataBean.class,
+                    holdingID);
 
             if (holding == null) {
                 Log.debug(
-                    "TradeSLSBBean:sell User " +
-                    userID +
-                    " attempted to sell holding " +
-                    holdingID +
-                    " which has already been sold"
-                );
+                        "TradeSLSBBean:sell User " +
+                                userID +
+                                " attempted to sell holding " +
+                                holdingID +
+                                " which has already been sold");
 
                 OrderDataBean orderData = new OrderDataBean();
                 orderData.setOrderStatus("cancelled");
@@ -211,8 +183,7 @@ public class TradeSLSBBean implements TradeServices {
             BigDecimal orderFee = order.getOrderFee();
             BigDecimal balance = account.getBalance();
             total = (new BigDecimal(quantity).multiply(price)).subtract(
-                orderFee
-            );
+                    orderFee);
             account.setBalance(balance.add(total));
             final Integer orderID = order.getOrderID();
 
@@ -225,64 +196,55 @@ public class TradeSLSBBean implements TradeServices {
             }
         } catch (Exception e) {
             Log.error(
-                "TradeSLSBBean:sell(" +
-                userID +
-                "," +
-                holdingID +
-                ") --> failed",
-                e
-            );
+                    "TradeSLSBBean:sell(" +
+                            userID +
+                            "," +
+                            holdingID +
+                            ") --> failed",
+                    e);
             // if (order != null) order.cancel();
             // UPDATE - handle all exceptions like:
-            throw new EJBException(
-                "TradeSLSBBean:sell(" + userID + "," + holdingID + ")",
-                e
-            );
+            throw new RuntimeException(
+                    "TradeSLSBBean:sell(" + userID + "," + holdingID + ")",
+                    e);
         }
         return order;
     }
 
     public void queueOrder(Integer orderID, boolean twoPhase) {
         // 2 phase
-        try (JMSContext queueContext = queueConnectionFactory.createContext()) {
-            TextMessage message = queueContext.createTextMessage();
+        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+        // Set a a queue
+        jmsTemplate.setPubSubDomain(false);
 
-            message.setStringProperty("command", "neworder");
-            message.setIntProperty("orderID", orderID);
-            message.setBooleanProperty("twoPhase", twoPhase);
-            message.setText(
-                "neworder: orderID=" +
-                orderID +
-                " runtimeMode=EJB twoPhase=" +
-                twoPhase
-            );
-            message.setLongProperty("publishTime", System.currentTimeMillis());
-
-            queueContext.createProducer().send(tradeBrokerQueue, message);
-        } catch (Exception e) {
-            throw new EJBException(e.getMessage(), e); // pass the exception
-        }
+        jmsTemplate.send("TradeBrokerQueue", session -> {
+            TextMessage m = session.createTextMessage();
+            m.setStringProperty("command", "neworder");
+            m.setIntProperty("orderID", orderID);
+            m.setBooleanProperty("twoPhase", twoPhase);
+            m.setLongProperty("publishTime", System.currentTimeMillis());
+            m.setText("neworder: orderID=" + orderID + " runtimeMode=EJB twoPhase=" + twoPhase);
+            return m;
+        });
     }
 
     @Override
     public OrderDataBean completeOrder(Integer orderID, boolean twoPhase)
-        throws Exception {
+            throws Exception {
         OrderDataBean order = entityManager.find(OrderDataBean.class, orderID);
 
         if (order == null) {
             System.out.println("error");
-            throw new EJBException(
-                "Error: attempt to complete Order that is null\n" + order
-            );
+            throw new RuntimeException(
+                    "Error: attempt to complete Order that is null\n" + order);
         }
 
         order.getQuote();
 
         if (order.isCompleted()) {
-            throw new EJBException(
-                "Error: attempt to complete Order that is already completed\n" +
-                order
-            );
+            throw new RuntimeException(
+                    "Error: attempt to complete Order that is already completed\n" +
+                            order);
         }
 
         AccountDataBean account = order.getAccount();
@@ -298,21 +260,18 @@ public class TradeSLSBBean implements TradeServices {
              */
 
             HoldingDataBean newHolding = createHolding(
-                account,
-                quote,
-                quantity,
-                price
-            );
+                    account,
+                    quote,
+                    quantity,
+                    price);
             order.setHolding(newHolding);
             order.setOrderStatus("closed");
             order.setCompletionDate(
-                new java.sql.Timestamp(System.currentTimeMillis())
-            );
+                    new java.sql.Timestamp(System.currentTimeMillis()));
             updateQuotePriceVolume(
-                quote.getSymbol(),
-                TradeConfig.getRandomPriceChangeFactor(),
-                quantity
-            );
+                    quote.getSymbol(),
+                    TradeConfig.getRandomPriceChangeFactor(),
+                    quantity);
         }
 
         if (order.isSell()) {
@@ -322,49 +281,44 @@ public class TradeSLSBBean implements TradeServices {
              */
             if (holding == null) {
                 Log.debug(
-                    "TradeSLSBBean:completeOrder -- Unable to sell order " +
-                    order.getOrderID() +
-                    " holding already sold"
-                );
+                        "TradeSLSBBean:completeOrder -- Unable to sell order " +
+                                order.getOrderID() +
+                                " holding already sold");
                 order.cancel();
-                // throw new EJBException("TradeSLSBBean:completeOrder -- Unable to sell order "
+                // throw new RuntimeException("TradeSLSBBean:completeOrder -- Unable to sell order "
                 // + order.getOrderID() + " holding already sold");
             } else {
                 entityManager.remove(holding);
                 order.setHolding(null);
                 order.setOrderStatus("closed");
                 order.setCompletionDate(
-                    new java.sql.Timestamp(System.currentTimeMillis())
-                );
+                        new java.sql.Timestamp(System.currentTimeMillis()));
                 updateQuotePriceVolume(
-                    quote.getSymbol(),
-                    TradeConfig.getRandomPriceChangeFactor(),
-                    quantity
-                );
+                        quote.getSymbol(),
+                        TradeConfig.getRandomPriceChangeFactor(),
+                        quantity);
             }
         }
 
         Log.trace(
-            "TradeSLSBBean:completeOrder--> Completed Order " +
-            order.getOrderID() +
-            "\n\t Order info: " +
-            order +
-            "\n\t Account info: " +
-            account +
-            "\n\t Quote info: " +
-            quote +
-            "\n\t Holding info: " +
-            holding
-        );
+                "TradeSLSBBean:completeOrder--> Completed Order " +
+                        order.getOrderID() +
+                        "\n\t Order info: " +
+                        order +
+                        "\n\t Account info: " +
+                        account +
+                        "\n\t Quote info: " +
+                        quote +
+                        "\n\t Holding info: " +
+                        holding);
 
         return order;
     }
 
     @Override
     public Future<OrderDataBean> completeOrderAsync(
-        Integer orderID,
-        boolean twoPhase
-    ) throws Exception {
+            Integer orderID,
+            boolean twoPhase) throws Exception {
         asyncEJBOrderSubmitter.submitOrder(orderID, twoPhase);
         return null;
     }
@@ -378,16 +332,14 @@ public class TradeSLSBBean implements TradeServices {
     @Override
     public void orderCompleted(String userID, Integer orderID) {
         throw new UnsupportedOperationException(
-            "TradeSLSBBean:orderCompleted method not supported"
-        );
+                "TradeSLSBBean:orderCompleted method not supported");
     }
 
     @Override
     public Collection<OrderDataBean> getOrders(String userID) {
         AccountProfileDataBean profile = entityManager.find(
-            AccountProfileDataBean.class,
-            userID
-        );
+                AccountProfileDataBean.class,
+                userID);
         AccountDataBean account = profile.getAccount();
         return account.getOrders();
     }
@@ -398,28 +350,21 @@ public class TradeSLSBBean implements TradeServices {
             /*
              * I want to do a CriteriaUpdate here, but there are issues with JBoss/Hibernate
              */
-            CriteriaBuilder criteriaBuilder =
-                entityManager.getCriteriaBuilder();
-            CriteriaQuery<OrderDataBean> criteriaQuery =
-                criteriaBuilder.createQuery(OrderDataBean.class);
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<OrderDataBean> criteriaQuery = criteriaBuilder.createQuery(OrderDataBean.class);
             Root<OrderDataBean> orders = criteriaQuery.from(
-                OrderDataBean.class
-            );
+                    OrderDataBean.class);
             criteriaQuery.select(orders);
             criteriaQuery.where(
-                criteriaBuilder.equal(
-                    orders.get("orderStatus"),
-                    criteriaBuilder.parameter(String.class, "p_status")
-                ),
-                criteriaBuilder.equal(
-                    orders.get("account").get("profile").get("userID"),
-                    criteriaBuilder.parameter(String.class, "p_userid")
-                )
-            );
+                    criteriaBuilder.equal(
+                            orders.get("orderStatus"),
+                            criteriaBuilder.parameter(String.class, "p_status")),
+                    criteriaBuilder.equal(
+                            orders.get("account").get("profile").get("userID"),
+                            criteriaBuilder.parameter(String.class, "p_userid")));
 
             TypedQuery<OrderDataBean> q = entityManager.createQuery(
-                criteriaQuery
-            );
+                    criteriaQuery);
             q.setParameter("p_status", "closed");
             q.setParameter("p_userid", userID);
             List<OrderDataBean> results = q.getResultList();
@@ -440,27 +385,25 @@ public class TradeSLSBBean implements TradeServices {
             return results;
         } catch (Exception e) {
             Log.error("TradeSLSBBean.getClosedOrders", e);
-            throw new EJBException("TradeSLSBBean.getClosedOrders - error", e);
+            throw new RuntimeException("TradeSLSBBean.getClosedOrders - error", e);
         }
     }
 
     @Override
     public QuoteDataBean createQuote(
-        String symbol,
-        String companyName,
-        BigDecimal price
-    ) {
+            String symbol,
+            String companyName,
+            BigDecimal price) {
         try {
             QuoteDataBean quote = new QuoteDataBean(
-                symbol,
-                companyName,
-                0,
-                price,
-                price,
-                price,
-                price,
-                0
-            );
+                    symbol,
+                    companyName,
+                    0,
+                    price,
+                    price,
+                    price,
+                    price,
+                    0);
             entityManager.persist(quote);
 
             Log.trace("TradeSLSBBean:createQuote-->" + quote);
@@ -468,10 +411,9 @@ public class TradeSLSBBean implements TradeServices {
             return quote;
         } catch (Exception e) {
             Log.error(
-                "TradeSLSBBean:createQuote -- exception creating Quote",
-                e
-            );
-            throw new EJBException(e);
+                    "TradeSLSBBean:createQuote -- exception creating Quote",
+                    e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -483,18 +425,16 @@ public class TradeSLSBBean implements TradeServices {
     @Override
     public Collection<QuoteDataBean> getAllQuotes() {
         TypedQuery<QuoteDataBean> query = entityManager.createNamedQuery(
-            "quoteejb.allQuotes",
-            QuoteDataBean.class
-        );
+                "quoteejb.allQuotes",
+                QuoteDataBean.class);
         return query.getResultList();
     }
 
     @Override
     public QuoteDataBean updateQuotePriceVolume(
-        String symbol,
-        BigDecimal changeFactor,
-        double sharesTraded
-    ) {
+            String symbol,
+            BigDecimal changeFactor,
+            double sharesTraded) {
         if (!TradeConfig.getUpdateQuotePrices()) {
             return new QuoteDataBean();
         }
@@ -502,9 +442,8 @@ public class TradeSLSBBean implements TradeServices {
         Log.trace("TradeSLSBBean:updateQuote", symbol, changeFactor);
 
         TypedQuery<QuoteDataBean> q = entityManager.createNamedQuery(
-            "quoteejb.quoteForUpdate",
-            QuoteDataBean.class
-        );
+                "quoteejb.quoteForUpdate",
+                QuoteDataBean.class);
         q.setParameter(1, symbol);
         QuoteDataBean quote = q.getSingleResult();
 
@@ -518,8 +457,8 @@ public class TradeSLSBBean implements TradeServices {
         }
 
         BigDecimal newPrice = changeFactor
-            .multiply(oldPrice)
-            .setScale(2, BigDecimal.ROUND_HALF_UP);
+                .multiply(oldPrice)
+                .setScale(2, BigDecimal.ROUND_HALF_UP);
 
         quote.setPrice(newPrice);
         quote.setChange(newPrice.subtract(openPrice).doubleValue());
@@ -528,11 +467,10 @@ public class TradeSLSBBean implements TradeServices {
 
         if (TradeConfig.getPublishQuotePriceChange()) {
             publishQuotePriceChange(
-                quote,
-                oldPrice,
-                changeFactor,
-                sharesTraded
-            );
+                    quote,
+                    oldPrice,
+                    changeFactor,
+                    sharesTraded);
         }
 
         recentQuotePriceChangeList.add(quote);
@@ -541,24 +479,19 @@ public class TradeSLSBBean implements TradeServices {
     }
 
     @Override
-    public Collection<@NotNull HoldingDataBean> getHoldings(String userID) {
+    public Collection<HoldingDataBean> getHoldings(String userID) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<HoldingDataBean> criteriaQuery =
-            criteriaBuilder.createQuery(HoldingDataBean.class);
+        CriteriaQuery<HoldingDataBean> criteriaQuery = criteriaBuilder.createQuery(HoldingDataBean.class);
         Root<HoldingDataBean> holdings = criteriaQuery.from(
-            HoldingDataBean.class
-        );
+                HoldingDataBean.class);
         criteriaQuery.where(
-            criteriaBuilder.equal(
-                holdings.get("account").get("profile").get("userID"),
-                criteriaBuilder.parameter(String.class, "p_userid")
-            )
-        );
+                criteriaBuilder.equal(
+                        holdings.get("account").get("profile").get("userID"),
+                        criteriaBuilder.parameter(String.class, "p_userid")));
         criteriaQuery.select(holdings);
 
         TypedQuery<HoldingDataBean> typedQuery = entityManager.createQuery(
-            criteriaQuery
-        );
+                criteriaQuery);
         typedQuery.setParameter("p_userid", userID);
         return typedQuery.getResultList();
     }
@@ -571,9 +504,8 @@ public class TradeSLSBBean implements TradeServices {
     @Override
     public AccountDataBean getAccountData(String userID) {
         AccountProfileDataBean profile = entityManager.find(
-            AccountProfileDataBean.class,
-            userID
-        );
+                AccountProfileDataBean.class,
+                userID);
         AccountDataBean account = profile.getAccount();
 
         // Added to populate transient field for account
@@ -589,12 +521,10 @@ public class TradeSLSBBean implements TradeServices {
 
     @Override
     public AccountProfileDataBean updateAccountProfile(
-        AccountProfileDataBean profileData
-    ) {
+            AccountProfileDataBean profileData) {
         AccountProfileDataBean temp = entityManager.find(
-            AccountProfileDataBean.class,
-            profileData.getUserID()
-        );
+                AccountProfileDataBean.class,
+                profileData.getUserID());
         temp.setAddress(profileData.getAddress());
         temp.setPassword(profileData.getPassword());
         temp.setFullName(profileData.getFullName());
@@ -608,26 +538,24 @@ public class TradeSLSBBean implements TradeServices {
 
     @Override
     public AccountDataBean login(String userID, String password)
-        throws RollbackException {
+            throws RollbackException {
         AccountProfileDataBean profile = entityManager.find(
-            AccountProfileDataBean.class,
-            userID
-        );
+                AccountProfileDataBean.class,
+                userID);
         if (profile == null) {
-            throw new EJBException("No such user: " + userID);
+            throw new RuntimeException("No such user: " + userID);
         }
 
         AccountDataBean account = profile.getAccount();
         account.login(password);
 
         Log.trace(
-            "TradeSLSBBean:login(" +
-            userID +
-            "," +
-            password +
-            ") success" +
-            account
-        );
+                "TradeSLSBBean:login(" +
+                        userID +
+                        "," +
+                        password +
+                        ") success" +
+                        account);
 
         return account;
     }
@@ -635,9 +563,8 @@ public class TradeSLSBBean implements TradeServices {
     @Override
     public void logout(String userID) {
         AccountProfileDataBean profile = entityManager.find(
-            AccountProfileDataBean.class,
-            userID
-        );
+                AccountProfileDataBean.class,
+                userID);
         AccountDataBean account = profile.getAccount();
         account.logout();
 
@@ -646,14 +573,13 @@ public class TradeSLSBBean implements TradeServices {
 
     @Override
     public AccountDataBean register(
-        String userID,
-        String password,
-        String fullname,
-        String address,
-        String email,
-        String creditcard,
-        BigDecimal openBalance
-    ) {
+            String userID,
+            String password,
+            String fullname,
+            String address,
+            String email,
+            String creditcard,
+            BigDecimal openBalance) {
         AccountDataBean account = null;
         AccountProfileDataBean profile = null;
 
@@ -662,29 +588,26 @@ public class TradeSLSBBean implements TradeServices {
 
         if (profile != null) {
             Log.error(
-                "Failed to register new Account - AccountProfile with userID(" +
-                userID +
-                ") already exists"
-            );
+                    "Failed to register new Account - AccountProfile with userID(" +
+                            userID +
+                            ") already exists");
             return null;
         } else {
             profile = new AccountProfileDataBean(
-                userID,
-                password,
-                fullname,
-                address,
-                email,
-                creditcard
-            );
+                    userID,
+                    password,
+                    fullname,
+                    address,
+                    email,
+                    creditcard);
             account = new AccountDataBean(
-                0,
-                0,
-                null,
-                new Timestamp(System.currentTimeMillis()),
-                openBalance,
-                openBalance,
-                userID
-            );
+                    0,
+                    0,
+                    null,
+                    new Timestamp(System.currentTimeMillis()),
+                    openBalance,
+                    openBalance,
+                    userID);
 
             profile.setAccount(account);
             account.setProfile(profile);
@@ -696,20 +619,20 @@ public class TradeSLSBBean implements TradeServices {
         return account;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void publishQuotePriceChange(
-        QuoteDataBean quote,
-        BigDecimal oldPrice,
-        BigDecimal changeFactor,
-        double sharesTraded
-    ) {
+            QuoteDataBean quote,
+            BigDecimal oldPrice,
+            BigDecimal changeFactor,
+            double sharesTraded) {
         if (!TradeConfig.getPublishQuotePriceChange()) {
             return;
         }
+        JmsTemplate t = new JmsTemplate(connectionFactory);
+        t.setPubSubDomain(true); // This is a queue!
 
-        try (JMSContext topicContext = topicConnectionFactory.createContext()) {
-            TextMessage message = topicContext.createTextMessage();
-
+        t.send("TradeStreamerTopic", session -> {
+            TextMessage message = session.createTextMessage();
             message.setStringProperty("command", "updateQuote");
             message.setStringProperty("symbol", quote.getSymbol());
             message.setStringProperty("company", quote.getCompanyName());
@@ -723,119 +646,114 @@ public class TradeSLSBBean implements TradeServices {
             message.setDoubleProperty("sharesTraded", sharesTraded);
             message.setLongProperty("publishTime", System.currentTimeMillis());
             message.setText(
-                "Update Stock price for " +
-                quote.getSymbol() +
-                " old price = " +
-                oldPrice +
-                " new price = " +
-                quote.getPrice()
-            );
+                    "Update Stock price for " +
+                            quote.getSymbol() +
+                            " old price = " +
+                            oldPrice +
+                            " new price = " +
+                            quote.getPrice());
+            return message;
+        });
 
-            topicContext.createProducer().send(tradeStreamerTopic, message);
-        } catch (Exception e) {
-            throw new EJBException(e.getMessage(), e); // pass the exception
-        }
     }
 
     public OrderDataBean createOrder(
-        AccountDataBean account,
-        QuoteDataBean quote,
-        HoldingDataBean holding,
-        String orderType,
-        double quantity
-    ) {
+            AccountDataBean account,
+            QuoteDataBean quote,
+            HoldingDataBean holding,
+            String orderType,
+            double quantity) {
         OrderDataBean order;
 
         try {
             order = new OrderDataBean(
-                orderType,
-                "open",
-                new Timestamp(System.currentTimeMillis()),
-                null,
-                quantity,
-                quote
-                    .getPrice()
-                    .setScale(FinancialUtils.SCALE, FinancialUtils.ROUND),
-                TradeConfig.getOrderFee(orderType),
-                account,
-                quote,
-                holding
-            );
+                    orderType,
+                    "open",
+                    new Timestamp(System.currentTimeMillis()),
+                    null,
+                    quantity,
+                    quote
+                            .getPrice()
+                            .setScale(FinancialUtils.SCALE, FinancialUtils.ROUND),
+                    TradeConfig.getOrderFee(orderType),
+                    account,
+                    quote,
+                    holding);
             entityManager.persist(order);
         } catch (Exception e) {
             Log.error(
-                "TradeSLSBBean:createOrder -- failed to create Order. The stock/quote may not exist in the database.",
-                e
-            );
-            throw new EJBException(
-                "TradeSLSBBean:createOrder -- failed to create Order. Check that the symbol exists in the database.",
-                e
-            );
+                    "TradeSLSBBean:createOrder -- failed to create Order. The stock/quote may not exist in the database.",
+                    e);
+            throw new RuntimeException(
+                    "TradeSLSBBean:createOrder -- failed to create Order. Check that the symbol exists in the database.",
+                    e);
         }
         return order;
     }
 
     private HoldingDataBean createHolding(
-        AccountDataBean account,
-        QuoteDataBean quote,
-        double quantity,
-        BigDecimal purchasePrice
-    ) throws Exception {
+            AccountDataBean account,
+            QuoteDataBean quote,
+            double quantity,
+            BigDecimal purchasePrice) throws Exception {
         HoldingDataBean newHolding = new HoldingDataBean(
-            quantity,
-            purchasePrice,
-            new Timestamp(System.currentTimeMillis()),
-            account,
-            quote
-        );
+                quantity,
+                purchasePrice,
+                new Timestamp(System.currentTimeMillis()),
+                account,
+                quote);
         entityManager.persist(newHolding);
         return newHolding;
     }
 
     @Override
     public double investmentReturn(double investment, double NetValue)
-        throws Exception {
+            throws Exception {
         double diff = NetValue - investment;
         double ir = diff / investment;
         return ir;
     }
 
     @Override
-    public QuoteDataBean pingTwoPhase(String symbol) throws Exception {
-        QuoteDataBean quoteData = null;
+    public QuoteDataBean pingTwoPhase(String symbol) {
+    QuoteDataBean quoteData = null;
 
-        try (JMSContext queueContext = queueConnectionFactory.createContext()) {
-            // Get a Quote and send a JMS message in a 2-phase commit
-            quoteData = entityManager.find(QuoteDataBean.class, symbol);
+    try {
+        // === DB work (unchanged) ===
+        quoteData = entityManager.find(QuoteDataBean.class, symbol);
 
-            double sharesTraded = (Math.random() * 100) + 1;
-            BigDecimal oldPrice = quoteData.getPrice();
-            BigDecimal openPrice = quoteData.getOpen();
-            BigDecimal changeFactor = new BigDecimal(Math.random() * 100);
+        double sharesTraded = (Math.random() * 100) + 1;
+        BigDecimal oldPrice   = quoteData.getPrice();
+        BigDecimal openPrice  = quoteData.getOpen();
+        BigDecimal changeFactor = new BigDecimal(Math.random() * 100);
 
-            BigDecimal newPrice = changeFactor
-                .multiply(oldPrice)
-                .setScale(2, BigDecimal.ROUND_HALF_UP);
+        BigDecimal newPrice = changeFactor
+            .multiply(oldPrice)
+            .setScale(2, BigDecimal.ROUND_HALF_UP);
 
-            quoteData.setPrice(newPrice);
-            quoteData.setChange(newPrice.subtract(openPrice).doubleValue());
-            quoteData.setVolume(quoteData.getVolume() + sharesTraded);
-            entityManager.merge(quoteData);
+        quoteData.setPrice(newPrice);
+        quoteData.setChange(newPrice.subtract(openPrice).doubleValue());
+        quoteData.setVolume(quoteData.getVolume() + sharesTraded);
+        entityManager.merge(quoteData);
 
-            TextMessage message = queueContext.createTextMessage();
+        // === JMS send (Spring) ===
+        JmsTemplate t = new JmsTemplate(connectionFactory);
+        t.setPubSubDomain(false); // queue
 
-            message.setStringProperty("command", "ping");
-            message.setLongProperty("publishTime", System.currentTimeMillis());
-            message.setText(
-                "Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from TradeSLSBBean:pingTwoPhase at " +
-                new java.util.Date()
-            );
-            queueContext.createProducer().send(tradeBrokerQueue, message);
-        } catch (Exception e) {
-            Log.error("TradeSLSBBean:pingTwoPhase -- exception caught", e);
-        }
+        // prefer destination by name to avoid needing a Queue bean/JNDI
+        t.send("TradeBrokerQueue", session -> {
+            TextMessage m = session.createTextMessage();
+            m.setStringProperty("command", "ping");
+            m.setLongProperty("publishTime", System.currentTimeMillis());
+            m.setText("Ping message for TradeBrokerQueue sent from TradeSLSBBean:pingTwoPhase at " + new Date());
+            return m;
+        });
 
-        return quoteData;
+    } catch (Exception e) {
+        Log.error("TradeSLSBBean:pingTwoPhase -- exception caught", e);
+    }
+
+    return quoteData;
     }
 
     class quotePriceComparator implements Comparator<QuoteDataBean> {
@@ -856,7 +774,6 @@ public class TradeSLSBBean implements TradeServices {
     @Override
     public void setInSession(boolean inSession) {
         throw new UnsupportedOperationException(
-            "TradeSLSBBean::setInGlobalTxn not supported"
-        );
+                "TradeSLSBBean::setInGlobalTxn not supported");
     }
 }
