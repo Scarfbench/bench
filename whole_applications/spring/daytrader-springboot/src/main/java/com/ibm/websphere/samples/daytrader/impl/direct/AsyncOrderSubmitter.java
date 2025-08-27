@@ -17,24 +17,23 @@ package com.ibm.websphere.samples.daytrader.impl.direct;
 
 import java.util.concurrent.Future;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.concurrent.ManagedExecutorService;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.stereotype.Component;
 
-@RequestScoped
+@Component
 public class AsyncOrderSubmitter {
-  
-  
-  @Resource
-  private ManagedExecutorService mes;
 
-  @Inject
+  @Autowired
+  @Qualifier("ManagedExecutorService") // Matching the bean name here
+  private AsyncTaskExecutor mes;
+
+  @Autowired
   private AsyncOrder asyncOrder;
-  
-  
+
   public Future<?> submitOrder(Integer orderID, boolean twoPhase) {
-    asyncOrder.setProperties(orderID,twoPhase);
+    asyncOrder.setProperties(orderID, twoPhase);
     return mes.submit(asyncOrder);
   }
 }

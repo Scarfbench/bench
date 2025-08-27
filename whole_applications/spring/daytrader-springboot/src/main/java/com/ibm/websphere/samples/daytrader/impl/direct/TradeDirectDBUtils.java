@@ -28,10 +28,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import javax.sql.DataSource;
+
+import org.springframework.stereotype.Service;
 
 import com.ibm.websphere.samples.daytrader.beans.RunStatsDataBean;
 import com.ibm.websphere.samples.daytrader.entities.AccountDataBean;
@@ -43,62 +43,60 @@ import com.ibm.websphere.samples.daytrader.util.MDBStats;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
 /**
- * TradeBuildDB uses operations provided by the TradeApplication to (a) create the Database tables
+ * TradeBuildDB uses operations provided by the TradeApplication to (a) create
+ * the Database tables
  * (b)populate a DayTrader database without creating the tables. Specifically, a
  * new DayTrader User population is created using UserIDs of the form "uid:xxx"
- * where xxx is a sequential number (e.g. uid:0, uid:1, etc.). New stocks are also created of the
- * form "s:xxx", again where xxx represents sequential numbers (e.g. s:1, s:2, etc.)
+ * where xxx is a sequential number (e.g. uid:0, uid:1, etc.). New stocks are
+ * also created of the
+ * form "s:xxx", again where xxx represents sequential numbers (e.g. s:1, s:2,
+ * etc.)
  */
-@ApplicationScoped
+@Service
 public class TradeDirectDBUtils implements TradeDB {
 
   // For Wildfly - add java:/ to this resource.
-  
-  @Resource(lookup = "jdbc/TradeDataSource")
-  //@Resource(lookup = "java:/jdbc/TradeDataSource")
+
+  @Autowired
   private DataSource datasource;
 
-  @Inject 
+  @Autowired
   @TradeJDBC
   TradeServices ts;
 
+  @Override
   public String checkDBProductName() throws Exception {
-    Connection conn = null;
     String dbProductName = null;
-
-    try {
-
-      conn = datasource.getConnection();
+    try (Connection conn = datasource.getConnection()) {
       DatabaseMetaData dbmd = conn.getMetaData();
       dbProductName = dbmd.getDatabaseProductName();
     } catch (SQLException e) {
       Log.error(e, "TradeDirect:checkDBProductName() -- Error checking the Daytrader Database Product Name");
-    } finally {
-      conn.close();
     }
     return dbProductName;
   }
 
-
   /**
-   * Re-create the DayTrader db tables and populate them OR just populate a DayTrader DB, logging to the provided output stream
+   * Re-create the DayTrader db tables and populate them OR just populate a
+   * DayTrader DB, logging to the provided output stream
    */
   public void buildDB(java.io.PrintWriter out, InputStream ddlFile) throws Exception {
     String symbol, companyName;
     int errorCount = 0; // Give up gracefully after 10 errors
 
-    //  TradeStatistics.statisticsEnabled=false;  // disable statistics
-    out.println("<HEAD><BR><EM> TradeBuildDB: Building DayTrader Database...</EM><BR> This operation will take several minutes. Please wait...</HEAD>");
+    // TradeStatistics.statisticsEnabled=false; // disable statistics
+    out.println(
+        "<HEAD><BR><EM> TradeBuildDB: Building DayTrader Database...</EM><BR> This operation will take several minutes. Please wait...</HEAD>");
     out.println("<BODY>");
 
     if (ddlFile != null) {
-      //out.println("<BR>TradeBuildDB: **** warPath= "+warPath+" ****</BR></BODY>");
+      // out.println("<BR>TradeBuildDB: **** warPath= "+warPath+" ****</BR></BODY>");
 
       boolean success = false;
 
       Object[] sqlBuffer = null;
 
-      //parse the DDL file and fill the SQL commands into a buffer
+      // parse the DDL file and fill the SQL commands into a buffer
       try {
         sqlBuffer = parseDDLToBuffer(ddlFile);
       } catch (Exception e) {
@@ -107,7 +105,8 @@ public class TradeDirectDBUtils implements TradeDB {
         return;
       }
       if ((sqlBuffer == null) || (sqlBuffer.length == 0)) {
-        out.println("<BR>TradeBuildDB: **** Parsing DDL file returned empty buffer, please check that a valid DB specific DDL file is available and retry ****</BR></BODY>");
+        out.println(
+            "<BR>TradeBuildDB: **** Parsing DDL file returned empty buffer, please check that a valid DB specific DDL file is available and retry ****</BR></BODY>");
         return;
       }
 
@@ -116,20 +115,24 @@ public class TradeDirectDBUtils implements TradeDB {
       try {
         success = recreateDBTables(sqlBuffer, out);
       } catch (Exception e) {
-        Log.error(e, "TradeBuildDB: Unable to drop and recreate DayTrader Db Tables, please check for database consistency before continuing");
-        out.println("TradeBuildDB: Unable to drop and recreate DayTrader Db Tables, please check for database consistency before continuing");
+        Log.error(e,
+            "TradeBuildDB: Unable to drop and recreate DayTrader Db Tables, please check for database consistency before continuing");
+        out.println(
+            "TradeBuildDB: Unable to drop and recreate DayTrader Db Tables, please check for database consistency before continuing");
         return;
       }
       if (!success) {
-        out.println("<BR>TradeBuildDB: **** Unable to drop and recreate DayTrader Db Tables, please check for database consistency before continuing ****</BR></BODY>");
+        out.println(
+            "<BR>TradeBuildDB: **** Unable to drop and recreate DayTrader Db Tables, please check for database consistency before continuing ****</BR></BODY>");
         return;
       }
-      out.println("<BR>TradeBuildDB: **** DayTrader tables successfully created! ****</BR><BR><b> Please Stop and Re-start your Daytrader application (or your application server) and then use the \"Repopulate Daytrader Database\" link to populate your database.</b></BR><BR><BR></BODY>");
+      out.println(
+          "<BR>TradeBuildDB: **** DayTrader tables successfully created! ****</BR><BR><b> Please Stop and Re-start your Daytrader application (or your application server) and then use the \"Repopulate Daytrader Database\" link to populate your database.</b></BR><BR><BR></BODY>");
       return;
     } // end of createDBTables
 
     out.println("<BR>TradeBuildDB: **** Creating " + TradeConfig.getMAX_QUOTES() + " Quotes ****</BR>");
-    //Attempt to delete all of the Trade users and Trade Quotes first
+    // Attempt to delete all of the Trade users and Trade Quotes first
     try {
       resetTrade(true);
     } catch (Exception e) {
@@ -158,7 +161,7 @@ public class TradeDirectDBUtils implements TradeDB {
     }
     out.println("<BR>");
     out.println("<BR>**** Registering " + TradeConfig.getMAX_USERS() + " Users **** ");
-    errorCount = 0; //reset for user registrations
+    errorCount = 0; // reset for user registrations
 
     // Registration is a formal operation in Trade 2.
     for (int i = 0; i < TradeConfig.getMAX_USERS(); i++) {
@@ -172,14 +175,16 @@ public class TradeDirectDBUtils implements TradeDB {
         initialBalance = 1000000; // uid:0 starts with a cool million.
       }
       try {
-        AccountDataBean accountData = ts.register(userID, "xxx", fullname, address, email, creditcard, new BigDecimal(initialBalance));
+        AccountDataBean accountData = ts.register(userID, "xxx", fullname, address, email, creditcard,
+            new BigDecimal(initialBalance));
 
         if (accountData != null) {
           if (i % 50 == 0) {
             out.print("<BR>Account# " + accountData.getAccountID() + " userID=" + userID);
           } // end-if
 
-          int holdings = TradeConfig.rndInt(TradeConfig.getMAX_HOLDINGS() + 1); // 0-MAX_HOLDING (inclusive), avg holdings per user = (MAX-0)/2
+          int holdings = TradeConfig.rndInt(TradeConfig.getMAX_HOLDINGS() + 1); // 0-MAX_HOLDING (inclusive), avg
+                                                                                // holdings per user = (MAX-0)/2
           double quantity = 0;
 
           for (int j = 0; j < holdings; j++) {
@@ -225,8 +230,11 @@ public class TradeDirectDBUtils implements TradeDB {
         } catch (SQLException ex) {
           // Ignore DROP statements as tables won't always exist.
           if (((String) sqlBuffer[i]).indexOf("DROP ") < 0) {
-            Log.error("TradeDirect:recreateDBTables SQL Exception thrown on executing the foll sql command: " + sqlBuffer[i], ex);
-            out.println("<BR>SQL Exception thrown on executing the foll sql command: <I>" + sqlBuffer[i] + "</I> . Check log for details.</BR>");
+            Log.error(
+                "TradeDirect:recreateDBTables SQL Exception thrown on executing the foll sql command: " + sqlBuffer[i],
+                ex);
+            out.println("<BR>SQL Exception thrown on executing the foll sql command: <I>" + sqlBuffer[i]
+                + "</I> . Check log for details.</BR>");
           }
         }
       }
@@ -240,7 +248,6 @@ public class TradeDirectDBUtils implements TradeDB {
     }
     return success;
   }
-
 
   public RunStatsDataBean resetTrade(boolean deleteAll) throws Exception {
     // Clear MDB Statistics
@@ -284,7 +291,8 @@ public class TradeDirectDBUtils implements TradeDB {
           // stmt.close();
           conn.commit();
         } catch (Exception e) {
-          Log.error(e, "TradeDirect:resetTrade(deleteAll) -- Error deleting Trade users and stock from the Trade database");
+          Log.error(e,
+              "TradeDirect:resetTrade(deleteAll) -- Error deleting Trade users and stock from the Trade database");
         }
         return runStatsData;
       }
@@ -299,7 +307,8 @@ public class TradeDirectDBUtils implements TradeDB {
       stmt.executeUpdate();
       stmt.close();
 
-      stmt = getStatement(conn, "delete from orderejb where account_accountid in (select accountid from accountejb a where a.profile_userid like 'ru:%')");
+      stmt = getStatement(conn,
+          "delete from orderejb where account_accountid in (select accountid from accountejb a where a.profile_userid like 'ru:%')");
       stmt.executeUpdate();
       stmt.close();
 
@@ -314,7 +323,8 @@ public class TradeDirectDBUtils implements TradeDB {
       stmt.close();
 
       // Count of trade users
-      stmt = getStatement(conn, "select count(accountid) as \"tradeUserCount\" from accountejb a where a.profile_userid like 'uid:%'");
+      stmt = getStatement(conn,
+          "select count(accountid) as \"tradeUserCount\" from accountejb a where a.profile_userid like 'uid:%'");
       rs = stmt.executeQuery();
       rs.next();
       int tradeUserCount = rs.getInt("tradeUserCount");
@@ -323,7 +333,8 @@ public class TradeDirectDBUtils implements TradeDB {
 
       rs.close();
       // Count of trade stocks
-      stmt = getStatement(conn, "select count(symbol) as \"tradeStockCount\" from quoteejb a where a.symbol like 's:%'");
+      stmt = getStatement(conn,
+          "select count(symbol) as \"tradeStockCount\" from quoteejb a where a.symbol like 's:%'");
       rs = stmt.executeQuery();
       rs.next();
       int tradeStockCount = rs.getInt("tradeStockCount");
@@ -349,8 +360,9 @@ public class TradeDirectDBUtils implements TradeDB {
       stmt.close();
 
       // count holdings for trade users
-      stmt = getStatement(conn, "select count(holdingid) as \"holdingCount\" from holdingejb h where h.account_accountid in "
-          + "(select accountid from accountejb a where a.profile_userid like 'uid:%')");
+      stmt = getStatement(conn,
+          "select count(holdingid) as \"holdingCount\" from holdingejb h where h.account_accountid in "
+              + "(select accountid from accountejb a where a.profile_userid like 'uid:%')");
 
       rs = stmt.executeQuery();
       rs.next();
@@ -401,7 +413,8 @@ public class TradeDirectDBUtils implements TradeDB {
 
       // count open orders by type for trade users
       stmt = getStatement(conn, "select count(orderid) \"openOrderCount\"from orderejb o where (o.account_accountid in "
-          + "(select accountid from accountejb a where a.profile_userid like 'uid:%')) AND " + " (o.orderStatus='open')");
+          + "(select accountid from accountejb a where a.profile_userid like 'uid:%')) AND "
+          + " (o.orderStatus='open')");
 
       rs = stmt.executeQuery();
       rs.next();
@@ -437,7 +450,8 @@ public class TradeDirectDBUtils implements TradeDB {
 
   public Object[] parseDDLToBuffer(InputStream ddlFile) throws Exception {
     BufferedReader br = null;
-    ArrayList<String> sqlBuffer = new ArrayList<String>(30); //initial capacity 30 assuming we have 30 ddl-sql statements to read
+    ArrayList<String> sqlBuffer = new ArrayList<String>(30); // initial capacity 30 assuming we have 30 ddl-sql
+                                                             // statements to read
 
     try {
       br = new BufferedReader(new InputStreamReader(ddlFile));
@@ -449,7 +463,7 @@ public class TradeDirectDBUtils implements TradeDB {
         {
           sql = sql + " " + s;
           if (s.endsWith(";")) { // reached end of sql statement
-            sql = sql.replace(';', ' '); //remove the semicolon
+            sql = sql.replace(';', ' '); // remove the semicolon
             sqlBuffer.add(sql);
             sql = "";
           }

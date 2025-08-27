@@ -14,53 +14,49 @@
  * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.util;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.concurrent.ManagedExecutorService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.NotificationOptions;
-import jakarta.inject.Inject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
+import com.ibm.websphere.samples.daytrader.events.QuotePriceChangeEvent;
+
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
-import com.ibm.websphere.samples.daytrader.interfaces.QuotePriceChange;
-
-
-/** This class is a holds the last 5 stock changes, used by the MarketSummary WebSocket
- *  and the JAX-RS SSE Broadcaster
- *  It fires a CDI event everytime a price change is added
+/**
+ * This class is a holds the last 5 stock changes, used by the MarketSummary
+ * WebSocket
+ * and the JAX-RS SSE Broadcaster
+ * It fires a CDI event everytime a price change is added
  **/
 
-@ApplicationScoped
-public class RecentQuotePriceChangeList  {
+@Component
+public class RecentQuotePriceChangeList {
 
-  private List<QuoteDataBean> list = new CopyOnWriteArrayList<QuoteDataBean>();
-  private int maxSize = 5;
+  private final List<QuoteDataBean> list = new CopyOnWriteArrayList<>();
+  private final int maxSize = 5;
 
-  @Resource
-  private ManagedExecutorService mes;
-
-  @Inject
-  @QuotePriceChange
-  Event<String> quotePriceChangeEvent;
+  @Autowired
+  ApplicationEventPublisher publisher;
 
   public boolean add(QuoteDataBean quoteData) {
 
-    int symbolNumber = new Integer(quoteData.getSymbol().substring(2));
+    int symbolNumber = Integer.parseInt(quoteData.getSymbol().substring(2));
 
-    if ( symbolNumber < TradeConfig.getMAX_QUOTES() * TradeConfig.getListQuotePriceChangeFrequency() * 0.01) {
+    if (symbolNumber < TradeConfig.getMAX_QUOTES() * TradeConfig.getListQuotePriceChangeFrequency() * 0.01) {
       list.add(0, quoteData);
 
       // Add stock, remove if needed
-      if(list.size() > maxSize) {
+      if (list.size() > maxSize) {
         list.remove(maxSize);
-      }      
-      quotePriceChangeEvent.fireAsync("quotePriceChange for symbol: " + quoteData.getSymbol(), NotificationOptions.builder().setExecutor(mes).build());
+      }
+      publisher.publishEvent(new QuotePriceChangeEvent("quotePriceChange for symbol: " + quoteData.getSymbol()));
     }
     return true;
   }
@@ -69,7 +65,7 @@ public class RecentQuotePriceChangeList  {
     return list.isEmpty();
   }
 
-  @Size(max=5)
+  @Size(max = 5)
   @NotEmpty
   public List<@NotNull QuoteDataBean> recentList() {
     return list;
