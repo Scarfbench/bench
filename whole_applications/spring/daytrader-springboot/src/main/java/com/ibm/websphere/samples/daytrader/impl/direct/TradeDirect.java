@@ -57,7 +57,7 @@ import com.ibm.websphere.samples.daytrader.interfaces.Trace;
 
 /**
  * TradeDirect uses direct JDBC and JMS access to a
- * <code>jakarta.sql.DataSource</code> to implement the business methods of the
+ * <code>javax.sql.DataSource</code> to implement the business methods of the
  * Trade online broker application. These business methods represent the
  * features and operations that can be performed by customers of the brokerage
  * such as login, logout, get a stock quote, buy or sell a stock, etc. and are

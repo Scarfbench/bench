@@ -25,6 +25,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeRunTimeModeLiteral;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -61,32 +62,22 @@ import com.ibm.websphere.samples.daytrader.events.QuotePriceChangeEvent;
  * events.
  **/
 @Component
-@ServerEndpoint(value = "/marketsummary", encoders = {
-        QuotePriceChangeListEncoder.class }, decoders = {
-                ActionDecoder.class }, configurator = SpringEndpointConfigurator.class // <-- bridge Spring into JSR 356
+@ServerEndpoint(
+    value = "/marketsummary", 
+    encoders = { QuotePriceChangeListEncoder.class }, 
+    decoders = { ActionDecoder.class }
 )
 public class MarketSummaryWebSocket {
 
     @Autowired
     RecentQuotePriceChangeList recentQuotePriceChangeList;
 
-    private TradeServices tradeAction;
+    // 
+    @Autowired
+    private Map<String, TradeServices> tradeActionMap;
 
     private static final List<Session> sessions = new CopyOnWriteArrayList<>();
     private final CountDownLatch latch = new CountDownLatch(1);
-
-    @Autowired
-    public MarketSummaryWebSocket(@Any Instance<TradeServices> services) {
-        tradeAction = services
-                .select(
-                        new TradeRunTimeModeLiteral(
-                                TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()]))
-                .get();
-    }
-
-    // should never be used
-    public MarketSummaryWebSocket() {
-    }
 
     @OnOpen
     public void onOpen(final Session session, EndpointConfig ec) {
@@ -164,9 +155,7 @@ public class MarketSummaryWebSocket {
         while (failSafeIterator.hasNext()) {
             Session s = failSafeIterator.next();
             if (s.isOpen()) {
-                s
-                        .getAsyncRemote()
-                        .sendObject(recentQuotePriceChangeList.recentList());
+                s.getAsyncRemote().sendObject(recentQuotePriceChangeList.recentList());
             }
         }
     }

@@ -1,0 +1,9 @@
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/AbstractIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/DatabaseIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/constants/TestConstants.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/integration/ArticlesResourceIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/integration/ProfilesResourceIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/integration/TagsResourceIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/integration/UserResourceIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/integration/UsersResourceIntegrationTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/realworld/src/test/java/org/example/realworldapi/util/UserEntityUtils.java

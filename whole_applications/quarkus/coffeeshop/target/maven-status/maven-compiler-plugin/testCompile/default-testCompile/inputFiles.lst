@@ -1,0 +1,10 @@
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/web/CoffeeshopApiResourceTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/utils/JsonUtilTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/counter/OrderServiceOrderUpTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/domain/OrderTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/web/CoffeeshopApiResourceIT.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/utils/TestUtils.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/counter/OrderServiceTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/domain/commands/PlaceOrderCommandJsonTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/kitchen/KitchenTest.java
+/Users/rkrsn/workspace/scarfbench/bench/whole_applications/quarkus/coffeeshop-quarkus/src/test/java/io/quarkuscoffeeshop/coffeeshop/barista/BaristaTest.java

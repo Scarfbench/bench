@@ -1,0 +1,9 @@
+org/example/realworldapi/integration/ArticlesResourceIntegrationTest.class
+org/example/realworldapi/AbstractIntegrationTest.class
+org/example/realworldapi/integration/TagsResourceIntegrationTest.class
+org/example/realworldapi/integration/UserResourceIntegrationTest.class
+org/example/realworldapi/constants/TestConstants.class
+org/example/realworldapi/util/UserEntityUtils.class
+org/example/realworldapi/DatabaseIntegrationTest.class
+org/example/realworldapi/integration/ProfilesResourceIntegrationTest.class
+org/example/realworldapi/integration/UsersResourceIntegrationTest.class
