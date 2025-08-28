@@ -1,5 +1,0 @@
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/struts/billpayment/src/main/java/struts/tutorial/billpayment/service/PaymentServiceImpl.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/struts/billpayment/src/main/java/struts/tutorial/billpayment/model/PaymentEvent.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/struts/billpayment/src/main/java/struts/tutorial/billpayment/action/PaymentAction.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/struts/billpayment/src/main/java/struts/tutorial/billpayment/interceptor/LoggingInterceptor.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/struts/billpayment/src/main/java/struts/tutorial/billpayment/service/PaymentService.java

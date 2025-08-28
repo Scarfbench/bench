@@ -1,7 +1,0 @@
-jakarta/tutorial/billpayment/payment/Debit.class
-jakarta/tutorial/billpayment/listener/PaymentHandler.class
-jakarta/tutorial/billpayment/interceptor/LoggedInterceptor.class
-jakarta/tutorial/billpayment/payment/PaymentBean.class
-jakarta/tutorial/billpayment/payment/Credit.class
-jakarta/tutorial/billpayment/event/PaymentEvent.class
-jakarta/tutorial/billpayment/interceptor/Logged.class

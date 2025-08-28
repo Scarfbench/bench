@@ -1,8 +1,0 @@
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/aspect/Logged.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/controller/PaymentController.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/event/PaymentEvent.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/BillPaymentApplication.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/aspect/LoggingAspect.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/listener/PaymentHandler.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/payment/PaymentService.java
-/home/rkrsn/workspace/reagent/ScarfBench/crosscutting/dependency_injection/spring/billpayment/src/main/java/org/springframework/tutorial/billpayment/payment/PaymentType.java
