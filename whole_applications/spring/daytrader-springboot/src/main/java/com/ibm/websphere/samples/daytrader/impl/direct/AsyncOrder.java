@@ -15,13 +15,13 @@
  */
 package com.ibm.websphere.samples.daytrader.impl.direct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.ibm.websphere.samples.daytrader.interfaces.TradeJDBC;
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 
-import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
 import jakarta.transaction.UserTransaction;
 
@@ -33,7 +33,7 @@ public class AsyncOrder implements Runnable {
   @TradeJDBC
   TradeServices tradeService;
 
-  @Resource
+  @Autowired(required = false)
   UserTransaction ut;
 
   Integer orderID;
@@ -48,13 +48,13 @@ public class AsyncOrder implements Runnable {
   public void run() {
 
     try {
-      ut.begin();
+      if (ut != null) ut.begin();
       tradeService.completeOrder(orderID, twoPhase);
-      ut.commit();
+      if (ut != null) ut.commit();
     } catch (Exception e) {
 
       try {
-        ut.rollback();
+        if (ut != null) ut.rollback();
       } catch (Exception e1) {
         try {
           throw new Exception(e1);

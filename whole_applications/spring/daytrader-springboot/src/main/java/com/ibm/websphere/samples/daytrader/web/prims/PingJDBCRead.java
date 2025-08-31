@@ -17,8 +17,10 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
@@ -27,7 +29,6 @@ import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
-import jakarta.enterprise.inject.Any;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -51,21 +52,17 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(name = "PingJDBCRead", urlPatterns = { "/servlet/PingJDBCRead" })
 public class PingJDBCRead extends HttpServlet {
 
-    @Autowired
     TradeServices trade;
+    
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private static final long serialVersionUID = -8810390150632488526L;
     private static String initTime;
     private static int hitCount;
-
-    public PingJDBCRead(@Any Map<String, TradeServices> services) {
-        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
-        TradeServices svc = services.get(key);
-        if (svc == null) {
-            throw new IllegalStateException(
-                    "No TradeServices bean named '" + key + "'");
-        }
-        this.trade = svc;
+    
+    public PingJDBCRead() {
+        // Default constructor required for servlet container
     }
 
     /**
@@ -115,7 +112,11 @@ public class PingJDBCRead extends HttpServlet {
                     + initTime);
             hitCount++;
             output.append("<BR>Hit Count: " + hitCount);
-            output.append("<HR>Quote Information <BR><BR>: " + quoteData.toHTML());
+            if (quoteData != null) {
+                output.append("<HR>Quote Information <BR><BR>: " + quoteData.toHTML());
+            } else {
+                output.append("<HR>No quote data available");
+            }
             output.append("<HR></body></html>");
             out.println(output.toString());
         } catch (Exception e) {
@@ -147,5 +148,17 @@ public class PingJDBCRead extends HttpServlet {
         hitCount = 0;
         initTime = new java.util.Date().toString();
         SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
+        // Resolve the TradeServices implementation by configured runtime mode after autowiring
+        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
+        if (applicationContext != null && applicationContext.containsBean(key)) {
+            this.trade = applicationContext.getBean(key, TradeServices.class);
+        }
+        if (this.trade == null) {
+            Map<String, TradeServices> beans = (applicationContext != null)
+                    ? applicationContext.getBeansOfType(TradeServices.class)
+                    : java.util.Collections.emptyMap();
+            Set<String> available = beans.keySet();
+            throw new IllegalStateException("No TradeServices bean named '" + key + "' (available: " + available + ")");
+        }
     }
 }

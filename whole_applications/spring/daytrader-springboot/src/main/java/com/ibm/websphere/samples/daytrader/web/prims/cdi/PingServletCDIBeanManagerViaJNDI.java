@@ -18,9 +18,9 @@ package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -35,7 +35,7 @@ public class PingServletCDIBeanManagerViaJNDI extends HttpServlet {
   private static final long serialVersionUID = -1803544618879689949L;
   private static String initTime;
 
-  @Inject
+  @Autowired
   PingCDIBean cdiBean;
 
   @Override

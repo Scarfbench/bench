@@ -17,17 +17,15 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.jms.core.JmsTemplate;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
-import jakarta.annotation.Resource;
-import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSContext;
-import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -55,12 +53,8 @@ public class PingServlet2MDBQueue extends HttpServlet {
 
     private static int hitCount;
 
-    @Resource(name = "jms/QueueConnectionFactory", authenticationType = jakarta.annotation.Resource.AuthenticationType.APPLICATION)
+    @Autowired
     private ConnectionFactory queueConnectionFactory;
-
-    // TODO: Glassfish does not like this - change to lookup?
-    @Resource(name = "jms/TradeBrokerQueue")
-    private Queue tradeBrokerQueue;
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -81,58 +75,37 @@ public class PingServlet2MDBQueue extends HttpServlet {
                 + "<FONT color=\"red\"><B>Note:</B> Not intended for performance testing.</FONT>");
 
         try {
-            Connection conn = queueConnectionFactory.createConnection();
-
+            TextMessage[] lastMessage = new TextMessage[1];
             try {
-                TextMessage message = null;
                 int iter = TradeConfig.getPrimIterations();
                 for (int ii = 0; ii < iter; ii++) {
-                    /*
-                     * Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                     * try {
-                     * MessageProducer producer = sess.createProducer(tradeBrokerQueue);
-                     * 
-                     * message = sess.createTextMessage();
-                     * 
-                     * String command = "ping";
-                     * message.setStringProperty("command", command);
-                     * message.setLongProperty("publishTime", System.currentTimeMillis());
-                     * message.
-                     * setText("Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from PingServlet2MDBQueue at "
-                     * + new java.util.Date());
-                     * producer.send(message);
-                     * } finally {
-                     * sess.close();
-                     * }
-                     */
-
-                    JMSContext context = queueConnectionFactory.createContext();
-
-                    message = context.createTextMessage();
-
-                    message.setStringProperty("command", "ping");
-                    message.setLongProperty("publishTime", System.currentTimeMillis());
-                    message.setText(
-                            "Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from PingServlet2MDBQueue at "
-                                    + new java.util.Date());
-
-                    context.createProducer().send(tradeBrokerQueue, message);
+                    JmsTemplate t = new JmsTemplate(queueConnectionFactory);
+                    t.setPubSubDomain(false);
+                    t.send("TradeBrokerQueue", session -> {
+                        TextMessage m = session.createTextMessage();
+                        m.setStringProperty("command", "ping");
+                        m.setLongProperty("publishTime", System.currentTimeMillis());
+                        m.setText("Ping message for queue TradeBrokerQueue sent from PingServlet2MDBQueue at "
+                                + new java.util.Date());
+                        lastMessage[0] = m;
+                        return m;
+                    });
                 }
 
                 // write out the output
                 output.append("<HR>initTime: ").append(initTime);
                 output.append("<BR>Hit Count: ").append(hitCount++);
-                output.append("<HR>Posted Text message to java:comp/env/jms/TradeBrokerQueue destination");
-                output.append("<BR>Message: ").append(message);
-                output.append("<BR><BR>Message text: ").append(message.getText());
+                output.append("<HR>Posted Text message to TradeBrokerQueue destination");
+                if (lastMessage[0] != null) {
+                    output.append("<BR>Message: ").append(lastMessage[0]);
+                    output.append("<BR><BR>Message text: ").append(lastMessage[0].getText());
+                }
                 output.append("<BR><HR></FONT></BODY></HTML>");
                 out.println(output.toString());
 
             } catch (Exception e) {
                 Log.error("PingServlet2MDBQueue.doGet(...):exception posting message to TradeBrokerQueue destination ");
                 throw e;
-            } finally {
-                conn.close();
             }
         } // this is where I actually handle the exceptions
         catch (Exception e) {

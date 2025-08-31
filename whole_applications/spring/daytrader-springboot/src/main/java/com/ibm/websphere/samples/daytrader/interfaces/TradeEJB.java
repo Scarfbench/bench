@@ -23,7 +23,7 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
-import jakarta.inject.Qualifier;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Qualifier
 @Retention(RUNTIME)

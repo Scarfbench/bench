@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,7 +36,7 @@ public class PingServletCDI extends HttpServlet {
   private static final long serialVersionUID = -1803544618879689949L;
   private static String initTime;
 
-  @Inject
+  @Autowired
   PingCDIBean cdiBean;
 
   @Autowired

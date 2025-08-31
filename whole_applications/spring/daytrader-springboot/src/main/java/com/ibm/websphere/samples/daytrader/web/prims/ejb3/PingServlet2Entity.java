@@ -52,7 +52,7 @@ public class PingServlet2Entity extends HttpServlet {
 
     private static int hitCount;
 
-    @PersistenceContext(unitName = "daytrader")
+    @PersistenceContext
     private EntityManager em;
 
     @Override

@@ -17,17 +17,15 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
-import jakarta.annotation.Resource;
-import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSContext;
 import jakarta.jms.TextMessage;
-import jakarta.jms.Topic;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -54,12 +52,8 @@ public class PingServlet2MDBTopic extends HttpServlet {
 
     private static int hitCount;
 
-    @Resource(name = "jms/TopicConnectionFactory", authenticationType = jakarta.annotation.Resource.AuthenticationType.APPLICATION)
+    @Autowired
     private ConnectionFactory topicConnectionFactory;
-
-    // TODO: Glassfish does not like this - change to lookup?
-    @Resource(name = "jms/TradeStreamerTopic")
-    private Topic tradeStreamerTopic;
 
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -82,58 +76,37 @@ public class PingServlet2MDBTopic extends HttpServlet {
         // we only want to look up the JMS resources once
         try {
 
-            Connection conn = topicConnectionFactory.createConnection();
-
+            TextMessage[] lastMessage = new TextMessage[1];
             try {
-                TextMessage message = null;
                 int iter = TradeConfig.getPrimIterations();
                 for (int ii = 0; ii < iter; ii++) {
-                    /*
-                     * Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                     * try {
-                     * MessageProducer producer = sess.createProducer(tradeStreamerTopic);
-                     * message = sess.createTextMessage();
-                     * 
-                     * String command = "ping";
-                     * message.setStringProperty("command", command);
-                     * message.setLongProperty("publishTime", System.currentTimeMillis());
-                     * message.
-                     * setText("Ping message for topic java:comp/env/jms/TradeStreamerTopic sent from PingServlet2MDBTopic at "
-                     * + new java.util.Date());
-                     * 
-                     * producer.send(message);
-                     * } finally {
-                     * sess.close();
-                     * }
-                     */
-
-                    JMSContext context = topicConnectionFactory.createContext();
-
-                    message = context.createTextMessage();
-
-                    message.setStringProperty("command", "ping");
-                    message.setLongProperty("publishTime", System.currentTimeMillis());
-                    message.setText(
-                            "Ping message for topic java:comp/env/jms/TradeStreamerTopic sent from PingServlet2MDBTopic at "
-                                    + new java.util.Date());
-
-                    context.createProducer().send(tradeStreamerTopic, message);
+                    JmsTemplate t = new JmsTemplate(topicConnectionFactory);
+                    t.setPubSubDomain(true);
+                    t.send("TradeStreamerTopic", session -> {
+                        TextMessage m = session.createTextMessage();
+                        m.setStringProperty("command", "ping");
+                        m.setLongProperty("publishTime", System.currentTimeMillis());
+                        m.setText("Ping message for topic TradeStreamerTopic sent from PingServlet2MDBTopic at "
+                                + new java.util.Date());
+                        lastMessage[0] = m;
+                        return m;
+                    });
                 }
 
                 // write out the output
                 output.append("<HR>initTime: ").append(initTime);
                 output.append("<BR>Hit Count: ").append(hitCount++);
-                output.append("<HR>Posted Text message to java:comp/env/jms/TradeStreamerTopic topic");
-                output.append("<BR>Message: ").append(message);
-                output.append("<BR><BR>Message text: ").append(message.getText());
+                output.append("<HR>Posted Text message to TradeStreamerTopic topic");
+                if (lastMessage[0] != null) {
+                    output.append("<BR>Message: ").append(lastMessage[0]);
+                    output.append("<BR><BR>Message text: ").append(lastMessage[0].getText());
+                }
                 output.append("<BR><HR></FONT></BODY></HTML>");
                 out.println(output.toString());
 
             } catch (Exception e) {
                 Log.error("PingServlet2MDBTopic.doGet(...):exception posting message to TradeStreamerTopic topic");
                 throw e;
-            } finally {
-                conn.close();
             }
         } // this is where I actually handle the exceptions
         catch (Exception e) {

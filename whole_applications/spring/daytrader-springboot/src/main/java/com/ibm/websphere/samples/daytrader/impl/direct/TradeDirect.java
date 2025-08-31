@@ -41,6 +41,7 @@ import jakarta.transaction.UserTransaction;
 import jakarta.validation.constraints.NotNull;
 
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeJDBC;
 import com.ibm.websphere.samples.daytrader.beans.MarketSummaryDataBean;
 import com.ibm.websphere.samples.daytrader.entities.AccountDataBean;
 import com.ibm.websphere.samples.daytrader.entities.AccountProfileDataBean;
@@ -73,6 +74,7 @@ import com.ibm.websphere.samples.daytrader.interfaces.Trace;
  */
 
 @Service("Direct (JDBC)")
+@TradeJDBC
 @Trace
 public class TradeDirect implements TradeServices, Serializable {
   /**
@@ -81,7 +83,7 @@ public class TradeDirect implements TradeServices, Serializable {
   private static final long serialVersionUID = -8089049090952927985L;
 
   // This lock is used to serialize market summary operations.
-  private static final Integer marketSummaryLock = 0;
+  private static final Object marketSummaryLock = new Object();
   private static long nextMarketSummary = System.currentTimeMillis();
   private static MarketSummaryDataBean cachedMSDB = MarketSummaryDataBean.getRandomInstance();
 
@@ -92,7 +94,7 @@ public class TradeDirect implements TradeServices, Serializable {
   @Autowired
   private DataSource datasource;
 
-  @Resource
+  @Autowired(required = false)
   private UserTransaction txn;
 
   @Autowired
@@ -274,7 +276,7 @@ public class TradeDirect implements TradeServices, Serializable {
 
       Log.trace("TradeDirect:buy - inSession(" + this.inSession + ")");// , userID, symbol, new Double(quantity));
 
-      if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE) {
+  if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE && txn != null) {
 
         Log.trace("TradeDirect:buy create/begin global transaction");
 
@@ -320,7 +322,7 @@ public class TradeDirect implements TradeServices, Serializable {
 
         Log.trace("TradeDirect:buy committing global transaction");
 
-        if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE) {
+        if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE && txn != null) {
           txn.commit();
           setInGlobalTxn(false);
         }
@@ -330,7 +332,7 @@ public class TradeDirect implements TradeServices, Serializable {
     } catch (Exception e) {
       Log.error("TradeDirect:buy error - rolling back", e);
       if (getInGlobalTxn()) {
-        txn.rollback();
+        if (txn != null) txn.rollback();
       } else {
         rollBack(conn, e);
       }
@@ -360,7 +362,7 @@ public class TradeDirect implements TradeServices, Serializable {
 
       Log.trace("TradeDirect:sell - inSession(" + this.inSession + ")", userID, holdingID);
 
-      if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE) {
+  if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE && txn != null) {
 
         Log.trace("TradeDirect:sell create/begin global transaction");
 
@@ -383,7 +385,7 @@ public class TradeDirect implements TradeServices, Serializable {
             + "\n\tquote=" + quoteData + "\nfor user: " + userID + " and holdingID: " + holdingID;
         Log.debug(error);
         if (getInGlobalTxn()) {
-          txn.rollback();
+          if (txn != null) txn.rollback();
         } else {
           rollBack(conn, new Exception(error));
         }
@@ -422,7 +424,7 @@ public class TradeDirect implements TradeServices, Serializable {
 
       orderData = getOrderData(conn, orderData.getOrderID().intValue());
 
-      if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE) {
+  if (!inSession && orderProcessingMode == TradeConfig.ASYNCH_2PHASE && txn != null) {
 
         Log.trace("TradeDirect:sell committing global transaction");
 
@@ -434,7 +436,7 @@ public class TradeDirect implements TradeServices, Serializable {
     } catch (Exception e) {
       Log.error("TradeDirect:sell error", e);
       if (getInGlobalTxn()) {
-        txn.rollback();
+        if (txn != null) txn.rollback();
       } else {
         rollBack(conn, e);
       }
@@ -548,7 +550,7 @@ public class TradeDirect implements TradeServices, Serializable {
      * accountData = getAccountData(accountID, conn); QuoteDataBean
      * quoteData = getQuoteData(conn, quoteID);
      */
-    String userID = getAccountProfileData(conn, new Integer(accountID)).getUserID();
+  String userID = getAccountProfileData(conn, Integer.valueOf(accountID)).getUserID();
 
     HoldingDataBean holdingData = null;
 
@@ -687,7 +689,7 @@ public class TradeDirect implements TradeServices, Serializable {
       stmt.setString(3, "open");
       stmt.setTimestamp(4, currentDate);
       stmt.setDouble(5, quantity);
-      stmt.setBigDecimal(6, quoteData.getPrice().setScale(FinancialUtils.SCALE, FinancialUtils.ROUND));
+  stmt.setBigDecimal(6, quoteData.getPrice().setScale(FinancialUtils.SCALE, java.math.RoundingMode.HALF_UP));
       stmt.setBigDecimal(7, TradeConfig.getOrderFee(orderType));
       stmt.setInt(8, accountData.getAccountID().intValue());
       if (holdingData == null) {
@@ -798,7 +800,7 @@ public class TradeDirect implements TradeServices, Serializable {
 
       Log.trace("TradeDirect:createQuote - inSession(" + this.inSession + ")");
 
-      price = price.setScale(FinancialUtils.SCALE, FinancialUtils.ROUND);
+  price = price.setScale(FinancialUtils.SCALE, java.math.RoundingMode.HALF_UP);
       double volume = 0.0, change = 0.0;
 
       conn = getConn();
@@ -1022,7 +1024,7 @@ public class TradeDirect implements TradeServices, Serializable {
     Connection conn = null;
     try {
 
-      Log.trace("TradeDirect:getAccountData - inSession(" + this.inSession + ")", new Integer(accountID));
+  Log.trace("TradeDirect:getAccountData - inSession(" + this.inSession + ")", Integer.valueOf(accountID));
 
       conn = getConn();
       accountData = getAccountData(accountID, conn);
@@ -1273,7 +1275,7 @@ public class TradeDirect implements TradeServices, Serializable {
 
     try {
       Log.trace("TradeDirect:updateQuotePriceVolume - inSession(" + this.inSession + ")", symbol, changeFactor,
-          new Double(sharesTraded));
+          Double.valueOf(sharesTraded));
 
       conn = getConn();
 
@@ -1289,7 +1291,7 @@ public class TradeDirect implements TradeServices, Serializable {
         changeFactor = TradeConfig.MAXIMUM_STOCK_SPLIT_MULTIPLIER;
       }
 
-      BigDecimal newPrice = changeFactor.multiply(oldPrice).setScale(2, BigDecimal.ROUND_HALF_UP);
+  BigDecimal newPrice = changeFactor.multiply(oldPrice).setScale(2, java.math.RoundingMode.HALF_UP);
       double change = newPrice.subtract(openPrice).doubleValue();
 
       updateQuotePriceVolume(conn, quoteData.getSymbol(), newPrice, newVolume, change);
@@ -1506,7 +1508,7 @@ public class TradeDirect implements TradeServices, Serializable {
     if (!rs.next()) {
       Log.error("TradeDirect:getAccountDataFromResultSet -- cannot find account data");
     } else {
-      accountData = new AccountDataBean(new Integer(rs.getInt("accountID")), rs.getInt("loginCount"),
+  accountData = new AccountDataBean(Integer.valueOf(rs.getInt("accountID")), rs.getInt("loginCount"),
           rs.getInt("logoutCount"),
           rs.getTimestamp("lastLogin"), rs.getTimestamp("creationDate"), rs.getBigDecimal("balance"),
           rs.getBigDecimal("openBalance"),
@@ -1532,7 +1534,7 @@ public class TradeDirect implements TradeServices, Serializable {
   private HoldingDataBean getHoldingDataFromResultSet(ResultSet rs) throws Exception {
     HoldingDataBean holdingData = null;
 
-    holdingData = new HoldingDataBean(new Integer(rs.getInt("holdingID")), rs.getDouble("quantity"),
+  holdingData = new HoldingDataBean(Integer.valueOf(rs.getInt("holdingID")), rs.getDouble("quantity"),
         rs.getBigDecimal("purchasePrice"),
         rs.getTimestamp("purchaseDate"), rs.getString("quote_symbol"));
     return holdingData;
@@ -1550,7 +1552,7 @@ public class TradeDirect implements TradeServices, Serializable {
   private OrderDataBean getOrderDataFromResultSet(ResultSet rs) throws Exception {
     OrderDataBean orderData = null;
 
-    orderData = new OrderDataBean(new Integer(rs.getInt("orderID")), rs.getString("orderType"),
+  orderData = new OrderDataBean(Integer.valueOf(rs.getInt("orderID")), rs.getString("orderType"),
         rs.getString("orderStatus"), rs.getTimestamp("openDate"),
         rs.getTimestamp("completionDate"), rs.getDouble("quantity"), rs.getBigDecimal("price"),
         rs.getBigDecimal("orderFee"),
@@ -1620,7 +1622,7 @@ public class TradeDirect implements TradeServices, Serializable {
    */
   private static int connCount = 0;
 
-  private static Integer lock = new Integer(0);
+  private static final Object lock = new Object();
 
   private Connection getConn() throws Exception {
 

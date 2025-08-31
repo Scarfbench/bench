@@ -18,7 +18,10 @@ package com.ibm.websphere.samples.daytrader.web.servlet;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
@@ -26,8 +29,6 @@ import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
-import jakarta.enterprise.inject.Any;
-import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -43,22 +44,29 @@ public class TestServlet extends HttpServlet {
 
     private TradeServices tradeAction;
 
-    @Inject
-    public TestServlet(@Any Map<String, TradeServices> services) {
-        // Match CDI: services.select(new TradeRunTimeModeLiteral(<modeName>)).get();
-        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
-        TradeServices svc = services.get(key);
-        if (svc == null) {
-            throw new IllegalStateException(
-                    "No TradeServices bean named '" + key + "'");
-        }
-        this.tradeAction = svc;
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    public TestServlet() {
+        // Default constructor for servlet container
     }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
+        // Resolve TradeServices by configured runtime mode after autowiring
+        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
+        if (applicationContext != null && applicationContext.containsBean(key)) {
+            this.tradeAction = applicationContext.getBean(key, TradeServices.class);
+        }
+        if (this.tradeAction == null) {
+            Map<String, TradeServices> beans = (applicationContext != null)
+                    ? applicationContext.getBeansOfType(TradeServices.class)
+                    : java.util.Collections.emptyMap();
+            Set<String> available = beans.keySet();
+            throw new IllegalStateException("No TradeServices bean named '" + key + "' (available: " + available + ")");
+        }
     }
 
     /**

@@ -20,12 +20,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.ibm.websphere.samples.daytrader.events.MarketSummaryUpdateEvent;
-import com.ibm.websphere.samples.daytrader.events.QuotePriceChangeEvent;
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.RecentQuotePriceChangeList;
@@ -56,11 +53,32 @@ public class MarketSummaryWebSocket {
     RecentQuotePriceChangeList recentQuotePriceChangeList;
 
     //
-    @Autowired
     private TradeServices tradeAction;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @jakarta.annotation.PostConstruct
+    void resolveTradeServices() {
+        String key = com.ibm.websphere.samples.daytrader.util.TradeConfig.getRunTimeModeNames()[com.ibm.websphere.samples.daytrader.util.TradeConfig.getRunTimeMode()];
+        if (applicationContext != null && applicationContext.containsBean(key)) {
+            this.tradeAction = applicationContext.getBean(key, TradeServices.class);
+        }
+        if (this.tradeAction == null) {
+            java.util.Map<String, TradeServices> beans = (applicationContext != null)
+                    ? applicationContext.getBeansOfType(TradeServices.class)
+                    : java.util.Collections.emptyMap();
+            java.util.Set<String> available = beans.keySet();
+            throw new IllegalStateException("No TradeServices bean named '" + key + "' (available: " + available + ")");
+        }
+    }
 
     private static final List<Session> sessions = new CopyOnWriteArrayList<>();
     private final CountDownLatch latch = new CountDownLatch(1);
+
+    static List<Session> getSessions() {
+        return sessions;
+    }
 
     @OnOpen
     public void onOpen(final Session session, EndpointConfig ec) {
@@ -132,35 +150,5 @@ public class MarketSummaryWebSocket {
         sessions.remove(session);
     }
 
-    @EventListener
-    @Async("ManagedExecutorService")
-    public void onStockChange(QuotePriceChangeEvent quotePriceChangeEvent) {
-        Log.trace("MarketSummaryWebSocket:onStockChange");
-        quotePriceChangeEvent.payload(); // touch payload to preserve behavior; result not used directly here
-        for (Session s : sessions) {
-            if (s.isOpen()) {
-                s.getAsyncRemote().sendObject(recentQuotePriceChangeList.recentList());
-            }
-        }
-    }
-
-    @EventListener
-    @Async("ManagedExecutorService")
-    public void onMarketSummarytUpdate(
-            MarketSummaryUpdateEvent marketSummaryUpdateEvent) {
-        Log.trace("MarketSummaryWebSocket:onJMSMessage");
-        marketSummaryUpdateEvent.payload(); // touch payload to preserve behavior; result not used directly here
-
-        try {
-            JsonObject mkSummary = tradeAction.getMarketSummary().toJSON();
-
-            for (Session s : sessions) {
-                if (s.isOpen()) {
-                    s.getAsyncRemote().sendText(mkSummary.toString());
-                }
-            }
-        } catch (Exception e) {
-            Log.error("MarketSummaryWebSocket:onMarketSummarytUpdate error", e);
-        }
-    }
+    // Event handling moved to MarketSummaryWebSocketEvents to avoid proxying this endpoint
 }

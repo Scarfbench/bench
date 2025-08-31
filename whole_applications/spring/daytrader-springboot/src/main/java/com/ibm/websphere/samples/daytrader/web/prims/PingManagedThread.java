@@ -43,7 +43,7 @@ public class PingManagedThread extends HttpServlet {
     private static int hitCount;
 
     @Autowired
-    @Qualifier("ManagedThreadFactoryBean")
+    @Qualifier("ManagedExecutorService")
     private AsyncTaskExecutor AsyncTaskExecutor;
 
     /**

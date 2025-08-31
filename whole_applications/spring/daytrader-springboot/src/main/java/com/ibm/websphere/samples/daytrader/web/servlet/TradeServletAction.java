@@ -24,8 +24,9 @@ import com.ibm.websphere.samples.daytrader.interfaces.Trace;
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import jakarta.enterprise.inject.Any;
-import jakarta.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import org.springframework.web.context.annotation.SessionScope;
+import org.springframework.stereotype.Component;
 
 /**
  * TradeServletAction provides servlet specific client side access to each of
@@ -49,25 +51,35 @@ import org.springframework.web.context.annotation.SessionScope;
  * {@link TradeAction} methods to actually perform each trading operation.
  *
  */
+@Component
 @SessionScope
 @Trace
 public class TradeServletAction implements Serializable {
 
     private static final long serialVersionUID = 7732313125198761455L;
 
-    private TradeServices tAction;
+        private TradeServices tAction;
 
-    @Inject
-    public TradeServletAction(@Any Map<String, TradeServices> services) {
-        // Match CDI: services.select(new TradeRunTimeModeLiteral(<modeName>)).get();
-        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
-        TradeServices svc = services.get(key);
-        if (svc == null) {
-            throw new IllegalStateException(
-                    "No TradeServices bean named '" + key + "'");
+        @Autowired
+        private ApplicationContext applicationContext;
+
+        public TradeServletAction() {
         }
-        this.tAction = svc;
-    }
+
+        @PostConstruct
+        void resolveTradeServices() {
+                String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
+                if (applicationContext != null && applicationContext.containsBean(key)) {
+                        this.tAction = applicationContext.getBean(key, TradeServices.class);
+                }
+                if (this.tAction == null) {
+                        Map<String, TradeServices> beans = (applicationContext != null)
+                                        ? applicationContext.getBeansOfType(TradeServices.class)
+                                        : java.util.Collections.emptyMap();
+                        java.util.Set<String> available = beans.keySet();
+                        throw new IllegalStateException("No TradeServices bean named '" + key + "' (available: " + available + ")");
+                }
+        }
 
     /**
      * Display User Profile information such as address, email, etc. for the

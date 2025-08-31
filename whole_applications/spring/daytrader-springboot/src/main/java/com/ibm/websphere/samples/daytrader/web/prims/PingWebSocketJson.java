@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,7 @@ import jakarta.websocket.server.ServerEndpoint;
 public class PingWebSocketJson {
 
     @Autowired
+    @Qualifier("ManagedExecutorService")
     private TaskExecutor taskExecutor; // define a ThreadPoolTaskExecutor bean
 
     // Per-connection state (new instance per WS connection)

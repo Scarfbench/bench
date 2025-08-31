@@ -18,12 +18,12 @@ package com.ibm.websphere.samples.daytrader.web.prims.beanval;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 
-import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -36,7 +36,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(name = "PingServletBeanValCDI", urlPatterns = { "/servlet/PingServletBeanValCDI" })
 public class PingServletBeanValCDI extends HttpServlet {
 
-  @Inject
+  @Autowired
   CDIMethodConstraintBean hitCountBean;
 
   private static final long serialVersionUID = 7097023236709683760L;

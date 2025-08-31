@@ -19,12 +19,14 @@ import java.util.Set;
 
 import javax.naming.InitialContext;
 
-import jakarta.enterprise.context.RequestScoped;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
 
-@RequestScoped
+@Component
+@RequestScope
 @PingInterceptorBinding
 public class PingCDIBean {
 

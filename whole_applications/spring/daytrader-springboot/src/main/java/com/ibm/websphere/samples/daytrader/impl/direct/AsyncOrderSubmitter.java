@@ -17,6 +17,7 @@ package com.ibm.websphere.samples.daytrader.impl.direct;
 
 import java.util.concurrent.Future;
 
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -30,10 +31,11 @@ public class AsyncOrderSubmitter {
   private AsyncTaskExecutor mes;
 
   @Autowired
-  private AsyncOrder asyncOrder;
+  private ObjectFactory<AsyncOrder> asyncOrderFactory;
 
   public Future<?> submitOrder(Integer orderID, boolean twoPhase) {
-    asyncOrder.setProperties(orderID, twoPhase);
-    return mes.submit(asyncOrder);
+  AsyncOrder task = asyncOrderFactory.getObject();
+  task.setProperties(orderID, twoPhase);
+  return mes.submit(task);
   }
 }
