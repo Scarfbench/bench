@@ -17,9 +17,16 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
-import jakarta.ejb.EJB;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.inject.Inject;
-import jakarta.naming.InitialContext;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -27,13 +34,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
-import com.ibm.websphere.samples.daytrader.impl.ejb3.TradeSLSBBean;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
 /**
  *
@@ -44,6 +44,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * stocks price is looked up using the Quote Entity EJB.
  *
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2Session2Entity2JSP", urlPatterns = { "/ejb3/PingServlet2Session2Entity2JSP" })
 public class PingServlet2Session2Entity2JSP extends HttpServlet {
 
@@ -100,6 +101,7 @@ public class PingServlet2Session2Entity2JSP extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         // hitCount = 0;
         // initTime = new java.util.Date().toString();
     }

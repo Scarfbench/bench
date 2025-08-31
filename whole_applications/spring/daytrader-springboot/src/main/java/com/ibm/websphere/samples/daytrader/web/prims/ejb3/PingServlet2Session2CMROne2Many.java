@@ -19,6 +19,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.entities.OrderDataBean;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -27,12 +36,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.entities.OrderDataBean;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-
 /**
  * Primitive to test Entity Container Managed Relationshiop One to One Servlet
  * will generate a random userID and get the profile for that user using a
@@ -40,6 +43,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * calling a Session to Entity EJB to get CMR One to One data
  *
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2Session2CMR2One2Many", urlPatterns = { "/ejb3/PingServlet2Session2CMROne2Many" })
 public class PingServlet2Session2CMROne2Many extends HttpServlet {
     private static final long serialVersionUID = -8658929449987440032L;
@@ -108,6 +112,7 @@ public class PingServlet2Session2CMROne2Many extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
     }

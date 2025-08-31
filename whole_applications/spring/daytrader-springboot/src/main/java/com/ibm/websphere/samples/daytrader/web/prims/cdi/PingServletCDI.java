@@ -18,7 +18,10 @@ package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import jakarta.ejb.EJB;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -27,6 +30,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 @WebServlet("/servlet/PingServletCDI")
 public class PingServletCDI extends HttpServlet {
 
@@ -36,7 +40,7 @@ public class PingServletCDI extends HttpServlet {
   @Inject
   PingCDIBean cdiBean;
 
-  @EJB
+  @Autowired
   PingEJBIFace ejb;
 
   @Override
@@ -44,7 +48,8 @@ public class PingServletCDI extends HttpServlet {
 
     PrintWriter pw = response.getWriter();
     pw.write("<html><head><title>Ping Servlet CDI</title></head>"
-        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+        + initTime
         + "<BR><BR></FONT>");
 
     pw.write("<B>hitCount: " + cdiBean.hello() + "</B><BR>");
@@ -59,11 +64,12 @@ public class PingServletCDI extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    * 
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     initTime = new java.util.Date().toString();
 
   }

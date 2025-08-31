@@ -18,6 +18,8 @@ package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.springframework.stereotype.Component;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -26,6 +28,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 @WebServlet("/servlet/PingServletCDIBeanManagerViaJNDI")
 public class PingServletCDIBeanManagerViaJNDI extends HttpServlet {
 
@@ -35,14 +38,13 @@ public class PingServletCDIBeanManagerViaJNDI extends HttpServlet {
   @Inject
   PingCDIBean cdiBean;
 
-
-
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     PrintWriter pw = response.getWriter();
     pw.write("<html><head><title>Ping Servlet CDI Bean Manager</title></head>"
-        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI Bean Manager<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI Bean Manager<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+        + initTime
         + "<BR><BR></FONT>");
 
     try {
@@ -60,11 +62,13 @@ public class PingServletCDIBeanManagerViaJNDI extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    * 
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    org.springframework.web.context.support.SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this,
+        config.getServletContext());
     initTime = new java.util.Date().toString();
 
   }

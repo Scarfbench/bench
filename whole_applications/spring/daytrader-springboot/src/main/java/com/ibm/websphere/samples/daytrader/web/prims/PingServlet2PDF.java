@@ -21,6 +21,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,13 +33,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
 /**
  *
  * PingServlet2PDF tests a call to a servlet which then loads a PDF document.
  *
  */
+@Component
 @WebServlet(name = "PingServlet2PDF", urlPatterns = { "/servlet/PingServlet2PDF" })
 public class PingServlet2PDF extends HttpServlet {
 
@@ -47,9 +51,9 @@ public class PingServlet2PDF extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -61,9 +65,9 @@ public class PingServlet2PDF extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -111,5 +115,11 @@ public class PingServlet2PDF extends HttpServlet {
             }
         }
 
+    }
+
+    @Override
+    public void init(jakarta.servlet.ServletConfig config) throws jakarta.servlet.ServletException {
+        super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 }

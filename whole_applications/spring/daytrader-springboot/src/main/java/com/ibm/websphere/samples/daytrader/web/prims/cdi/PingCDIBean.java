@@ -17,11 +17,12 @@ package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 
 import java.util.Set;
 
+import javax.naming.InitialContext;
+
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.spi.Bean;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
-import jakarta.naming.InitialContext;
 
 @RequestScoped
 @PingInterceptorBinding
@@ -30,7 +31,6 @@ public class PingCDIBean {
   private static int helloHitCount = 0;
   private static int getBeanManagerHitCountJNDI = 0;
   private static int getBeanManagerHitCountSPI = 0;
-
 
   public int hello() {
     return ++helloHitCount;

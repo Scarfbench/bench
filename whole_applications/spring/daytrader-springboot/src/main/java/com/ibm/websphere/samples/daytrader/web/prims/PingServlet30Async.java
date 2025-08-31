@@ -17,6 +17,9 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -31,12 +34,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  *
- * PingServlet31Async tests fundamental dynamic HTML creation functionality through
+ * PingServlet31Async tests fundamental dynamic HTML creation functionality
+ * through
  * server side servlet processing asynchronously.
  *
  */
 
-@WebServlet(name = "PingServlet30Async", urlPatterns = { "/servlet/PingServlet30Async" }, asyncSupported=true)
+@Component
+@WebServlet(name = "PingServlet30Async", urlPatterns = { "/servlet/PingServlet30Async" }, asyncSupported = true)
 public class PingServlet30Async extends HttpServlet {
 
     private static final long serialVersionUID = 8731300373855056660L;
@@ -48,17 +53,17 @@ public class PingServlet30Async extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("text/html");
-                        
+
         AsyncContext ac = req.startAsync();
         StringBuilder sb = new StringBuilder();
-        
+
         ServletInputStream input = req.getInputStream();
         byte[] b = new byte[1024];
         int len = -1;
@@ -68,30 +73,31 @@ public class PingServlet30Async extends HttpServlet {
         }
 
         ServletOutputStream output = res.getOutputStream();
-        
+
         output.println("<html><head><title>Ping Servlet 3.0 Async</title></head>"
                 + "<body><hr/><br/><font size=\"+2\" color=\"#000066\">Ping Servlet 3.0 Async</font><br/>"
                 + "<font size=\"+1\" color=\"#000066\">Init time : " + initTime
-                + "</font><br/><br/><b>Hit Count: " + ++hitCount + "</b><br/>Data Received: "+ sb.toString() + "</body></html>");
-        
-        ac.complete();
-    }       
+                + "</font><br/><br/><b>Hit Count: " + ++hitCount + "</b><br/>Data Received: " + sb.toString()
+                + "</body></html>");
 
+        ac.complete();
+    }
 
     /**
      * this is the main method of the servlet that will service all get
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        doPost(req,res);
-          
+        doPost(req, res);
+
     }
+
     /**
      * returns a string of information about the servlet
      *
@@ -106,13 +112,14 @@ public class PingServlet30Async extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         initTime = new java.util.Date().toString();
         hitCount = 0;
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
 
     }
 }

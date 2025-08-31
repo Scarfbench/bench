@@ -18,53 +18,59 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.WebConnection;
-import jakarta.servlet.annotation.WebServlet;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
-@WebServlet(name = "PingUpgradeServlet", urlPatterns = { "/servlet/PingUpgradeServlet" }, asyncSupported=true)
+@Component
+@WebServlet(name = "PingUpgradeServlet", urlPatterns = { "/servlet/PingUpgradeServlet" }, asyncSupported = true)
 public class PingUpgradeServlet extends HttpServlet {
   private static final long serialVersionUID = -6955518532146927509L;
 
-
   @Override
-  protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
-    doPost(req,res);
+  protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
+      throws ServletException, IOException {
+    doPost(req, res);
   }
 
   @Override
-  protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
+  }
 
+  @Override
+  protected void doPost(final HttpServletRequest req, final HttpServletResponse res)
+      throws ServletException, IOException {
 
     Log.trace("PingUpgradeServlet:doPost");
 
-
     if ("echo".equals(req.getHeader("Upgrade"))) {
 
-
       Log.trace("PingUpgradeServlet:doPost -- found echo, doing upgrade");
-
 
       res.setStatus(101);
       res.setHeader("Upgrade", "echo");
       res.setHeader("Connection", "Upgrade");
 
-      req.upgrade(Handler.class);          
+      req.upgrade(Handler.class);
 
     } else {
 
-
       Log.trace("PingUpgradeServlet:doPost -- did not find echo, no upgrade");
-
 
       res.getWriter().println("No upgrade: " + req.getHeader("Upgrade"));
     }
@@ -87,7 +93,6 @@ public class PingUpgradeServlet extends HttpServlet {
 
         Log.trace("PingUpgradeServlet$Handler.init() -- Initializing Handler");
 
-
         // flush headers if any
         wc.getOutputStream().flush();
         wc.getInputStream().setReadListener(listener);
@@ -98,7 +103,7 @@ public class PingUpgradeServlet extends HttpServlet {
     }
 
     @Override
-    public void destroy() {     
+    public void destroy() {
       Log.trace("PingUpgradeServlet$Handler.destroy() -- Destroying Handler");
     }
   }
@@ -108,7 +113,7 @@ public class PingUpgradeServlet extends HttpServlet {
     private ServletInputStream input = null;
     private ServletOutputStream output = null;
 
-    private Listener(final WebConnection connection) throws IOException  {
+    private Listener(final WebConnection connection) throws IOException {
       this.connection = connection;
       this.input = connection.getInputStream();
       this.output = connection.getOutputStream();
@@ -122,7 +127,7 @@ public class PingUpgradeServlet extends HttpServlet {
       byte[] data = new byte[1024];
       int len = -1;
 
-      while (input.isReady()  && (len = input.read(data)) != -1) {
+      while (input.isReady() && (len = input.read(data)) != -1) {
         String dataRead = new String(data, 0, len);
 
         Log.trace("PingUpgradeServlet$Listener.onDataAvailable() -- Adding data to queue -->" + dataRead + "<--");
@@ -142,7 +147,6 @@ public class PingUpgradeServlet extends HttpServlet {
         Log.error(e.toString());
       }
     }
-
 
     @Override
     public void onAllDataRead() throws IOException {

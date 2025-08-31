@@ -17,6 +17,11 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -25,8 +30,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
 /**
  *
  * PingServletSetContentLength tests fundamental dynamic HTML creation
@@ -34,6 +37,7 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  *
  */
 
+@Component
 @WebServlet(name = "PingServletSetContentLength", urlPatterns = { "/servlet/PingServletSetContentLength" })
 public class PingServletSetContentLength extends HttpServlet {
 
@@ -44,9 +48,9 @@ public class PingServletSetContentLength extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -58,9 +62,9 @@ public class PingServletSetContentLength extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -68,7 +72,6 @@ public class PingServletSetContentLength extends HttpServlet {
             res.setContentType("text/html");
             String lengthParam = req.getParameter("contentLength");
             Integer length;
-
             if (lengthParam == null) {
                 length = 0;
             } else {
@@ -76,10 +79,9 @@ public class PingServletSetContentLength extends HttpServlet {
             }
 
             ServletOutputStream out = res.getOutputStream();
-
             // Add characters (a's) to the SOS to equal the requested length
             // 167 is the smallest length possible.
-            
+
             int i = 0;
             String buffer = "";
 
@@ -89,7 +91,8 @@ public class PingServletSetContentLength extends HttpServlet {
             }
 
             out.println("<html><head><title>Ping Servlet</title></head>"
-                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet<BR></FONT><FONT size=\"+1\" color=\"#000066\">" + buffer
+                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet<BR></FONT><FONT size=\"+1\" color=\"#000066\">"
+                    + buffer
                     + "</B></body></html>");
         } catch (Exception e) {
             Log.error(e, "PingServlet.doGet(...): general exception caught");
@@ -105,17 +108,19 @@ public class PingServletSetContentLength extends HttpServlet {
      **/
     @Override
     public String getServletInfo() {
-        return "Basic dynamic HTML generation through a servlet, with " + "contentLength set by contentLength parameter.";
+        return "Basic dynamic HTML generation through a servlet, with "
+                + "contentLength set by contentLength parameter.";
     }
 
     /**
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 }

@@ -17,15 +17,10 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
-import jakarta.ejb.EJB;
-import jakarta.inject.Inject;
-import jakarta.naming.InitialContext;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.naming.InitialContext;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
 import com.ibm.websphere.samples.daytrader.impl.ejb3.TradeSLSBBean;
@@ -33,6 +28,14 @@ import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
 import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -43,6 +46,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * stocks price is looked up using the Quote Entity EJB.
  *
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2Session2Entity", urlPatterns = { "/ejb3/PingServlet2Session2Entity" })
 public class PingServlet2Session2Entity extends HttpServlet {
 
@@ -71,8 +75,10 @@ public class PingServlet2Session2Entity extends HttpServlet {
         StringBuffer output = new StringBuffer(100);
 
         output.append("<html><head><title>PingServlet2Session2Entity</title></head>"
-                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2Session2Entity<BR></FONT>" + "<FONT size=\"-1\" color=\"#000066\">"
-                + "PingServlet2Session2Entity tests the common path of a Servlet calling a Session EJB " + "which in turn calls an Entity EJB.<BR>");
+                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2Session2Entity<BR></FONT>"
+                + "<FONT size=\"-1\" color=\"#000066\">"
+                + "PingServlet2Session2Entity tests the common path of a Servlet calling a Session EJB "
+                + "which in turn calls an Entity EJB.<BR>");
 
         try {
             try {
@@ -108,6 +114,7 @@ public class PingServlet2Session2Entity extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
 

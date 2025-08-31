@@ -17,9 +17,16 @@ package com.ibm.websphere.samples.daytrader.web.servlet;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Map;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
 import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -28,38 +35,43 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import com.ibm.websphere.samples.daytrader.util.TradeRunTimeModeLiteral;
-
+@Component
 @WebServlet(name = "TestServlet", urlPatterns = { "/TestServlet" })
 public class TestServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2927579146688173127L;
-    
+
     private TradeServices tradeAction;
-    
-    @Inject 
-    public TestServlet(@Any Instance<TradeServices> services) {
-      tradeAction = services.select(new TradeRunTimeModeLiteral(TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()])).get();
+
+    @Inject
+    public TestServlet(@Any Map<String, TradeServices> services) {
+        // Match CDI: services.select(new TradeRunTimeModeLiteral(<modeName>)).get();
+        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
+        TradeServices svc = services.get(key);
+        if (svc == null) {
+            throw new IllegalStateException(
+                    "No TradeServices bean named '" + key + "'");
+        }
+        this.tradeAction = svc;
     }
-    
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 
     /**
      * Process incoming HTTP GET requests
      *
      * @param request
-     *            Object that encapsulates the request to the servlet
+     *                 Object that encapsulates the request to the servlet
      * @param response
-     *            Object that encapsulates the response from the servlet
+     *                 Object that encapsulates the response from the servlet
      */
     @Override
-    public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         performTask(request, response);
     }
 
@@ -67,12 +79,13 @@ public class TestServlet extends HttpServlet {
      * Process incoming HTTP POST requests
      *
      * @param request
-     *            Object that encapsulates the request to the servlet
+     *                 Object that encapsulates the request to the servlet
      * @param response
-     *            Object that encapsulates the response from the servlet
+     *                 Object that encapsulates the response from the servlet
      */
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         performTask(request, response);
     }
 
@@ -80,16 +93,20 @@ public class TestServlet extends HttpServlet {
      * Main service method for TradeAppServlet
      *
      * @param request
-     *            Object that encapsulates the request to the servlet
+     *                 Object that encapsulates the request to the servlet
      * @param response
-     *            Object that encapsulates the response from the servlet
+     *                 Object that encapsulates the response from the servlet
      */
-    public void performTask(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public void performTask(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         try {
             Log.debug("Enter TestServlet doGet");
-            //TradeDirect tradeDirect = new TradeDirect();
+            // TradeDirect tradeDirect = new TradeDirect();
             for (int i = 0; i < 10; i++) {
-                tradeAction.createQuote("s:" + i, "Company " + i, new BigDecimal(i * 1.1));
+                tradeAction.createQuote(
+                        "s:" + i,
+                        "Company " + i,
+                        new BigDecimal(i * 1.1));
             }
             /*
              *

@@ -19,6 +19,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.json.Json;
 import jakarta.json.stream.JsonGenerator;
 import jakarta.json.stream.JsonParser;
@@ -30,17 +35,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
 /**
  *
- * PingJSONP tests JSON generating and parsing 
+ * PingJSONP tests JSON generating and parsing
  *
  */
 
+@Component
 @WebServlet(name = "PingJSONPStreaming", urlPatterns = { "/servlet/PingJSONPStreaming" })
 public class PingJSONPStreaming extends HttpServlet {
-
 
     /**
      * 
@@ -54,9 +57,9 @@ public class PingJSONPStreaming extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -68,9 +71,9 @@ public class PingJSONPStreaming extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -78,47 +81,48 @@ public class PingJSONPStreaming extends HttpServlet {
             res.setContentType("text/html");
 
             ServletOutputStream out = res.getOutputStream();
-            
+
             hitCount++;
-            
+
             // JSON generate
             StringWriter sw = new StringWriter();
             JsonGenerator generator = Json.createGenerator(sw);
-             
+
             generator.writeStartObject();
-            generator.write("initTime",initTime);
+            generator.write("initTime", initTime);
             generator.write("hitCount", hitCount);
             generator.writeEnd();
             generator.flush();
-            
-            String generatedJSON =  sw.toString();
-            StringBuffer parsedJSON = new StringBuffer(); 
-            
+
+            String generatedJSON = sw.toString();
+            StringBuffer parsedJSON = new StringBuffer();
+
             // JSON parse
             JsonParser parser = Json.createParser(new StringReader(generatedJSON));
             while (parser.hasNext()) {
-               JsonParser.Event event = parser.next();
-               switch(event) {
-                  case START_ARRAY:
-                  case END_ARRAY:
-                  case START_OBJECT:
-                  case END_OBJECT:
-                  case VALUE_FALSE:
-                  case VALUE_NULL:
-                  case VALUE_TRUE:
-                     break;
-                  case KEY_NAME:
-                      parsedJSON.append(parser.getString() + ":");
-                     break;
-                  case VALUE_STRING:
-                  case VALUE_NUMBER:
-                      parsedJSON.append(parser.getString() + " ");
-                     break;
-               }
+                JsonParser.Event event = parser.next();
+                switch (event) {
+                    case START_ARRAY:
+                    case END_ARRAY:
+                    case START_OBJECT:
+                    case END_OBJECT:
+                    case VALUE_FALSE:
+                    case VALUE_NULL:
+                    case VALUE_TRUE:
+                        break;
+                    case KEY_NAME:
+                        parsedJSON.append(parser.getString() + ":");
+                        break;
+                    case VALUE_STRING:
+                    case VALUE_NUMBER:
+                        parsedJSON.append(parser.getString() + " ");
+                        break;
+                }
             }
-            
+
             out.println("<html><head><title>Ping JSONP</title></head>"
-                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping JSONP</FONT><BR>Generated JSON: " + generatedJSON + "<br>Parsed JSON: " + parsedJSON + "</body></html>");
+                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping JSONP</FONT><BR>Generated JSON: "
+                    + generatedJSON + "<br>Parsed JSON: " + parsedJSON + "</body></html>");
         } catch (Exception e) {
             Log.error(e, "PingJSONP.doGet(...): general exception caught");
             res.sendError(500, e.toString());
@@ -140,11 +144,12 @@ public class PingJSONPStreaming extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         initTime = new java.util.Date().toString();
         hitCount = 0;
     }

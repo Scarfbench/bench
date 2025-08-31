@@ -18,6 +18,10 @@ package com.ibm.websphere.samples.daytrader.web.prims.beanval;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -26,24 +30,22 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
+@Component
 @WebServlet(name = "PingServletBeanValSimple1", urlPatterns = { "/servlet/PingServletBeanValSimple1" })
-public class PingServletBeanValSimple1  extends HttpServlet {
+public class PingServletBeanValSimple1 extends HttpServlet {
 
   private static final long serialVersionUID = 7097023236709683760L;
   private static LocalDateTime initTime;
   private static int hitCount = 0;
-
 
   /**
    * forwards post requests to the doGet method Creation date: (11/6/2000
    * 10:52:39 AM)
    *
    * @param res
-   *            jakarta.servlet.http.HttpServletRequest
+   *             jakarta.servlet.http.HttpServletRequest
    * @param res2
-   *            jakarta.servlet.http.HttpServletResponse
+   *             jakarta.servlet.http.HttpServletResponse
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -55,13 +57,13 @@ public class PingServletBeanValSimple1  extends HttpServlet {
    * requests.
    *
    * @param request
-   *            HttpServletRequest
+   *                 HttpServletRequest
    * @param responce
-   *            HttpServletResponce
+   *                 HttpServletResponce
    **/
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-    try {            
+    try {
       res.setContentType("text/html");
 
       SimpleBean1 simpleBean1 = new SimpleBean1();
@@ -71,7 +73,8 @@ public class PingServletBeanValSimple1  extends HttpServlet {
 
       int currentHitCount = ++hitCount;
       out.println("<html><head><title>Ping Servlet Bean Validation Simple</title></head>"
-          + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet Bean Validation Simple<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+          + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet Bean Validation Simple<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+          + initTime
           + "<BR><BR></FONT>  <B>Hit Count: " + currentHitCount + "</B></body></html>");
     } catch (Exception e) {
       Log.error(e, "PingServlet.doGet(...): general exception caught");
@@ -94,13 +97,12 @@ public class PingServletBeanValSimple1  extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    *
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
     initTime = LocalDateTime.now();
-
 
   }
 }

@@ -18,6 +18,11 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,8 +30,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
-import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
  *
@@ -37,6 +40,7 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  * 2024 bits being retrieved and stored upon each request.
  *
  */
+@Component
 @WebServlet(name = "PingSession3", urlPatterns = { "/servlet/PingSession3" })
 public class PingSession3 extends HttpServlet {
     private static final long serialVersionUID = -6129599971684210414L;
@@ -49,9 +53,9 @@ public class PingSession3 extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -63,9 +67,9 @@ public class PingSession3 extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -113,7 +117,8 @@ public class PingSession3 extends HttpServlet {
                     Log.error(e, "PingSession3.doGet(...): input should be an integer, input=" + num_objects);
                 } // revert to current value on exception
 
-                outputBuffer.append("<html><head> Session object size set to " + NUM_OBJECTS + "K bytes </head><body></body></html>");
+                outputBuffer.append("<html><head> Session object size set to " + NUM_OBJECTS
+                        + "K bytes </head><body></body></html>");
                 if (session != null) {
                     session.invalidate();
                 }
@@ -143,7 +148,8 @@ public class PingSession3 extends HttpServlet {
                     .append(initTime).append("</FONT><BR><BR>");
             hitCount++;
             outputBuffer.append("<B>Hit Count: ").append(hitCount)
-                    .append("<BR>Session object updated. Session Object size = " + num_bytes + " bytes </B></body></html>");
+                    .append("<BR>Session object updated. Session Object size = " + num_bytes
+                            + " bytes </B></body></html>");
             // output the Buffer to the printWriter.
             out.println(outputBuffer.toString());
 
@@ -170,11 +176,12 @@ public class PingSession3 extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
 

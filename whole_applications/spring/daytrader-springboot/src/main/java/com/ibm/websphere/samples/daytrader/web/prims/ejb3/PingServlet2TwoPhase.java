@@ -17,13 +17,8 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
-import jakarta.inject.Inject;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.ibm.websphere.samples.daytrader.entities.QuoteDataBean;
 import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
@@ -31,6 +26,13 @@ import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
 import com.ibm.websphere.samples.daytrader.util.Log;
 import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  *
@@ -40,6 +42,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * a 2-phase commit
  *
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2TwoPhase", urlPatterns = { "/ejb3/PingServlet2TwoPhase" })
 public class PingServlet2TwoPhase extends HttpServlet {
 
@@ -58,8 +61,6 @@ public class PingServlet2TwoPhase extends HttpServlet {
     doGet(req, res);
   }
 
-
-
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException, ServletException {
 
@@ -70,9 +71,11 @@ public class PingServlet2TwoPhase extends HttpServlet {
     StringBuffer output = new StringBuffer(100);
 
     output.append("<html><head><title>PingServlet2TwoPhase</title></head>"
-        + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2TwoPhase<BR></FONT>" + "<FONT size=\"-1\" color=\"#000066\">"
+        + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2TwoPhase<BR></FONT>"
+        + "<FONT size=\"-1\" color=\"#000066\">"
         + "PingServlet2TwoPhase tests the path of a Servlet calling a Session EJB "
-        + "which in turn calls an Entity EJB to read a DB row (quote). The Session EJB " + "then posts a message to a JMS Queue. "
+        + "which in turn calls an Entity EJB to read a DB row (quote). The Session EJB "
+        + "then posts a message to a JMS Queue. "
         + "<BR> These operations are wrapped in a 2-phase commit<BR>");
 
     try {
@@ -93,8 +96,9 @@ public class PingServlet2TwoPhase extends HttpServlet {
       }
 
       output.append("<HR>initTime: " + initTime).append("<BR>Hit Count: " + hitCount++);
-      output.append("<HR>Two phase ping selected a quote and sent a message to TradeBrokerQueue JMS queue<BR>Quote Information<BR><BR>"
-          + quoteData.toHTML());
+      output.append(
+          "<HR>Two phase ping selected a quote and sent a message to TradeBrokerQueue JMS queue<BR>Quote Information<BR><BR>"
+              + quoteData.toHTML());
       out.println(output.toString());
 
     } catch (Exception e) {
@@ -112,6 +116,7 @@ public class PingServlet2TwoPhase extends HttpServlet {
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     hitCount = 0;
     initTime = new java.util.Date().toString();
   }

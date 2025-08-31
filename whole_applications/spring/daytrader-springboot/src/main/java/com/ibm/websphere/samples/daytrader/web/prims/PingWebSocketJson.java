@@ -1,26 +1,18 @@
-/**
- * (C) Copyright IBM Corporation 2015.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ibm.websphere.samples.daytrader.web.prims;
 
-import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.enterprise.concurrent.ManagedThreadFactory;
-import jakarta.naming.InitialContext;
-import jakarta.naming.NamingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.web.SpringEndpointConfigurator;
+import com.ibm.websphere.samples.daytrader.web.websocket.JsonDecoder;
+import com.ibm.websphere.samples.daytrader.web.websocket.JsonEncoder;
+import com.ibm.websphere.samples.daytrader.web.websocket.JsonMessage;
+
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.OnClose;
@@ -30,87 +22,73 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
-import com.ibm.websphere.samples.daytrader.web.websocket.JsonDecoder;
-import com.ibm.websphere.samples.daytrader.web.websocket.JsonEncoder;
-import com.ibm.websphere.samples.daytrader.web.websocket.JsonMessage;
-
-/** This class a simple websocket that sends the number of times it has been pinged. */
-
-@ServerEndpoint(value = "/pingWebSocketJson",encoders=JsonEncoder.class ,decoders=JsonDecoder.class)
+@Component
+@ServerEndpoint(value = "/pingWebSocketJson", encoders = JsonEncoder.class, decoders = JsonDecoder.class, configurator = SpringEndpointConfigurator.class // ensures
+                                                                                                                                                          // Spring
+                                                                                                                                                          // builds/autowires
+                                                                                                                                                          // this
+)
 public class PingWebSocketJson {
 
-    private Session currentSession = null;
-    private Integer sentHitCount = null;
-    private Integer receivedHitCount = null;
-       
+    @Autowired
+    private TaskExecutor taskExecutor; // define a ThreadPoolTaskExecutor bean
+
+    // Per-connection state (new instance per WS connection)
+    // Keep a session reference if needed later (not used directly now)
+    private Session currentSession;
+    private final AtomicInteger sentHitCount = new AtomicInteger();
+    private final AtomicInteger receivedHitCount = new AtomicInteger();
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
     @OnOpen
     public void onOpen(final Session session, EndpointConfig ec) {
-        currentSession = session;
-        sentHitCount = 0;
-        receivedHitCount = 0;
-        
-        
-        InitialContext context;
-        ManagedThreadFactory mtf = null;
-        
-        try {
-            context = new InitialContext();
-            mtf = (ManagedThreadFactory) context.lookup("java:comp/DefaultManagedThreadFactory");
-        
-        } catch (NamingException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-        
-        Thread thread = mtf.newThread(new Runnable() {
+        this.currentSession = session;
+        sentHitCount.set(0);
+        receivedHitCount.set(0);
+        running.set(true);
 
-            @Override
-            public void run() {
-                
-                try {
-                
-                    Thread.sleep(500);
-                    
-                    while (currentSession.isOpen()) {
-                        sentHitCount++;
-                    
-                        JsonMessage response = new JsonMessage();
-                        response.setKey("sentHitCount");
-                        response.setValue(sentHitCount.toString());
-                        currentSession.getAsyncRemote().sendObject(response);
+        taskExecutor.execute(() -> {
+            try {
+                Thread.sleep(500);
+                while (running.get() && session.isOpen()) {
+                    int count = sentHitCount.incrementAndGet();
 
-                        Thread.sleep(100);
-                    }
-                    
-                           
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    JsonMessage response = new JsonMessage();
+                    response.setKey("sentHitCount");
+                    response.setValue(Integer.toString(count));
+
+                    session.getAsyncRemote().sendObject(response);
+                    Thread.sleep(100);
                 }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            } catch (Throwable t) {
+                Log.error("PingWebSocketJson: background loop error", t);
             }
-                
         });
-        
-        thread.start();
-        
     }
 
     @OnMessage
-    public void ping(JsonMessage message) throws IOException {
-        receivedHitCount++;
+    public void onMessage(JsonMessage message, Session session) {
+        int count = receivedHitCount.incrementAndGet();
+
         JsonMessage response = new JsonMessage();
         response.setKey("receivedHitCount");
-        response.setValue(receivedHitCount.toString());
-        currentSession.getAsyncRemote().sendObject(response);
-    }
+        response.setValue(Integer.toString(count));
 
-    @OnError
-    public void onError(Throwable t) {
-        t.printStackTrace();
+        // use the session passed by JSR-356 (or currentSession; both are same
+        // connection)
+        session.getAsyncRemote().sendObject(response);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-       
+        running.set(false);
     }
 
+    @OnError
+    public void onError(Session session, Throwable t) {
+        running.set(false);
+        Log.error("PingWebSocketJson:onError", t);
+    }
 }

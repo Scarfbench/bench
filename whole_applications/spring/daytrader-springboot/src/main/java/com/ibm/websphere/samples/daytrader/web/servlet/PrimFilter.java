@@ -17,6 +17,11 @@ package com.ibm.websphere.samples.daytrader.web.servlet;
 
 import java.io.IOException;
 
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.interfaces.Trace;
+import com.ibm.websphere.samples.daytrader.util.Diagnostics;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -25,44 +30,43 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 
-import com.ibm.websphere.samples.daytrader.interfaces.Trace;
-import com.ibm.websphere.samples.daytrader.util.Diagnostics;
-
 @WebFilter(filterName = "PrimFilter", urlPatterns = "/drive/*")
 @Trace
 public class PrimFilter implements Filter {
-	
-  /**
-   * @see Filter#init(FilterConfig)
-   */
-  private FilterConfig filterConfig = null;
 
-  @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
-    this.filterConfig = filterConfig;
-  }
+    /**
+     * @see Filter#init(FilterConfig)
+     */
+    private FilterConfig filterConfig = null;
 
-  /**
-   * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
-   */
-  @Override
-  public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
-
-    if (filterConfig == null) {
-      return;
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        this.filterConfig = filterConfig;
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, filterConfig.getServletContext());
     }
 
-    Diagnostics.checkDiagnostics();
+    /**
+     * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
+     */
+    @Override
+    public void doFilter(
+            ServletRequest req,
+            ServletResponse resp,
+            FilterChain chain) throws IOException, ServletException {
+        if (filterConfig == null) {
+            return;
+        }
 
-    chain.doFilter(req, resp/* wrapper */);
-  }
+        Diagnostics.checkDiagnostics();
 
-  /**
-   * @see Filter#destroy()
-   */
-  @Override
-  public void destroy() {
-    this.filterConfig = null;
-  }
+        chain.doFilter(req, resp /* wrapper */);
+    }
 
+    /**
+     * @see Filter#destroy()
+     */
+    @Override
+    public void destroy() {
+        this.filterConfig = null;
+    }
 }

@@ -31,17 +31,21 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 //import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
  *
- * PingServlet31Async tests fundamental dynamic HTML creation functionality through
+ * PingServlet31Async tests fundamental dynamic HTML creation functionality
+ * through
  * server side servlet processing asynchronously with non-blocking i/o.
  *
  */
 
-@WebServlet(name = "PingServlet31Async", urlPatterns = { "/servlet/PingServlet31Async" }, asyncSupported=true)
+@Component
+@WebServlet(name = "PingServlet31Async", urlPatterns = { "/servlet/PingServlet31Async" }, asyncSupported = true)
 public class PingServlet31Async extends HttpServlet {
 
     private static final long serialVersionUID = 8731300373855056660L;
@@ -53,16 +57,16 @@ public class PingServlet31Async extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("text/html");
-                
+
         AsyncContext ac = req.startAsync();
-           
+
         ServletInputStream input = req.getInputStream();
         ReadListener readListener = new ReadListenerImpl(input, res, ac);
         input.setReadListener(readListener);
@@ -79,32 +83,32 @@ public class PingServlet31Async extends HttpServlet {
             res = r;
             ac = c;
         }
-    
+
         public void onDataAvailable() throws IOException {
             StringBuilder sb = new StringBuilder();
             int len = -1;
             byte b[] = new byte[1024];
-            
+
             while (input.isReady() && (len = input.read(b)) != -1) {
                 String data = new String(b, 0, len);
                 sb.append(data);
             }
             queue.add(sb.toString());
-            
+
         }
-    
+
         public void onAllDataRead() throws IOException {
             ServletOutputStream output = res.getOutputStream();
             WriteListener writeListener = new WriteListenerImpl(output, queue, ac);
             output.setWriteListener(writeListener);
         }
-    
+
         public void onError(final Throwable t) {
             ac.complete();
             t.printStackTrace();
         }
     }
-    
+
     class WriteListenerImpl implements WriteListener {
         private ServletOutputStream output = null;
         private Queue<String> queue = null;
@@ -114,7 +118,7 @@ public class PingServlet31Async extends HttpServlet {
             output = sos;
             queue = q;
             ac = c;
-            
+
             try {
                 output.print("<html><head><title>Ping Servlet 3.1 Async</title></head>"
                         + "<body><hr/><br/><font size=\"+2\" color=\"#000066\">Ping Servlet 3.1 Async</font>"
@@ -127,12 +131,12 @@ public class PingServlet31Async extends HttpServlet {
         }
 
         public void onWritePossible() throws IOException {
-            
+
             while (queue.peek() != null && output.isReady()) {
                 String data = (String) queue.poll();
                 output.print(data);
             }
-            
+
             if (queue.peek() == null) {
                 output.println("</body></html>");
                 ac.complete();
@@ -144,22 +148,21 @@ public class PingServlet31Async extends HttpServlet {
             t.printStackTrace();
         }
     }
-        
-
 
     /**
      * this is the main method of the servlet that will service all get
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        doPost(req,res);          
+        doPost(req, res);
     }
+
     /**
      * returns a string of information about the servlet
      *
@@ -174,13 +177,14 @@ public class PingServlet31Async extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         initTime = new java.util.Date().toString();
         hitCount = 0;
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
 
     }
 }

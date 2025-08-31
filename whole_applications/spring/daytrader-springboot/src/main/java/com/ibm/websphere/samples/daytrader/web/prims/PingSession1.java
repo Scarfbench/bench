@@ -27,6 +27,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -35,6 +37,7 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  * the users session and is accessed and displayed on each user request.
  *
  */
+@Component
 @WebServlet(name = "PingSession1", urlPatterns = { "/servlet/PingSession1" })
 public class PingSession1 extends HttpServlet {
     private static final long serialVersionUID = -3703858656588519807L;
@@ -49,9 +52,9 @@ public class PingSession1 extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -63,9 +66,9 @@ public class PingSession1 extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -95,10 +98,12 @@ public class PingSession1 extends HttpServlet {
             response.setHeader("SessionKeyTest-SessionID", SessionID);
 
             PrintWriter out = response.getWriter();
-            out.println("<html><head><title>HTTP Session Key Test</title></head><body><HR><BR><FONT size=\"+2\" color=\"#000066\">HTTP Session Test 1: Session Key<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time: "
-                    + initTime + "</FONT><BR><BR>");
+            out.println(
+                    "<html><head><title>HTTP Session Key Test</title></head><body><HR><BR><FONT size=\"+2\" color=\"#000066\">HTTP Session Test 1: Session Key<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time: "
+                            + initTime + "</FONT><BR><BR>");
             hitCount++;
-            out.println("<B>Hit Count: " + hitCount + "<BR>Your HTTP Session key is " + SessionID + "</B></body></html>");
+            out.println(
+                    "<B>Hit Count: " + hitCount + "<BR>Your HTTP Session key is " + SessionID + "</B></body></html>");
         } catch (Exception e) {
             // log the excecption
             Log.error(e, "PingSession1.doGet(..l.): error.");
@@ -123,7 +128,7 @@ public class PingSession1 extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -131,6 +136,7 @@ public class PingSession1 extends HttpServlet {
         count = 0;
         hitCount = 0;
         initTime = new java.util.Date().toString();
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
 
     }
 }

@@ -17,6 +17,11 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.annotation.Resource;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -30,9 +35,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-
 /**
  * This primitive is designed to run inside the TradeApplication and relies upon
  * the {@link com.ibm.websphere.samples.daytrader.util.TradeConfig} class to set
@@ -42,6 +44,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * EJB {@link com.ibm.websphere.samples.daytrader.ejb3.DTStreamer3MDB} by
  * posting a message to the MDB Topic
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2MDBTopic", urlPatterns = { "/ejb3/PingServlet2MDBTopic" })
 public class PingServlet2MDBTopic extends HttpServlet {
 
@@ -71,7 +74,8 @@ public class PingServlet2MDBTopic extends HttpServlet {
         // use a stringbuffer to avoid concatenation of Strings
         StringBuffer output = new StringBuffer(100);
         output.append("<html><head><title>PingServlet2MDBTopic</title></head>"
-                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2MDBTopic<BR></FONT>" + "<FONT size=\"-1\" color=\"#000066\">"
+                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2MDBTopic<BR></FONT>"
+                + "<FONT size=\"-1\" color=\"#000066\">"
                 + "Tests the basic operation of a servlet posting a message to an EJB MDB (and other subscribers) through a JMS Topic.<BR>"
                 + "<FONT color=\"red\"><B>Note:</B> Not intended for performance testing.</FONT>");
 
@@ -84,30 +88,36 @@ public class PingServlet2MDBTopic extends HttpServlet {
                 TextMessage message = null;
                 int iter = TradeConfig.getPrimIterations();
                 for (int ii = 0; ii < iter; ii++) {
-                    /*Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                    try {
-                        MessageProducer producer = sess.createProducer(tradeStreamerTopic);
-                        message = sess.createTextMessage();
+                    /*
+                     * Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                     * try {
+                     * MessageProducer producer = sess.createProducer(tradeStreamerTopic);
+                     * message = sess.createTextMessage();
+                     * 
+                     * String command = "ping";
+                     * message.setStringProperty("command", command);
+                     * message.setLongProperty("publishTime", System.currentTimeMillis());
+                     * message.
+                     * setText("Ping message for topic java:comp/env/jms/TradeStreamerTopic sent from PingServlet2MDBTopic at "
+                     * + new java.util.Date());
+                     * 
+                     * producer.send(message);
+                     * } finally {
+                     * sess.close();
+                     * }
+                     */
 
-                        String command = "ping";
-                        message.setStringProperty("command", command);
-                        message.setLongProperty("publishTime", System.currentTimeMillis());
-                        message.setText("Ping message for topic java:comp/env/jms/TradeStreamerTopic sent from PingServlet2MDBTopic at " + new java.util.Date());
+                    JMSContext context = topicConnectionFactory.createContext();
 
-                        producer.send(message);
-                    } finally {
-                        sess.close();
-                    }*/
-                	
-                	JMSContext context = topicConnectionFactory.createContext();
-            		
-            		message = context.createTextMessage();
+                    message = context.createTextMessage();
 
-            		message.setStringProperty("command", "ping");
+                    message.setStringProperty("command", "ping");
                     message.setLongProperty("publishTime", System.currentTimeMillis());
-                    message.setText("Ping message for topic java:comp/env/jms/TradeStreamerTopic sent from PingServlet2MDBTopic at " + new java.util.Date());
-              		
-            		context.createProducer().send(tradeStreamerTopic, message);
+                    message.setText(
+                            "Ping message for topic java:comp/env/jms/TradeStreamerTopic sent from PingServlet2MDBTopic at "
+                                    + new java.util.Date());
+
+                    context.createProducer().send(tradeStreamerTopic, message);
                 }
 
                 // write out the output

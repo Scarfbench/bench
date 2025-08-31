@@ -15,28 +15,22 @@
  */
 package com.ibm.websphere.samples.daytrader.web.websocket;
 
-import com.ibm.websphere.samples.daytrader.interfaces.MarketSummaryUpdate;
-import com.ibm.websphere.samples.daytrader.interfaces.QuotePriceChange;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.RecentQuotePriceChangeList;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import com.ibm.websphere.samples.daytrader.util.TradeRunTimeModeLiteral;
-
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
-import jakarta.annotation.Priority;
-import jakarta.enterprise.event.ObservesAsync;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.interceptor.Interceptor;
+import com.ibm.websphere.samples.daytrader.events.MarketSummaryUpdateEvent;
+import com.ibm.websphere.samples.daytrader.events.QuotePriceChangeEvent;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.RecentQuotePriceChangeList;
+import com.ibm.websphere.samples.daytrader.web.SpringEndpointConfigurator;
+
 import jakarta.json.JsonObject;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EndpointConfig;
@@ -47,14 +41,6 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
-import org.springframework.context.event.EventListener;
-import org.springframework.core.annotation.Order;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-
-import com.ibm.websphere.samples.daytrader.events.MarketSummaryUpdateEvent;
-import com.ibm.websphere.samples.daytrader.events.QuotePriceChangeEvent;
-
 /**
  * This class is a WebSocket EndPoint that sends the Market Summary in JSON form
  * and
@@ -62,19 +48,16 @@ import com.ibm.websphere.samples.daytrader.events.QuotePriceChangeEvent;
  * events.
  **/
 @Component
-@ServerEndpoint(
-    value = "/marketsummary", 
-    encoders = { QuotePriceChangeListEncoder.class }, 
-    decoders = { ActionDecoder.class }
-)
+@ServerEndpoint(value = "/marketsummary", encoders = { QuotePriceChangeListEncoder.class }, decoders = {
+        ActionDecoder.class }, configurator = SpringEndpointConfigurator.class)
 public class MarketSummaryWebSocket {
 
     @Autowired
     RecentQuotePriceChangeList recentQuotePriceChangeList;
 
-    // 
+    //
     @Autowired
-    private Map<String, TradeServices> tradeActionMap;
+    private TradeServices tradeAction;
 
     private static final List<Session> sessions = new CopyOnWriteArrayList<>();
     private final CountDownLatch latch = new CountDownLatch(1);
@@ -102,8 +85,12 @@ public class MarketSummaryWebSocket {
         // Make sure onopen is finished
         try {
             latch.await();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.error("MarketSummaryWebSocket:sendMarketSummary interrupted", e);
+            return;
+        } catch (Throwable t) {
+            Log.error("MarketSummaryWebSocket:sendMarketSummary await failed", t);
             return;
         }
 
@@ -118,7 +105,7 @@ public class MarketSummaryWebSocket {
 
                 currentSession.getAsyncRemote().sendText(mkSummary.toString());
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.error("MarketSummaryWebSocket:sendMarketSummary error", e);
             }
         } else if (action != null && action.equals("updateRecentQuotePriceChange")) {
             if (!recentQuotePriceChangeList.isEmpty()) {
@@ -135,7 +122,7 @@ public class MarketSummaryWebSocket {
                 "MarketSummaryWebSocket:onError -- session -->" +
                         currentSession +
                         "<--");
-        t.printStackTrace();
+        Log.error("MarketSummaryWebSocket:onError", t);
     }
 
     @OnClose
@@ -147,13 +134,10 @@ public class MarketSummaryWebSocket {
 
     @EventListener
     @Async("ManagedExecutorService")
-    public void onStockChange(
-            QuotePriceChangeEvent quotePriceChangeEvent) {
+    public void onStockChange(QuotePriceChangeEvent quotePriceChangeEvent) {
         Log.trace("MarketSummaryWebSocket:onStockChange");
-        var event = quotePriceChangeEvent.payload();
-        Iterator<Session> failSafeIterator = sessions.iterator();
-        while (failSafeIterator.hasNext()) {
-            Session s = failSafeIterator.next();
+        quotePriceChangeEvent.payload(); // touch payload to preserve behavior; result not used directly here
+        for (Session s : sessions) {
             if (s.isOpen()) {
                 s.getAsyncRemote().sendObject(recentQuotePriceChangeList.recentList());
             }
@@ -165,20 +149,18 @@ public class MarketSummaryWebSocket {
     public void onMarketSummarytUpdate(
             MarketSummaryUpdateEvent marketSummaryUpdateEvent) {
         Log.trace("MarketSummaryWebSocket:onJMSMessage");
-        var event = marketSummaryUpdateEvent.payload();
+        marketSummaryUpdateEvent.payload(); // touch payload to preserve behavior; result not used directly here
 
         try {
             JsonObject mkSummary = tradeAction.getMarketSummary().toJSON();
 
-            Iterator<Session> failSafeIterator = sessions.iterator();
-            while (failSafeIterator.hasNext()) {
-                Session s = failSafeIterator.next();
+            for (Session s : sessions) {
                 if (s.isOpen()) {
                     s.getAsyncRemote().sendText(mkSummary.toString());
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("MarketSummaryWebSocket:onMarketSummarytUpdate error", e);
         }
     }
 }

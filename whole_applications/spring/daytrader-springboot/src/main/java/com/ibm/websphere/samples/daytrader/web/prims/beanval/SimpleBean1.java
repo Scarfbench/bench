@@ -19,8 +19,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jakarta.naming.Context;
-import jakarta.naming.InitialContext;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -33,7 +34,8 @@ import jakarta.validation.constraints.Size;
 public class SimpleBean1 {
   /**
    * Logging support and the static initializer for this class. Used to trace file
-   * version information. This will display the current version of the class in the
+   * version information. This will display the current version of the class in
+   * the
    * debug log at the time the class is loaded.
    */
   private static final String thisClass = SimpleBean1.class.getName();
@@ -52,11 +54,7 @@ public class SimpleBean1 {
   @Pattern(regexp = "[a-z][a-z]*", message = "go to your room!")
   String pattern = "mypattern";
 
-
-
   boolean setToFail = false;
-
-
 
   public SimpleBean1() throws Exception {
     if (validatorFactory == null) {
@@ -88,10 +86,10 @@ public class SimpleBean1 {
     traceLogger.exiting(thisClass, "checkInjectionValidation ");
   }
 
-
   @Override
   public String toString() {
-    String result = "iMin:" + iMin + " iMax:" + iMax + " iMinArray:" + iMinArray + " iMaxArray:" + iMaxArray + " pattern:" + pattern
+    String result = "iMin:" + iMin + " iMax:" + iMax + " iMinArray:" + iMinArray + " iMaxArray:" + iMaxArray
+        + " pattern:" + pattern
         + " setToFail:" + setToFail;
 
     return result;
@@ -100,7 +98,8 @@ public class SimpleBean1 {
   /**
    * Convert the constraint violations for use within WAS diagnostic logs.
    *
-   * @return a String representation of the constraint violations formatted one per line and uniformly indented.
+   * @return a String representation of the constraint violations formatted one
+   *         per line and uniformly indented.
    */
   public String formatConstraintViolations(Set<ConstraintViolation<SimpleBean1>> cvSet) {
     traceLogger.entering(thisClass, "formatConstraintViolations " + cvSet);

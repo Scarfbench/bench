@@ -19,7 +19,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import jakarta.ejb.EJB;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.entities.HoldingDataBean;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -27,13 +35,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.ibm.websphere.samples.daytrader.entities.HoldingDataBean;
-import com.ibm.websphere.samples.daytrader.impl.ejb3.TradeSLSBBean;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
 /**
  *
@@ -45,7 +46,9 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * Holdings
  *
  */
-@WebServlet(name = "ejb3.PingServlet2Session2EntityCollection", urlPatterns = { "/ejb3/PingServlet2Session2EntityCollection" })
+@Component
+@WebServlet(name = "ejb3.PingServlet2Session2EntityCollection", urlPatterns = {
+        "/ejb3/PingServlet2Session2EntityCollection" })
 public class PingServlet2Session2EntityCollection extends HttpServlet {
 
     private static final long serialVersionUID = 6171380014749902308L;
@@ -56,8 +59,8 @@ public class PingServlet2Session2EntityCollection extends HttpServlet {
 
     @Inject
     @TradeEJB
-     private TradeServices tradeSLSBLocal;
-    
+    private TradeServices tradeSLSBLocal;
+
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         doGet(req, res);
@@ -73,7 +76,8 @@ public class PingServlet2Session2EntityCollection extends HttpServlet {
         StringBuffer output = new StringBuffer(100);
 
         output.append("<html><head><title>PingServlet2Session2EntityCollection</title></head>"
-                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2Session2EntityCollection<BR></FONT>" + "<FONT size=\"-1\" color=\"#000066\">"
+                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2Session2EntityCollection<BR></FONT>"
+                + "<FONT size=\"-1\" color=\"#000066\">"
                 + "PingServlet2Session2EntityCollection tests the common path of a Servlet calling a Session EJB "
                 + "which in turn calls a finder on an Entity EJB returning a collection of Entity EJBs.<BR>");
 
@@ -90,12 +94,15 @@ public class PingServlet2Session2EntityCollection extends HttpServlet {
                     // trade.remove();
                 }
             } catch (Exception ne) {
-                Log.error(ne, "PingServlet2Session2EntityCollection.goGet(...): exception getting HoldingData collection through Trade for user " + userID);
+                Log.error(ne,
+                        "PingServlet2Session2EntityCollection.goGet(...): exception getting HoldingData collection through Trade for user "
+                                + userID);
                 throw ne;
             }
 
             output.append("<HR>initTime: " + initTime).append("<BR>Hit Count: " + hitCount++);
-            output.append("<HR>User: " + userID + " is currently holding " + holdingDataBeans.size() + " stock holdings:");
+            output.append(
+                    "<HR>User: " + userID + " is currently holding " + holdingDataBeans.size() + " stock holdings:");
             Iterator<?> it = holdingDataBeans.iterator();
             while (it.hasNext()) {
                 HoldingDataBean holdingData = (HoldingDataBean) it.next();
@@ -117,6 +124,7 @@ public class PingServlet2Session2EntityCollection extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
     }

@@ -17,6 +17,11 @@ package com.ibm.websphere.samples.daytrader.web.prims.drive;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -25,8 +30,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
 /**
  *
  * PingServlet tests fundamental dynamic HTML creation functionality through
@@ -34,11 +37,12 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  *
  */
 
+@Component
 @WebServlet(name = "PingServletDrive", urlPatterns = { "/drive/PingServlet" })
 public class PingServletDrive extends HttpServlet {
 
-	private static final long serialVersionUID = 7097023236709683760L;
-	private static String initTime;
+    private static final long serialVersionUID = 7097023236709683760L;
+    private static String initTime;
     private static int hitCount;
 
     /**
@@ -46,9 +50,9 @@ public class PingServletDrive extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -60,9 +64,9 @@ public class PingServletDrive extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -77,7 +81,8 @@ public class PingServletDrive extends HttpServlet {
             // java.io.PrintWriter out = res.getWriter();
             hitCount++;
             out.println("<html><head><title>Ping Servlet</title></head>"
-                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+                    + initTime
                     + "<BR><BR></FONT>  <B>Hit Count: " + hitCount + "</B></body></html>");
         } catch (Exception e) {
             Log.error(e, "PingServlet.doGet(...): general exception caught");
@@ -100,11 +105,12 @@ public class PingServletDrive extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         initTime = new java.util.Date().toString();
         hitCount = 0;
 

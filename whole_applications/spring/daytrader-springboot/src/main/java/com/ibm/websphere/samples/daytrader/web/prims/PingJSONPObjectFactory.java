@@ -18,6 +18,11 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.json.Json;
 import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
@@ -31,13 +36,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
 /**
  *
- * PingJSONP tests JSON generating and parsing 
+ * PingJSONP tests JSON generating and parsing
  *
  */
+@Component
 @WebServlet(name = "PingJSONPObjectFactory", urlPatterns = { "/servlet/PingJSONPObjectFactory" })
 public class PingJSONPObjectFactory extends HttpServlet {
 
@@ -55,9 +59,9 @@ public class PingJSONPObjectFactory extends HttpServlet {
    * 10:52:39 AM)
    *
    * @param res
-   *            jakarta.servlet.http.HttpServletRequest
+   *             jakarta.servlet.http.HttpServletRequest
    * @param res2
-   *            jakarta.servlet.http.HttpServletResponse
+   *             jakarta.servlet.http.HttpServletResponse
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -69,9 +73,9 @@ public class PingJSONPObjectFactory extends HttpServlet {
    * requests.
    *
    * @param request
-   *            HttpServletRequest
+   *                 HttpServletRequest
    * @param responce
-   *            HttpServletResponce
+   *                 HttpServletResponce
    **/
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -90,11 +94,11 @@ public class PingJSONPObjectFactory extends HttpServlet {
 
       // Read back
       JsonReader jsonReader = jSONReaderFactory.createReader(new StringReader(generatedJSON));
-      String parsedJSON = jsonReader.readObject().toString();        
-
+      String parsedJSON = jsonReader.readObject().toString();
 
       out.println("<html><head><title>Ping JSONP</title></head>"
-          + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping JSONP</FONT><BR>Generated JSON: " + generatedJSON + "<br>Parsed JSON: " + parsedJSON + "</body></html>");
+          + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping JSONP</FONT><BR>Generated JSON: " + generatedJSON
+          + "<br>Parsed JSON: " + parsedJSON + "</body></html>");
     } catch (Exception e) {
       Log.error(e, "PingJSONPObject.doGet(...): general exception caught");
       res.sendError(500, e.toString());
@@ -116,11 +120,12 @@ public class PingJSONPObjectFactory extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    *
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     initTime = new java.util.Date().toString();
     hitCount = 0;
   }

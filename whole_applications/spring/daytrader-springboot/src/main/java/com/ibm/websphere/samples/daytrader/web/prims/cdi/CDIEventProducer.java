@@ -15,35 +15,32 @@
  */
 package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.concurrent.ManagedExecutorService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.NotificationOptions;
-import jakarta.inject.Inject;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.stereotype.Component;
 
-@ApplicationScoped //?
+import com.ibm.websphere.samples.daytrader.events.HitAsyncEvent;
+import com.ibm.websphere.samples.daytrader.events.HitEvent;
+
+@Component
 public class CDIEventProducer {
 
-  @Resource
-  private ManagedExecutorService mes;
+  private final ApplicationEventPublisher publisher;
+  private final AsyncTaskExecutor mes;
 
-  @Inject
-  @Hit
-  Event<String> hitCountEvent;
-  
-  @Inject
-  @HitAsync
-  Event<String> hitCountEventAsync;
-  
+  public CDIEventProducer(ApplicationEventPublisher publisher,
+      @Qualifier("ManagedExecutorService") AsyncTaskExecutor mes) {
+    this.publisher = publisher;
+    this.mes = mes;
+  }
+
   public void produceSyncEvent() {
-    hitCountEvent.fire("hitCount++");
+    publisher.publishEvent(new HitEvent("hitCount++"));
   }
 
   public void produceAsyncEvent() {
-    hitCountEventAsync.fireAsync("hitCount++", NotificationOptions.builder().setExecutor(mes).build());
+    mes.submit(() -> publisher.publishEvent(new HitAsyncEvent("hitCount++")));
   }
-  
-  
 
 }

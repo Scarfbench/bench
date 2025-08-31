@@ -18,9 +18,11 @@ package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -28,7 +30,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
+@Component
 @WebServlet("/servlet/PingServletCDIEvent")
 public class PingServletCDIEvent extends HttpServlet {
 
@@ -46,7 +48,8 @@ public class PingServletCDIEvent extends HttpServlet {
 
     PrintWriter pw = response.getWriter();
     pw.write("<html><head><title>Ping Servlet CDI Event</title></head>"
-        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI Event<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI Event<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+        + initTime
         + "<BR><BR></FONT>");
 
     try {
@@ -63,11 +66,12 @@ public class PingServletCDIEvent extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    * 
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     initTime = new java.util.Date().toString();
     hitCount = 0;
 
@@ -77,4 +81,3 @@ public class PingServletCDIEvent extends HttpServlet {
     hitCount++;
   }
 }
-

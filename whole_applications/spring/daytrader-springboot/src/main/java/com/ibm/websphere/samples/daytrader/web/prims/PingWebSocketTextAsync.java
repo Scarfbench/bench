@@ -15,25 +15,32 @@
  */
 package com.ibm.websphere.samples.daytrader.web.prims;
 
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.web.SpringEndpointConfigurator;
+
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
 import jakarta.websocket.OnMessage;
 import jakarta.websocket.OnOpen;
-import jakarta.websocket.SendHandler;
-import jakarta.websocket.SendResult;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
-/** This class a simple websocket that sends the number of times it has been pinged. */
+/**
+ * This class a simple websocket that sends the number of times it has been
+ * pinged.
+ */
 
-@ServerEndpoint(value = "/pingTextAsync")
+@Component
+@ServerEndpoint(value = "/pingTextAsync", configurator = SpringEndpointConfigurator.class)
 public class PingWebSocketTextAsync {
 
     private Session currentSession = null;
     private Integer hitCount = null;
-   
+
     @OnOpen
     public void onOpen(final Session session, EndpointConfig ec) {
         currentSession = session;
@@ -42,29 +49,20 @@ public class PingWebSocketTextAsync {
 
     @OnMessage
     public void ping(String text) {
-      
-
         hitCount++;
-        currentSession.getAsyncRemote().sendText(hitCount.toString(), new SendHandler() {
-
-          @Override
-          public void onResult(SendResult result) {
+        currentSession.getAsyncRemote().sendText(hitCount.toString(), result -> {
             if (!result.isOK()) {
-              System.out.println("NOT OK");
+                Log.error("PingWebSocketTextAsync: send not OK", result.getException());
             }
-          }
-        }
-        ); 
+        });
     }
 
     @OnError
     public void onError(Throwable t) {
-        t.printStackTrace();
+        Log.error("PingWebSocketTextAsync:onError", t);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-     
     }
-
 }

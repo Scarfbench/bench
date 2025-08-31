@@ -17,10 +17,18 @@ package com.ibm.websphere.samples.daytrader.web.servlet;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.interfaces.Trace;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Diagnostics;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
 import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -30,87 +38,94 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 
-import com.ibm.websphere.samples.daytrader.interfaces.Trace;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Diagnostics;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-import com.ibm.websphere.samples.daytrader.util.TradeRunTimeModeLiteral;
-
 @WebFilter(filterName = "OrdersAlertFilter", urlPatterns = "/app")
 @Trace
 public class OrdersAlertFilter implements Filter {
-	
-  private TradeServices tradeAction;
 
-  @Inject 
-  public OrdersAlertFilter(@Any Instance<TradeServices> services) {
-    super();
-    tradeAction = services.select(new TradeRunTimeModeLiteral(TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()])).get();
-  }
+    private TradeServices tradeAction;
 
-
-  /**
-   * @see Filter#init(FilterConfig)
-   */
-  private FilterConfig filterConfig = null;
-
-  @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
-    this.filterConfig = filterConfig;
-  }
-
-  /**
-   * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
-   */
-  @Override
-  public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException, ServletException {
-    if (filterConfig == null) {
-      return;
-    }
-
-    if (TradeConfig.getDisplayOrderAlerts() == true) {
-
-      try {
-        String action = req.getParameter("action");
-        if (action != null) {
-          action = action.trim();
-          if ((action.length() > 0) && (!action.equals("logout"))) {
-            String userID;
-            if (action.equals("login")) {
-              userID = req.getParameter("uid");
-            } else {
-              userID = (String) ((HttpServletRequest) req).getSession().getAttribute("uidBean");
-            }
-
-            if ((userID != null) && (userID.trim().length() > 0)) {
-
-              Collection<?> closedOrders = tradeAction.getClosedOrders(userID);
-              if ((closedOrders != null) && (closedOrders.size() > 0)) {
-                req.setAttribute("closedOrders", closedOrders);
-              }
-              if (Log.doTrace()) {
-                Log.printCollection("OrderAlertFilter: userID=" + userID + " closedOrders=", closedOrders);
-              }
-            }
-          }
+    @Autowired
+    public OrdersAlertFilter(@Any Map<String, TradeServices> services) {
+        super();
+        String key = TradeConfig.getRunTimeModeNames()[TradeConfig.getRunTimeMode()];
+        TradeServices svc = services.get(key);
+        if (svc == null) {
+            throw new IllegalStateException(
+                    "No TradeServices bean named '" + key + "'");
         }
-      } catch (Exception e) {
-        Log.error(e, "OrdersAlertFilter - Error checking for closedOrders");
-      }
+        this.tradeAction = svc;
     }
-    
-    Diagnostics.checkDiagnostics();
 
-    chain.doFilter(req, resp/* wrapper */);
-  }
+    /**
+     * @see Filter#init(FilterConfig)
+     */
+    private FilterConfig filterConfig = null;
 
-  /**
-   * @see Filter#destroy()
-   */
-  @Override
-  public void destroy() {
-    this.filterConfig = null;
-  }
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        this.filterConfig = filterConfig;
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, filterConfig.getServletContext());
+    }
 
+    /**
+     * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
+     */
+    @Override
+    public void doFilter(
+            ServletRequest req,
+            ServletResponse resp,
+            FilterChain chain) throws IOException, ServletException {
+        if (filterConfig == null) {
+            return;
+        }
+
+        if (TradeConfig.getDisplayOrderAlerts() == true) {
+            try {
+                String action = req.getParameter("action");
+                if (action != null) {
+                    action = action.trim();
+                    if ((action.length() > 0) && (!action.equals("logout"))) {
+                        String userID;
+                        if (action.equals("login")) {
+                            userID = req.getParameter("uid");
+                        } else {
+                            userID = (String) ((HttpServletRequest) req).getSession().getAttribute(
+                                    "uidBean");
+                        }
+
+                        if ((userID != null) && (userID.trim().length() > 0)) {
+                            Collection<?> closedOrders = tradeAction.getClosedOrders(userID);
+                            if ((closedOrders != null) &&
+                                    (closedOrders.size() > 0)) {
+                                req.setAttribute("closedOrders", closedOrders);
+                            }
+                            if (Log.doTrace()) {
+                                Log.printCollection(
+                                        "OrderAlertFilter: userID=" +
+                                                userID +
+                                                " closedOrders=",
+                                        closedOrders);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.error(
+                        e,
+                        "OrdersAlertFilter - Error checking for closedOrders");
+            }
+        }
+
+        Diagnostics.checkDiagnostics();
+
+        chain.doFilter(req, resp /* wrapper */);
+    }
+
+    /**
+     * @see Filter#destroy()
+     */
+    @Override
+    public void destroy() {
+        this.filterConfig = null;
+    }
 }

@@ -63,7 +63,6 @@ public class QuotePriceChangeListEncoder implements Encoder.Text<CopyOnWriteArra
   @Override
   public void destroy() {
     // TODO Auto-generated method stub
-
   }
 
 }

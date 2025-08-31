@@ -17,15 +17,18 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.impl.direct.TradeDirect;
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.ibm.websphere.samples.daytrader.impl.direct.TradeDirect;
-import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
  *
@@ -34,6 +37,7 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  *
  */
 
+@Component
 @WebServlet(name = "PingServlet2DB", urlPatterns = { "/servlet/PingServlet2DB" })
 public class PingServlet2DB extends HttpServlet {
 
@@ -46,9 +50,9 @@ public class PingServlet2DB extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -60,9 +64,9 @@ public class PingServlet2DB extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -78,7 +82,8 @@ public class PingServlet2DB extends HttpServlet {
             trade.getConnPublic();
 
             output.append("<html><head><title>PingServlet2DB.</title></head>"
-                    + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2DB:</FONT><HR><FONT size=\"-1\" color=\"#000066\">Init time : " + initTime);
+                    + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2DB:</FONT><HR><FONT size=\"-1\" color=\"#000066\">Init time : "
+                    + initTime);
             hitCount++;
             output.append("<BR>Hit Count: " + hitCount);
             output.append("<HR></body></html>");
@@ -103,12 +108,13 @@ public class PingServlet2DB extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         hitCount = 0;
         initTime = new java.util.Date().toString();
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 }

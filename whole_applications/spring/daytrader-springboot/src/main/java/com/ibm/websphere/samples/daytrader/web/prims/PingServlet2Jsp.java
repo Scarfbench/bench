@@ -17,13 +17,17 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
  *
@@ -31,6 +35,7 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  * server-side dynamic HTML through JSP scripting.
  *
  */
+@Component
 @WebServlet(name = "PingServlet2Jsp", urlPatterns = { "/servlet/PingServlet2Jsp" })
 public class PingServlet2Jsp extends HttpServlet {
     private static final long serialVersionUID = -5199543766883932389L;
@@ -41,9 +46,9 @@ public class PingServlet2Jsp extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -55,9 +60,9 @@ public class PingServlet2Jsp extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -74,5 +79,11 @@ public class PingServlet2Jsp extends HttpServlet {
             res.sendError(500, "PingServlet2Jsp.doGet(...): request error" + ex.toString());
 
         }
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 }

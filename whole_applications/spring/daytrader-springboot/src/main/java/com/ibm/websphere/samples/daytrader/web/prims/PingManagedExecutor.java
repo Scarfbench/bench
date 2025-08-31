@@ -17,8 +17,9 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.concurrent.ManagedExecutorService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
+
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -28,24 +29,31 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(asyncSupported=true,name = "PingManagedExecutor", urlPatterns = { "/servlet/PingManagedExecutor" })
-public class PingManagedExecutor extends HttpServlet{
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.springframework.stereotype.Component;
 
-	private static final long serialVersionUID = -4695386150928451234L;
-	private static String initTime;
+@Component
+@WebServlet(asyncSupported = true, name = "PingManagedExecutor", urlPatterns = { "/servlet/PingManagedExecutor" })
+public class PingManagedExecutor extends HttpServlet {
+
+    private static final long serialVersionUID = -4695386150928451234L;
+    private static String initTime;
     private static int hitCount;
 
-	@Resource 
-	private ManagedExecutorService mes;
-	
-	 /**
+    private final AsyncTaskExecutor mes;
+
+    public PingManagedExecutor(@Qualifier("ManagedExecutorService") AsyncTaskExecutor mes) {
+        this.mes = mes;
+    }
+
+    /**
      * forwards post requests to the doGet method Creation date: (03/18/2014
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -57,43 +65,41 @@ public class PingManagedExecutor extends HttpServlet{
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 
-    	final AsyncContext asyncContext = req.startAsync();
+        final AsyncContext asyncContext = req.startAsync();
         final ServletOutputStream out = res.getOutputStream();
-    	
-    	try {
-    		res.setContentType("text/html");
-    		    		
-    		out.println("<html><head><title>Ping ManagedExecutor</title></head>"
-                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping ManagedExecutor<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+
+        try {
+            res.setContentType("text/html");
+
+            out.println("<html><head><title>Ping ManagedExecutor</title></head>"
+                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping ManagedExecutor<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+                    + initTime
                     + "<BR><BR></FONT>  </body></html>");
-    		   		   		    	
-    		// Runnable task
-    		mes.submit(new Runnable() {
-    			@Override
-    			public void run() {
-    				try {
-						out.println("<b>HitCount: " + ++hitCount  +"</b><br/>");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-    				asyncContext.complete();
-    			}
-    		});   		    		
-    		
-    			 
-    	} catch (Exception e) {
-			e.printStackTrace();
-		}  
-    }	
-    		
-    	
+
+            // Runnable task
+            mes.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        out.println("<b>HitCount: " + ++hitCount + "</b><br/>");
+                    } catch (IOException e) {
+                    }
+                    asyncContext.complete();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * returns a string of information about the servlet
      *
@@ -108,13 +114,14 @@ public class PingManagedExecutor extends HttpServlet{
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         initTime = new java.util.Date().toString();
         hitCount = 0;
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
-	
+
 }

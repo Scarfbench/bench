@@ -17,6 +17,12 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.annotation.Resource;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
@@ -30,9 +36,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-
 /**
  * This primitive is designed to run inside the TradeApplication and relies upon
  * the {@link com.ibm.websphere.samples.daytrader.util.TradeConfig} class to set
@@ -42,6 +45,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * {@link com.ibm.websphere.samples.daytrader.ejb3.DTBroker3MDB} by posting a
  * message to the MDB Queue
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2MDBQueue", urlPatterns = { "/ejb3/PingServlet2MDBQueue" })
 public class PingServlet2MDBQueue extends HttpServlet {
 
@@ -71,7 +75,8 @@ public class PingServlet2MDBQueue extends HttpServlet {
         // use a stringbuffer to avoid concatenation of Strings
         StringBuffer output = new StringBuffer(100);
         output.append("<html><head><title>PingServlet2MDBQueue</title></head>"
-                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2MDBQueue<BR></FONT>" + "<FONT size=\"-1\" color=\"#000066\">"
+                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2MDBQueue<BR></FONT>"
+                + "<FONT size=\"-1\" color=\"#000066\">"
                 + "Tests the basic operation of a servlet posting a message to an EJB MDB through a JMS Queue.<BR>"
                 + "<FONT color=\"red\"><B>Note:</B> Not intended for performance testing.</FONT>");
 
@@ -82,30 +87,36 @@ public class PingServlet2MDBQueue extends HttpServlet {
                 TextMessage message = null;
                 int iter = TradeConfig.getPrimIterations();
                 for (int ii = 0; ii < iter; ii++) {
-                    /*Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-                    try {
-                        MessageProducer producer = sess.createProducer(tradeBrokerQueue);
+                    /*
+                     * Session sess = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                     * try {
+                     * MessageProducer producer = sess.createProducer(tradeBrokerQueue);
+                     * 
+                     * message = sess.createTextMessage();
+                     * 
+                     * String command = "ping";
+                     * message.setStringProperty("command", command);
+                     * message.setLongProperty("publishTime", System.currentTimeMillis());
+                     * message.
+                     * setText("Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from PingServlet2MDBQueue at "
+                     * + new java.util.Date());
+                     * producer.send(message);
+                     * } finally {
+                     * sess.close();
+                     * }
+                     */
 
-                        message = sess.createTextMessage();
+                    JMSContext context = queueConnectionFactory.createContext();
 
-                        String command = "ping";
-                        message.setStringProperty("command", command);
-                        message.setLongProperty("publishTime", System.currentTimeMillis());
-                        message.setText("Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from PingServlet2MDBQueue at " + new java.util.Date());
-                        producer.send(message);
-                    } finally {
-                        sess.close();
-                    }*/
-                	
-                	JMSContext context = queueConnectionFactory.createContext();
-            		
-            		message = context.createTextMessage();
+                    message = context.createTextMessage();
 
-            		message.setStringProperty("command", "ping");
+                    message.setStringProperty("command", "ping");
                     message.setLongProperty("publishTime", System.currentTimeMillis());
-                    message.setText("Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from PingServlet2MDBQueue at " + new java.util.Date());
-              		
-            		context.createProducer().send(tradeBrokerQueue, message);
+                    message.setText(
+                            "Ping message for queue java:comp/env/jms/TradeBrokerQueue sent from PingServlet2MDBQueue at "
+                                    + new java.util.Date());
+
+                    context.createProducer().send(tradeBrokerQueue, message);
                 }
 
                 // write out the output
@@ -140,6 +151,7 @@ public class PingServlet2MDBQueue extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
     }

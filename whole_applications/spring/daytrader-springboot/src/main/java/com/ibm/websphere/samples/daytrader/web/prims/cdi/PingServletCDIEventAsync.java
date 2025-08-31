@@ -18,6 +18,11 @@ package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -29,8 +34,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
+@Component
 @WebServlet("/servlet/PingServletCDIEventAsync")
 public class PingServletCDIEventAsync extends HttpServlet {
 
@@ -49,7 +53,8 @@ public class PingServletCDIEventAsync extends HttpServlet {
 
     PrintWriter pw = response.getWriter();
     pw.write("<html><head><title>Ping Servlet CDI Event Async</title></head>"
-        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI Event Async<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+        + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet CDI Event Async<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+        + initTime
         + "<BR><BR></FONT>");
 
     try {
@@ -66,11 +71,12 @@ public class PingServletCDIEventAsync extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    * 
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     initTime = new java.util.Date().toString();
     hitCount1 = 0;
     hitCount2 = 0;
@@ -81,10 +87,10 @@ public class PingServletCDIEventAsync extends HttpServlet {
   }
 
   public void onAsyncEvent2(@ObservesAsync @Priority(Interceptor.Priority.APPLICATION + 1) @HitAsync String event) {
-    if (hitCount1 <= hitCount2 ) {
-      Log.error("Priority Error");;
+    if (hitCount1 <= hitCount2) {
+      Log.error("Priority Error");
+      ;
     }
     hitCount2++;
   }
 }
-

@@ -17,13 +17,17 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
  *
@@ -35,6 +39,7 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  * that sends a request to {@link PingServlet2ServletRcv}
  *
  */
+@Component
 @WebServlet(name = "PingServlet2Servlet", urlPatterns = { "/servlet/PingServlet2Servlet" })
 public class PingServlet2Servlet extends HttpServlet {
     private static final long serialVersionUID = -955942781902636048L;
@@ -45,9 +50,9 @@ public class PingServlet2Servlet extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -59,9 +64,9 @@ public class PingServlet2Servlet extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -72,11 +77,18 @@ public class PingServlet2Servlet extends HttpServlet {
             ab.setMsg("Hit Count: " + hitCount);
             req.setAttribute("ab", ab);
 
-            getServletConfig().getServletContext().getRequestDispatcher("/servlet/PingServlet2ServletRcv").forward(req, res);
+            getServletConfig().getServletContext().getRequestDispatcher("/servlet/PingServlet2ServletRcv").forward(req,
+                    res);
         } catch (Exception ex) {
             Log.error(ex, "PingServlet2Servlet.doGet(...): general exception");
             res.sendError(500, "PingServlet2Servlet.doGet(...): general exception" + ex.toString());
 
         }
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 }

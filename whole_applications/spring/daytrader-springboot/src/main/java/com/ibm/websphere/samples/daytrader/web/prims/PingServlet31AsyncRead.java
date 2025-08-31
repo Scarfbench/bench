@@ -12,10 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */  
+ */
 package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ReadListener;
@@ -32,12 +35,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  *
- * PingServlet31Async tests fundamental dynamic HTML creation functionality through
+ * PingServlet31Async tests fundamental dynamic HTML creation functionality
+ * through
  * server side servlet processing asynchronously with non-blocking i/o.
  *
  */
 
-@WebServlet(name = "PingServlet31AsyncRead", urlPatterns = { "/servlet/PingServlet31AsyncRead" }, asyncSupported=true)
+@Component
+@WebServlet(name = "PingServlet31AsyncRead", urlPatterns = { "/servlet/PingServlet31AsyncRead" }, asyncSupported = true)
 public class PingServlet31AsyncRead extends HttpServlet {
 
     private static final long serialVersionUID = 8731300373855056660L;
@@ -49,16 +54,16 @@ public class PingServlet31AsyncRead extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("text/html");
-                
+
         AsyncContext ac = req.startAsync();
-           
+
         ServletInputStream input = req.getInputStream();
         ReadListener readListener = new ReadListenerImpl(input, res, ac);
         input.setReadListener(readListener);
@@ -75,50 +80,49 @@ public class PingServlet31AsyncRead extends HttpServlet {
             res = r;
             ac = c;
         }
-    
+
         public void onDataAvailable() throws IOException {
-            
+
             int len = -1;
             byte b[] = new byte[1024];
-            
+
             while (input.isReady() && (len = input.read(b)) != -1) {
                 String data = new String(b, 0, len);
                 sb.append(data);
             }
-            
-            
+
         }
-    
+
         public void onAllDataRead() throws IOException {
             ServletOutputStream output = res.getOutputStream();
             output.println("<html><head><title>Ping Servlet 3.1 Async</title></head>"
                     + "<body><hr/><br/><font size=\"+2\" color=\"#000066\">Ping Servlet 3.1 AsyncRead</font>"
                     + "<br/><font size=\"+1\" color=\"#000066\">Init time : " + initTime
-                    + "</font><br/><br/><b>Hit Count: " + ++hitCount + "</b><br/>Data Received: " + sb.toString() + "</body></html>");
+                    + "</font><br/><br/><b>Hit Count: " + ++hitCount + "</b><br/>Data Received: " + sb.toString()
+                    + "</body></html>");
             ac.complete();
         }
-    
+
         public void onError(final Throwable t) {
             ac.complete();
             t.printStackTrace();
         }
     }
-        
-
 
     /**
      * this is the main method of the servlet that will service all get
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        doPost(req,res);          
+        doPost(req, res);
     }
+
     /**
      * returns a string of information about the servlet
      *
@@ -133,13 +137,14 @@ public class PingServlet31AsyncRead extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         initTime = new java.util.Date().toString();
         hitCount = 0;
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
 
     }
 }

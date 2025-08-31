@@ -19,6 +19,11 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.web.SpringEndpointConfigurator;
+
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.OnClose;
@@ -29,25 +34,25 @@ import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
 /** This class a simple websocket that echos the binary it has been sent. */
-
-@ServerEndpoint(value = "/pingBinary")
+@Component
+@ServerEndpoint(value = "/pingBinary", configurator = SpringEndpointConfigurator.class)
 public class PingWebSocketBinary {
 
     private Session currentSession = null;
-   
+
     @OnOpen
     public void onOpen(final Session session, EndpointConfig ec) {
         currentSession = session;
     }
 
     @OnMessage
-    public void ping(ByteBuffer data) {       
+    public void ping(ByteBuffer data) {
         currentSession.getAsyncRemote().sendBinary(data);
     }
 
     @OnError
     public void onError(Throwable t) {
-        t.printStackTrace();
+        Log.error("PingWebSocketBinary:onError", t);
     }
 
     @OnClose
@@ -58,7 +63,7 @@ public class PingWebSocketBinary {
                 session.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("PingWebSocketBinary:onClose error", e);
         }
     }
 

@@ -15,14 +15,12 @@
  */
 package com.ibm.websphere.samples.daytrader.web.prims.cdi;
 
-import jakarta.ejb.Local;
-import jakarta.ejb.Stateful;
+import org.springframework.stereotype.Service;
 
 /**
  *
  */
-@Stateful
-@Local
+@Service("PingEJBLocal")
 public class PingEJBLocal implements PingEJBIFace {
 
   private static int hitCount;

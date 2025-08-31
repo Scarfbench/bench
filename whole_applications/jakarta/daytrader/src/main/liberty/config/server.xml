@@ -3,7 +3,7 @@
    <featureManager>
       <feature>ejb-3.2</feature>
       <feature>servlet-4.0</feature>
-      <feature>jsf-2.3</feature>
+
       <feature>jpa-2.2</feature>
       <feature>mdb-3.2</feature>
       <feature>wasJmsServer-1.0</feature>
@@ -29,50 +29,50 @@
       <tcpOptions soReuseAddr="true" />
       <httpOptions maxKeepAliveRequests="-1" />
    </httpEndpoint>
-  
+
    <application location="io.openliberty.sample.daytrader8.war" type="war" context-root="/daytrader" />
-   
-   <!-- Derby Library Configuration -->    
+
+   <!-- Derby Library Configuration -->
    <library id="derbyJDBCLib">
      <file name="${derby.lib}" />
    </library>
-   
+
    <authData id="TradeDataSourceAuthData" password="db_password" user="db_username" />
    <authData id="TradeAdminAuthData" password="db_password" user="db_username" />
 
-   <connectionManager agedTimeout="-1" connectionTimeout="0" id="conMgr1" maxIdleTime="-1" maxPoolSize="100" minPoolSize="100" purgePolicy="FailingConnectionOnly" reapTime="-1" />  
+   <connectionManager agedTimeout="-1" connectionTimeout="0" id="conMgr1" maxIdleTime="-1" maxPoolSize="100" minPoolSize="100" purgePolicy="FailingConnectionOnly" reapTime="-1" />
    <dataSource connectionManagerRef="conMgr1" id="DefaultDataSource" isolationLevel="TRANSACTION_READ_COMMITTED"  jndiName="jdbc/TradeDataSource" statementCacheSize="60">
       <jdbcDriver libraryRef="derbyJDBCLib" />
       <properties.derby.embedded databaseName="${shared.resource.dir}/data/tradedb" password="db_password" user="db_username" />
    </dataSource>
-   
+
    <messagingEngine id="defaultME">
       <queue id="TradeBrokerQueue" />
       <topicSpace id="TradeTopicSpace" />
    </messagingEngine>
-   
+
    <connectionManager id="ConMgr2" maxPoolSize="20" />
    <jmsQueueConnectionFactory connectionManagerRef="ConMgr2" jndiName="jms/TradeBrokerQCF">
       <properties.wasJms />
    </jmsQueueConnectionFactory>
-   
+
    <connectionManager id="ConMgr3" maxPoolSize="20" />
    <jmsTopicConnectionFactory connectionManagerRef="ConMgr3" jndiName="jms/TradeStreamerTCF">
       <properties.wasJms />
-   </jmsTopicConnectionFactory> 
-   
+   </jmsTopicConnectionFactory>
+
    <jmsQueue id="TradeBrokerQueue" jndiName="jms/TradeBrokerQueue">
       <properties.wasJms deliveryMode="NonPersistent" queueName="TradeBrokerQueue" />
    </jmsQueue>
-   
+
    <jmsTopic id="TradeStreamerTopic" jndiName="jms/TradeStreamerTopic">
       <properties.wasJms deliveryMode="NonPersistent" topicSpace="TradeTopicSpace" />
    </jmsTopic>
-  
+
   <jmsActivationSpec id="io.openliberty.sample.daytrader8/DTBroker3MDB">
       <properties.wasJms destinationRef="TradeBrokerQueue" />
    </jmsActivationSpec>
-   
+
    <jmsActivationSpec id="io.openliberty.sample.daytrader8/DTStreamer3MDB">
       <properties.wasJms destinationRef="TradeStreamerTopic" destinationType="javax.jms.Topic" />
    </jmsActivationSpec>

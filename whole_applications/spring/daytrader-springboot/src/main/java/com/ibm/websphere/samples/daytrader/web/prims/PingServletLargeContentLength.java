@@ -17,6 +17,9 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -31,10 +34,9 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  */
 
+@Component
 @WebServlet(name = "PingServletLargeContentLength", urlPatterns = { "/servlet/PingServletLargeContentLength" })
 public class PingServletLargeContentLength extends HttpServlet {
-
-
 
     /**
      * 
@@ -46,17 +48,14 @@ public class PingServletLargeContentLength extends HttpServlet {
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         System.out.println("Length: " + req.getContentLengthLong());
-        
-        
-        
-        
+
     }
 
     /**
@@ -64,13 +63,14 @@ public class PingServletLargeContentLength extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-       doPost(req,res);    }
+        doPost(req, res);
+    }
 
     /**
      * returns a string of information about the servlet
@@ -79,17 +79,19 @@ public class PingServletLargeContentLength extends HttpServlet {
      **/
     @Override
     public String getServletInfo() {
-        return "Basic dynamic HTML generation through a servlet, with " + "contentLength set by contentLength parameter.";
+        return "Basic dynamic HTML generation through a servlet, with "
+                + "contentLength set by contentLength parameter.";
     }
 
     /**
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     }
 }

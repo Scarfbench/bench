@@ -17,7 +17,14 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
-import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -25,12 +32,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.ibm.websphere.samples.daytrader.impl.ejb3.TradeSLSBBean;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
 
 /**
  *
@@ -42,6 +43,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * numbers.
  *
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2Session", urlPatterns = { "/ejb3/PingServlet2Session" })
 public class PingServlet2Session extends HttpServlet {
 
@@ -55,7 +57,6 @@ public class PingServlet2Session extends HttpServlet {
     @TradeEJB
     private TradeServices tradeSLSBLocal;
 
-    
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         doGet(req, res);
@@ -69,7 +70,8 @@ public class PingServlet2Session extends HttpServlet {
         // use a stringbuffer to avoid concatenation of Strings
         StringBuffer output = new StringBuffer(100);
         output.append("<html><head><title>PingServlet2SessionLocal</title></head>"
-                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2SessionLocal<BR></FONT>" + "<FONT size=\"-1\" color=\"#000066\">"
+                + "<body><HR><FONT size=\"+2\" color=\"#000066\">PingServlet2SessionLocal<BR></FONT>"
+                + "<FONT size=\"-1\" color=\"#000066\">"
                 + "Tests the basis path from a Servlet to a Session Bean.");
 
         try {
@@ -115,6 +117,7 @@ public class PingServlet2Session extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
     }

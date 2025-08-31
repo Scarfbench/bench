@@ -16,9 +16,11 @@
 package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
-//import java.util.Collections;
-//import java.util.HashSet;
-//import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.web.SpringEndpointConfigurator;
 
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EndpointConfig;
@@ -29,14 +31,17 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
-/** This class a simple websocket that sends the number of times it has been pinged. */
-
-@ServerEndpoint(value = "/pingTextSync")
+/**
+ * This class a simple websocket that sends the number of times it has been
+ * pinged.
+ */
+@Component
+@ServerEndpoint(value = "/pingTextSync", configurator = SpringEndpointConfigurator.class)
 public class PingWebSocketTextSync {
 
     private Session currentSession = null;
     private Integer hitCount = null;
-   
+
     @OnOpen
     public void onOpen(final Session session, EndpointConfig ec) {
         currentSession = session;
@@ -46,22 +51,19 @@ public class PingWebSocketTextSync {
     @OnMessage
     public void ping(String text) {
         hitCount++;
-    
         try {
             currentSession.getBasicRemote().sendText(hitCount.toString());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("PingWebSocketTextSync:send error", e);
         }
     }
 
     @OnError
     public void onError(Throwable t) {
-        t.printStackTrace();
+        Log.error("PingWebSocketTextSync:onError", t);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-               
     }
-
 }

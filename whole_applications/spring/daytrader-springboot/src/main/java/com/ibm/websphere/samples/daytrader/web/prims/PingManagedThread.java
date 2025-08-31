@@ -17,8 +17,14 @@ package com.ibm.websphere.samples.daytrader.web.prims;
 
 import java.io.IOException;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.concurrent.ManagedThreadFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -28,26 +34,26 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
+@Component
+@WebServlet(asyncSupported = true, name = "PingManagedThread", urlPatterns = { "/servlet/PingManagedThread" })
+public class PingManagedThread extends HttpServlet {
 
-@WebServlet(asyncSupported=true,name = "PingManagedThread", urlPatterns = { "/servlet/PingManagedThread" })
-public class PingManagedThread extends HttpServlet{
-
-	private static final long serialVersionUID = -4695386150928451234L;
-	private static String initTime;
+    private static final long serialVersionUID = -4695386150928451234L;
+    private static String initTime;
     private static int hitCount;
 
-	@Resource 
-	private ManagedThreadFactory managedThreadFactory;
-	
-	 /**
+    @Autowired
+    @Qualifier("ManagedThreadFactoryBean")
+    private AsyncTaskExecutor AsyncTaskExecutor;
+
+    /**
      * forwards post requests to the doGet method Creation date: (03/18/2014
      * 10:52:39 AM)
      *
      * @param res
-     *            jakarta.servlet.http.HttpServletRequest
+     *             jakarta.servlet.http.HttpServletRequest
      * @param res2
-     *            jakarta.servlet.http.HttpServletResponse
+     *             jakarta.servlet.http.HttpServletResponse
      */
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -59,46 +65,43 @@ public class PingManagedThread extends HttpServlet{
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-    	
-		final AsyncContext asyncContext = req.startAsync();
-		final ServletOutputStream out = res.getOutputStream();	
-		
-		try {
-			
-			res.setContentType("text/html");
-					
-			out.println("<html><head><title>Ping ManagedThread</title></head>"
-                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping ManagedThread<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime + "<BR/><BR/></FONT>");			
-		
-			Thread thread = managedThreadFactory.newThread(new Runnable() {
-    			@Override
-    			public void run() {
-    				try {
-						out.println("<b>HitCount: " + ++hitCount  +"</b><br/>");
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-    				asyncContext.complete();
-    			}
-    		});   		    		
-			
-			thread.start();
-		
-		} catch (Exception e) {
-			Log.error(e, "PingManagedThreadServlet.doGet(...): general exception caught");
-			res.sendError(500, e.toString());
-		}
-		
-	}
-    
-    
-    
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
+
+        final AsyncContext asyncContext = req.startAsync();
+        final ServletOutputStream out = res.getOutputStream();
+
+        try {
+
+            res.setContentType("text/html");
+
+            out.println("<html><head><title>Ping ManagedThread</title></head>"
+                    + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping ManagedThread<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+                    + initTime + "<BR/><BR/></FONT>");
+
+            AsyncTaskExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        out.println("<b>HitCount: " + ++hitCount + "</b><br/>");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    asyncContext.complete();
+                }
+            });
+
+        } catch (Exception e) {
+            Log.error(e, "PingManagedThreadServlet.doGet(...): general exception caught");
+            res.sendError(500, e.toString());
+        }
+
+    }
+
     /**
      * returns a string of information about the servlet
      *
@@ -113,14 +116,15 @@ public class PingManagedThread extends HttpServlet{
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         initTime = new java.util.Date().toString();
         hitCount = 0;
 
     }
-	
+
 }

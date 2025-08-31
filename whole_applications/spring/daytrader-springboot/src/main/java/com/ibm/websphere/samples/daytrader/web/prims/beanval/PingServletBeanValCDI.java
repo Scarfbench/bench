@@ -18,6 +18,11 @@ package com.ibm.websphere.samples.daytrader.web.prims.beanval;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.util.Log;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -27,25 +32,24 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.util.Log;
-
+@Component
 @WebServlet(name = "PingServletBeanValCDI", urlPatterns = { "/servlet/PingServletBeanValCDI" })
-public class PingServletBeanValCDI  extends HttpServlet {
+public class PingServletBeanValCDI extends HttpServlet {
 
-  @Inject CDIMethodConstraintBean hitCountBean;
-  
+  @Inject
+  CDIMethodConstraintBean hitCountBean;
+
   private static final long serialVersionUID = 7097023236709683760L;
   private static LocalDateTime initTime;
-
 
   /**
    * forwards post requests to the doGet method Creation date: (11/6/2000
    * 10:52:39 AM)
    *
    * @param res
-   *            jakarta.servlet.http.HttpServletRequest
+   *             jakarta.servlet.http.HttpServletRequest
    * @param res2
-   *            jakarta.servlet.http.HttpServletResponse
+   *             jakarta.servlet.http.HttpServletResponse
    */
   @Override
   public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -57,9 +61,9 @@ public class PingServletBeanValCDI  extends HttpServlet {
    * requests.
    *
    * @param request
-   *            HttpServletRequest
+   *                 HttpServletRequest
    * @param responce
-   *            HttpServletResponce
+   *                 HttpServletResponce
    **/
   @Override
   public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -70,9 +74,10 @@ public class PingServletBeanValCDI  extends HttpServlet {
 
       int currentHitCount = hitCountBean.getHitCount(initTime);
       hitCountBean.hitList();
-      
+
       out.println("<html><head><title>Ping Servlet Bean Validation CDI</title></head>"
-          + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet Bean Validation CDI<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : " + initTime
+          + "<body><HR><BR><FONT size=\"+2\" color=\"#000066\">Ping Servlet Bean Validation CDI<BR></FONT><FONT size=\"+1\" color=\"#000066\">Init time : "
+          + initTime
           + "<BR><BR></FONT>  <B>Hit Count: " + currentHitCount + "</B></body></html>");
     } catch (Exception e) {
       Log.error(e, "PingServlet.doGet(...): general exception caught");
@@ -95,13 +100,13 @@ public class PingServletBeanValCDI  extends HttpServlet {
    * called when the class is loaded to initialize the servlet
    *
    * @param config
-   *            ServletConfig:
+   *               ServletConfig:
    **/
   @Override
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
+    SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
     initTime = LocalDateTime.now();
-    
 
   }
 }

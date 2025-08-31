@@ -21,6 +21,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
@@ -29,11 +32,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 @WebServlet(name = "PingReentryServlet", urlPatterns = { "/servlet/PingReentryServlet" })
 public class PingReentryServlet extends HttpServlet {
 
     private static final long serialVersionUID = -2536027021580175706L;
-    
+
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         doGet(req, res);
@@ -44,9 +48,9 @@ public class PingReentryServlet extends HttpServlet {
      * requests.
      *
      * @param request
-     *            HttpServletRequest
+     *                 HttpServletRequest
      * @param responce
-     *            HttpServletResponce
+     *                 HttpServletResponce
      **/
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -59,22 +63,22 @@ public class PingReentryServlet extends HttpServlet {
             // stream.
             ServletOutputStream out = res.getOutputStream();
             // java.io.PrintWriter out = res.getWriter();
-            int numReentriesLeft; 
+            int numReentriesLeft;
             int sleepTime;
-            
-            if(req.getParameter("numReentries") != null){
+
+            if (req.getParameter("numReentries") != null) {
                 numReentriesLeft = Integer.parseInt(req.getParameter("numReentries"));
             } else {
                 numReentriesLeft = 0;
             }
-            
-            if(req.getParameter("sleep") != null){
+
+            if (req.getParameter("sleep") != null) {
                 sleepTime = Integer.parseInt(req.getParameter("sleep"));
             } else {
                 sleepTime = 0;
             }
-                
-            if(numReentriesLeft <= 0) {
+
+            if (numReentriesLeft <= 0) {
                 Thread.sleep(sleepTime);
                 out.println(numReentriesLeft);
             } else {
@@ -83,32 +87,32 @@ public class PingReentryServlet extends HttpServlet {
                 req.getContextPath();
                 int saveNumReentriesLeft = numReentriesLeft;
                 int nextNumReentriesLeft = numReentriesLeft - 1;
-                
+
                 // Recursively call into the same server, decrementing the counter by 1.
-                String url = "http://" +  hostname + ":" + port + "/" + req.getRequestURI() + 
-                        "?numReentries=" +  nextNumReentriesLeft +
+                String url = "http://" + hostname + ":" + port + "/" + req.getRequestURI() +
+                        "?numReentries=" + nextNumReentriesLeft +
                         "&sleep=" + sleepTime;
                 URL obj = new URL(url);
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                 con.setRequestMethod("GET");
                 con.setRequestProperty("User-Agent", "Mozilla/5.0");
-                
-                //Append the recursion count to the response and return it.
+
+                // Append the recursion count to the response and return it.
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(con.getInputStream()));
                 String inputLine;
                 StringBuffer response = new StringBuffer();
-         
+
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
                 }
                 in.close();
-                
+
                 Thread.sleep(sleepTime);
                 out.println(saveNumReentriesLeft + response.toString());
             }
         } catch (Exception e) {
-            //Log.error(e, "PingReentryServlet.doGet(...): general exception caught");
+            // Log.error(e, "PingReentryServlet.doGet(...): general exception caught");
             res.sendError(500, e.toString());
 
         }
@@ -128,11 +132,12 @@ public class PingReentryServlet extends HttpServlet {
      * called when the class is loaded to initialize the servlet
      *
      * @param config
-     *            ServletConfig:
+     *               ServletConfig:
      **/
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
 
     }
 }

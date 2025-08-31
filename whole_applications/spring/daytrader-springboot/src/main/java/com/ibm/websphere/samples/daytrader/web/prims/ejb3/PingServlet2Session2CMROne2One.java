@@ -17,7 +17,15 @@ package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.IOException;
 
-import jakarta.ejb.EJB;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.ibm.websphere.samples.daytrader.entities.AccountProfileDataBean;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
+import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
+import com.ibm.websphere.samples.daytrader.util.Log;
+import com.ibm.websphere.samples.daytrader.util.TradeConfig;
+
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -26,13 +34,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ibm.websphere.samples.daytrader.entities.AccountProfileDataBean;
-import com.ibm.websphere.samples.daytrader.impl.ejb3.TradeSLSBBean;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeEJB;
-import com.ibm.websphere.samples.daytrader.interfaces.TradeServices;
-import com.ibm.websphere.samples.daytrader.util.Log;
-import com.ibm.websphere.samples.daytrader.util.TradeConfig;
-
 /**
  * Primitive to test Entity Container Managed Relationshiop One to One Servlet
  * will generate a random userID and get the profile for that user using a
@@ -40,6 +41,7 @@ import com.ibm.websphere.samples.daytrader.util.TradeConfig;
  * calling a Session to Entity EJB to get CMR One to One data
  *
  */
+@Component
 @WebServlet(name = "ejb3.PingServlet2Session2CMR2One2One", urlPatterns = { "/ejb3/PingServlet2Session2CMROne2One" })
 public class PingServlet2Session2CMROne2One extends HttpServlet {
     private static final long serialVersionUID = 567062418489199248L;
@@ -51,7 +53,7 @@ public class PingServlet2Session2CMROne2One extends HttpServlet {
     @Inject
     @TradeEJB
     private TradeServices tradeSLSBLocal;
-    
+
     @Override
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         doGet(req, res);
@@ -81,7 +83,8 @@ public class PingServlet2Session2CMROne2One extends HttpServlet {
             }
 
             output.append("<HR>initTime: " + initTime + "<BR>Hit Count: ").append(hitCount++);
-            output.append("<HR>One to One CMR access of AccountProfile Information from Account Entity<BR><BR> " + accountProfileData.toHTML());
+            output.append("<HR>One to One CMR access of AccountProfile Information from Account Entity<BR><BR> "
+                    + accountProfileData.toHTML());
             output.append("</font><HR></body></html>");
             out.println(output.toString());
         } catch (Exception e) {
@@ -101,6 +104,7 @@ public class PingServlet2Session2CMROne2One extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, config.getServletContext());
         hitCount = 0;
         initTime = new java.util.Date().toString();
     }
