@@ -8,7 +8,7 @@ Install / enable the following before running any examples.
 1. just
    - Project command runner used throughout the repository.
    - Install (choose one):
-     - With package manager (Debian/Ubuntu): `sudo apt install just` (may require adding a backport / latest repo) 
+     - With package manager (Debian/Ubuntu): `sudo apt install just` (may require adding a backport / latest repo)
      - With Cargo: `cargo install just`
      - See latest instructions: https://github.com/casey/just
    - Verify: `just --version`
@@ -48,14 +48,14 @@ Install / enable the following before running any examples.
 
 ## 1. Whole Applications (`/whole_applications/`)
 
-| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
-|-------------|---------|---------|-----------|---------|---------|
-| cargotracker | . | 🛑 | . | . | . |
-| coffeeshop | . | . | . | 🛑 | . |
-| daytrader | 🏗️ (@rahlk) | 🛑 | . | . | . |
-| realworld | 🛑 | 🛑 | 🛑 | 🛑 | . |
-| petclinic   | 🛑 | . | . | 🛑 | . |
-| mailreader2 | . | . | . | . | 🛑 |
+| Application  | Spring | Jakarta | Quarkus | Struts |
+| ------------ | ------ | ------- | ------- | ------ |
+| cargotracker | ✅      | ✅       | ✅       | 🛑      |
+| coffeeshop   | 🛑      | 🛑       | ✅       | 🛑      |
+| daytrader    | ✅      | ✅       | 🛑       | 🛑      |
+| realworld    | ✅      | ✅       | ✅       | ✅      |
+| petclinic    | ✅      | 🛑       | ✅       | 🛑      |
+| mailreader2  | 🛑      | 🛑       | 🛑       | ✅      |
 
 🛑: Start
 
@@ -68,43 +68,43 @@ NOTE: RECORD TIME AND EFFORT
 
 ## 2. Dependency Injection (`/dependency_injection/`)
 
-| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
-|-------------|---------|---------|-----------|---------|---------|
-| billpayment | 🛑 | 🛑 | . | . | 🛑 |
-| decorators | . | 🛑 | . | . | . |
-| encoder | . | 🛑 | . | . | . |
-| guessnumber | . | 🛑 | . | . | . |
-| producerfields | . | 🛑 | . | . | . |
-| producermethods | . | 🛑 | . | . | . |
-| simplegreeting | . | 🛑 | . | . | . |
+| Application     | Spring | Jakarta | Quarkus | Struts |
+| --------------- | ------ | ------- | ------- | ------ |
+| billpayment     | ✅      | ✅       | 🛑       | ✅      |
+| decorators      | 🛑      | ✅       | 🛑       | 🛑      |
+| encoder         | 🛑      | ✅       | 🛑       | 🛑      |
+| guessnumber     | 🛑      | ✅       | 🛑       | 🛑      |
+| producerfields  | 🛑      | ✅       | 🛑       | 🛑      |
+| producermethods | 🛑      | ✅       | 🛑       | 🛑      |
+| simplegreeting  | 🛑      | ✅       | 🛑       | 🛑      |
 
 ## 3. Persistence (`/persistence/`)
 
-| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
-|-------------|---------|---------|-----------|---------|---------|
-| address-book | . | 🛑 | . | . | . |
-| order | . | 🛑 | . | . | . |
-| roster | . | 🛑 | . | . | . |
+| Application  | Spring | Jakarta | Quarkus | Struts |
+| ------------ | ------ | ------- | ------- | ------ |
+| address-book | 🛑      | ✅       | 🛑       | 🛑      |
+| order        | 🛑      | ✅       | 🛑       | 🛑      |
+| roster       | 🛑      | ✅       | 🛑       | 🛑      |
 
 ## 4. Presentation (`/presentation/`)
 
-| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
-|-------------|---------|---------|-----------|---------|---------|
-| dukeetf | . | 🛑 | . | . | . |
-| dukeetf2 | . | 🛑 | . | . | . |
-| fileupload | . | 🛑 | . | . | . |
-| hello-servlet | . | 🛑 | . | . | . |
-| mood | . | 🛑 | . | . | . |
-| websocketbot | . | 🛑 | . | . | . |
+| Application   | Spring | Jakarta | Quarkus | Struts |
+| ------------- | ------ | ------- | ------- | ------ |
+| dukeetf       | 🛑      | ✅       | 🛑       | 🛑      |
+| dukeetf2      | 🛑      | ✅       | 🛑       | 🛑      |
+| fileupload    | 🛑      | ✅       | 🛑       | 🛑      |
+| hello-servlet | 🛑      | ✅       | 🛑       | 🛑      |
+| mood          | 🛑      | ✅       | 🛑       | 🛑      |
+| websocketbot  | 🛑      | ✅       | 🛑       | 🛑      |
 
 ## 5. Business Domain (`/business_domain/`)
 
-| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
-|-------------|---------|---------|-----------|---------|---------|
-| *No applications yet* | . | . | . | . | . |
+| Application           | Spring | Jakarta | Quarkus | Struts |
+| --------------------- | ------ | ------- | ------- | ------ |
+| *No applications yet* | 🛑      | 🛑       | 🛑       | 🛑      |
 
 ## 6. Integration (`/integration/`)
 
-| Application | Spring | Jakarta | Micronaut | Quarkus | Struts |
-|-------------|---------|---------|-----------|---------|---------|
-| *No applications yet* | . | . | . | . | . |
+| Application           | Spring | Jakarta | Quarkus | Struts |
+| --------------------- | ------ | ------- | ------- | ------ |
+| *No applications yet* | 🛑      | 🛑       | 🛑       | 🛑      |
