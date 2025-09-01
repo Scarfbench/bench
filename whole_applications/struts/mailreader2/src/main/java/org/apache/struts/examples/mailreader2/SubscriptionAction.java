@@ -105,7 +105,7 @@ public class SubscriptionAction extends MailreaderSupport implements Preparable 
      *
      * @return INPUT or Error, if Subscription is not found
      */
-    public String edit() {
+    public String editEntry() {
         setTask(Constants.EDIT);
         return find();
     }

@@ -1,20 +1,16 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 package org.apache.struts.examples.mailreader2;
@@ -29,26 +25,29 @@ import org.apache.struts.examples.mailreader2.dao.impl.memory.MemoryUserDatabase
 import java.io.*;
 
 /**
- * <p><code>ServletContextListener</code> that initializes and finalizes the
- * persistent storage of User and Subscription information for the Struts
- * Demonstration Application, using an in-memory database backed by an XML
- * file.</p>
+ * <p>
+ * <code>ServletContextListener</code> that initializes and finalizes the persistent storage of User
+ * and Subscription information for the Struts Demonstration Application, using an in-memory
+ * database backed by an XML file.
+ * </p>
  * <p/>
- * <p><strong>IMPLEMENTATION WARNING</strong> - If this web application is run
- * from a WAR file, or in another environment where reading and writing of the
- * web application resource is impossible, the initial contents will be copied
- * to a file in the web application temporary directory provided by the
- * container.  This is for demonstration purposes only - you should
- * <strong>NOT</strong> assume that files written here will survive a restart
- * of your servlet container.</p>
+ * <p>
+ * <strong>IMPLEMENTATION WARNING</strong> - If this web application is run from a WAR file, or in
+ * another environment where reading and writing of the web application resource is impossible, the
+ * initial contents will be copied to a file in the web application temporary directory provided by
+ * the container. This is for demonstration purposes only - you should <strong>NOT</strong> assume
+ * that files written here will survive a restart of your servlet container.
+ * </p>
  * <p/>
- * <p>This class was borrowed from the Shale Mailreader. Changes were:</p>
+ * <p>
+ * This class was borrowed from the Shale Mailreader. Changes were:
+ * </p>
  * <p/>
  * <ul>
  * <p/>
- * <li>Path to database.xml (under classes here). </li>
+ * <li>Path to database.xml (under classes here).</li>
  * <p/>
- * <li>Class to store protocol list (an array here). </li>
+ * <li>Class to store protocol list (an array here).</li>
  * <p/>
  * </ul>
  * <p>
@@ -60,19 +59,24 @@ public final class ApplicationListener implements ServletContextListener {
     private static final Logger LOG = LogManager.getLogger(ApplicationListener.class);
 
     /**
-     * <p>Appication scope attribute key under which the in-memory version of
-     * our database is stored.</p>
+     * <p>
+     * Appication scope attribute key under which the in-memory version of our database is stored.
+     * </p>
      */
     public static final String DATABASE_KEY = "database";
 
     /**
-     * <p>Application scope attribute key under which the valid selection
-     * items for the protocol property is stored.</p>
+     * <p>
+     * Application scope attribute key under which the valid selection items for the protocol
+     * property is stored.
+     * </p>
      */
     public static final String PROTOCOLS_KEY = "protocols";
 
     /**
-     * <p>The <code>ServletContext</code> for this web application.</p>
+     * <p>
+     * The <code>ServletContext</code> for this web application.
+     * </p>
      */
     private ServletContext context = null;
 
@@ -82,13 +86,16 @@ public final class ApplicationListener implements ServletContextListener {
     private MemoryUserDatabase database = null;
 
     /**
-     * <p>The web application resource path of our persistent database storage
-     * file.</p>
+     * <p>
+     * The web application resource path of our persistent database storage file.
+     * </p>
      */
     private String pathname = "/WEB-INF/database.xml";
 
     /**
-     * <p>Return the application resource path to the database.</p>
+     * <p>
+     * Return the application resource path to the database.
+     * </p>
      *
      * @return application resource path path to the database
      */
@@ -97,7 +104,9 @@ public final class ApplicationListener implements ServletContextListener {
     }
 
     /**
-     * <p>Set the application resource path to the database.</p>
+     * <p>
+     * Set the application resource path to the database.
+     * </p>
      *
      * @param pathname to the database
      */
@@ -106,11 +115,14 @@ public final class ApplicationListener implements ServletContextListener {
     }
 
     /**
-     * <p>Gracefully shut down this database, releasing any resources that
-     * were allocated at initialization.</p>
+     * <p>
+     * Gracefully shut down this database, releasing any resources that were allocated at
+     * initialization.
+     * </p>
      *
      * @param event ServletContextEvent to process
      */
+    @Override
     public void contextDestroyed(ServletContextEvent event) {
         LOG.info("Finalizing memory database plug in");
 
@@ -129,11 +141,13 @@ public final class ApplicationListener implements ServletContextListener {
     }
 
     /**
-     * <p>Initialize and load our initial database from persistent
-     * storage.</p>
+     * <p>
+     * Initialize and load our initial database from persistent storage.
+     * </p>
      *
      * @param event The context initialization event
      */
+    @Override
     public void contextInitialized(ServletContextEvent event) {
         LOG.info("Initializing memory database plug in from '" + pathname + "'");
 
@@ -158,8 +172,10 @@ public final class ApplicationListener implements ServletContextListener {
     }
 
     /**
-     * <p>Calculate and return an absolute pathname to the XML file to contain
-     * our persistent storage information.</p>
+     * <p>
+     * Calculate and return an absolute pathname to the XML file to contain our persistent storage
+     * information.
+     * </p>
      *
      * @throws Exception if an input/output error occurs
      */
