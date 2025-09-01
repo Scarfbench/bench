@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org"
+      th:fragment="layout (pageTitle, pageBody)">
+<head>
+  <meta charset="UTF-8">
+  <title>
+    <!-- Inserts whatever the child page passes as its <title> fragment -->
+    <th:block th:insert="${pageTitle}">Default Title</th:block>
+  </title>
+  <link rel="stylesheet" th:href="@{/css/jsfcrud.css}">
+</head>
+<body>
+  <h1>
+    <th:block th:insert="${pageTitle}">Default Title</th:block>
+  </h1>
+
+  <div>
+    <!-- Inserts the child page body fragment -->
+    <th:block th:insert="${pageBody}">Default Body</th:block>
+  </div>
+</body>
+</html>

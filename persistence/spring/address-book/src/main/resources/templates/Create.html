@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{CreateContactTitle}">Create Contact</title>
+  <link rel="stylesheet" th:href="@{/css/jsfcrud.css}">
+</head>
+<body>
+
+<h1 th:text="#{CreateContactTitle}">Create Contact</h1>
+
+<form th:action="@{/contacts}" th:object="${contact}" method="post">
+  <table role="presentation">
+    <tr>
+      <td><label for="firstName" th:text="#{CreateContactLabel_firstName}">First Name</label></td>
+      <td>
+        <input id="firstName" th:field="*{firstName}" th:title="#{CreateContactTitle_firstName}" />
+      </td>
+      <td><div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div></td>
+    </tr>
+
+    <tr>
+      <td><label for="lastName" th:text="#{CreateContactLabel_lastName}">Last Name</label></td>
+      <td>
+        <input id="lastName" th:field="*{lastName}" th:title="#{CreateContactTitle_lastName}" />
+      </td>
+      <td><div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div></td>
+    </tr>
+
+    <tr>
+      <td><label for="birthday" th:text="#{CreateContactLabel_birthday}">Birthday</label></td>
+      <td>
+        <!-- keep MM/dd/yyyy like JSF; add placeholder; binder uses app format -->
+        <input id="birthday" th:field="*{birthday}" placeholder="MM/dd/yyyy"
+               th:title="#{CreateContactTitle_birthday}" />
+      </td>
+      <td><div th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}"></div></td>
+    </tr>
+
+    <tr>
+      <td><label for="homePhone" th:text="#{CreateContactLabel_homePhone}">Home Phone</label></td>
+      <td>
+        <input id="homePhone" th:field="*{homePhone}" th:title="#{CreateContactTitle_homePhone}" />
+      </td>
+      <td><div th:if="${#fields.hasErrors('homePhone')}" th:errors="*{homePhone}"></div></td>
+    </tr>
+
+    <tr>
+      <td><label for="mobilePhone" th:text="#{CreateContactLabel_mobilePhone}">Mobile Phone</label></td>
+      <td>
+        <input id="mobilePhone" th:field="*{mobilePhone}" th:title="#{CreateContactTitle_mobilePhone}" />
+      </td>
+      <td><div th:if="${#fields.hasErrors('mobilePhone')}" th:errors="*{mobilePhone}"></div></td>
+    </tr>
+
+    <tr>
+      <td><label for="email" th:text="#{CreateContactLabel_email}">Email</label></td>
+      <td>
+        <input id="email" th:field="*{email}" th:title="#{CreateContactTitle_email}" />
+      </td>
+      <td><div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div></td>
+    </tr>
+  </table>
+
+  <br/>
+  <button type="submit" th:text="#{CreateContactSaveLink}">Save</button>
+</form>
+
+<br/><br/>
+<a th:href="@{/contacts/list}" th:text="#{CreateContactShowAllLink}">Show all</a>
+<br/><br/>
+<a th:href="@{/}" th:text="#{CreateContactIndexLink}">Index</a>
+
+<div class="messagecolor">
+  <!-- equivalents of <h:messages/> -->
+  <p th:if="${error}" th:text="${error}" style="color:#d20005"></p>
+  <p th:if="${success}"   th:text="${success}"   style="color:green"></p>
+</div>
+
+</body>
+</html>

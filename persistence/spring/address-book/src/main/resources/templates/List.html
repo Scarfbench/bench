@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{ListContactTitle}">Contacts</title>
+  <link rel="stylesheet" th:href="@{/css/jsfcrud.css}">
+</head>
+<body>
+
+<h1 th:text="#{ListContactTitle}">Contacts</h1>
+
+<!-- message panel (equivalent of <h:messages/>) -->
+<div id="messagePanel">
+  <p th:if="${error}" th:text="${error}" style="color:#d20005"></p>
+  <p th:if="${msg}"   th:text="${msg}"   style="color:green"></p>
+</div>
+
+<!-- empty state -->
+<p th:if="${#lists.isEmpty(items)}"
+   th:utext="#{ListContactEmpty}">
+  No contacts.
+</p>
+
+<!-- list & pagination -->
+<div th:if="${!#lists.isEmpty(items)}">
+  <span th:text="${pagination.pageFirstItem + 1}">1</span>
+  ..
+  <span th:text="${pagination.pageLastItem + 1}">10</span>
+  /
+  <span th:text="${pagination.itemsCount}">10</span>
+  &nbsp;
+
+  <a th:if="${pagination.hasPreviousPage}"
+     th:href="@{/contacts/previous}"
+     th:text="#{Previous} + ' ' + ${pagination.pageSize}">Previous</a>
+  &nbsp;
+  <a th:if="${pagination.hasNextPage}"
+     th:href="@{/contacts/next}"
+     th:text="#{Next} + ' ' + ${pagination.pageSize}">Next</a>
+  &nbsp;
+  <form class="jsfcrud_list_form">
+  <table summary="Contact list" border="0" cellpadding="2" cellspacing="0"
+         class="jsfcrud_list_form" style="border:solid 1px" rules="all">
+    <thead>
+      <tr>
+        <th th:text="#{ListContactTitle_id}">ID</th>
+        <th th:text="#{ListContactTitle_lastName}">Last Name</th>
+        <th th:text="#{ListContactTitle_firstName}">First Name</th>
+        <th th:text="#{ListContactTitle_birthday}">Birthday</th>
+        <th th:text="#{ListContactTitle_homePhone}">Home Phone</th>
+        <th th:text="#{ListContactTitle_mobilePhone}">Mobile Phone</th>
+        <th th:text="#{ListContactTitle_email}">Email</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="item,iter : ${items}"
+          th:class="${iter.index % 2 == 0} ? 'jsfcrud_odd_row' : 'jsfcrud_even_row'">
+        <td th:text="${item.id}">1</td>
+        <td th:text="${item.lastName}">Doe</td>
+        <td th:text="${item.firstName}">Jane</td>
+        <td th:text="${item.birthday} ? ${#dates.format(item.birthday, 'MM/dd/yyyy')} : ''">01/01/2000</td>
+        <td th:text="${item.homePhone}">(555) 555-5555</td>
+        <td th:text="${item.mobilePhone}">(555) 555-5555</td>
+        <td th:text="${item.email}">jane@example.com</td>
+        <td>
+          <a th:href="@{|/contacts/view/${item.id}|}"
+             th:text="#{ListContactViewLink}">View</a>
+          &nbsp;
+          <a th:href="@{|/contacts/edit/${item.id}|}"
+             th:text="#{ListContactEditLink}">Edit</a>
+          &nbsp;
+          <form th:action="@{|/contacts/delete/${item.id}|}" method="post" style="display:inline">
+            <button type="submit" th:text="#{ListContactDestroyLink}">Delete</button>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </form>
+</div>
+
+<br/>
+<a th:href="@{/contacts/create}" th:text="#{ListContactCreateLink}">Create</a>
+<br/><br/>
+<a th:href="@{/}" th:text="#{ListContactIndexLink}">Index</a>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="#{ViewContactTitle}">View Contact</title>
+  <link rel="stylesheet" th:href="@{/css/jsfcrud.css}">
+</head>
+<body>
+
+<h1 th:text="#{ViewContactTitle}">View Contact</h1>
+
+<!-- messages (equivalent of <h:messages/>) -->
+<div id="messagePanel">
+  <p th:if="${error}" th:text="${error}" style="color:#d20005"></p>
+  <p th:if="${msg}"   th:text="${msg}"   style="color:green"></p>
+</div>
+
+<table role="presentation">
+  <tr>
+    <td><span th:text="#{ViewContactLabel_id}">ID</span></td>
+    <td><span th:text="${contact.id}" th:title="#{ViewContactTitle_id}">1</span></td>
+  </tr>
+  <tr>
+    <td><span th:text="#{ViewContactLabel_firstName}">First Name</span></td>
+    <td><span th:text="${contact.firstName}" th:title="#{ViewContactTitle_firstName}">Jane</span></td>
+  </tr>
+  <tr>
+    <td><span th:text="#{ViewContactLabel_lastName}">Last Name</span></td>
+    <td><span th:text="${contact.lastName}" th:title="#{ViewContactTitle_lastName}">Doe</span></td>
+  </tr>
+  <tr>
+    <td><span th:text="#{ViewContactLabel_birthday}">Birthday</span></td>
+    <td>
+      <span th:title="#{ViewContactTitle_birthday}"
+            th:text="${contact.birthday} ? ${#dates.format(contact.birthday, 'MM/dd/yyyy')} : ''">
+        01/01/2000
+      </span>
+    </td>
+  </tr>
+  <tr>
+    <td><span th:text="#{ViewContactLabel_homePhone}">Home Phone</span></td>
+    <td><span th:text="${contact.homePhone}" th:title="#{ViewContactTitle_homePhone}">(555) 555-5555</span></td>
+  </tr>
+  <tr>
+    <td><span th:text="#{ViewContactLabel_mobilePhone}">Mobile Phone</span></td>
+    <td><span th:text="${contact.mobilePhone}" th:title="#{ViewContactTitle_mobilePhone}">(555) 555-5555</span></td>
+  </tr>
+  <tr>
+    <td><span th:text="#{ViewContactLabel_email}">Email</span></td>
+    <td><span th:text="${contact.email}" th:title="#{ViewContactTitle_email}">jane@example.com</span></td>
+  </tr>
+</table>
+
+<br/>
+
+<form th:action="@{|/contacts/delete-and-view/${contact.id}|}" method="post" style="display:inline">
+  <button type="submit" th:text="#{ViewContactDestroyLink}">Delete</button>
+</form>
+
+<br/><br/>
+<a th:href="@{|/contacts/edit/${contact.id}|}" th:text="#{ViewContactEditLink}">Edit</a>
+<br/>
+<a th:href="@{/contacts/create}" th:text="#{ViewContactCreateLink}">Create</a>
+<br/>
+<a th:href="@{/contacts/list}" th:text="#{ViewContactShowAllLink}">Show all</a>
+<br/><br/>
+<a th:href="@{/}" th:text="#{ViewContactIndexLink}">Index</a>
+
+</body>
+</html>
