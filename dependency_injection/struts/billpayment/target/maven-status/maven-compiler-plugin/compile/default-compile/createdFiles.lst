@@ -1,5 +1,0 @@
-struts/tutorial/billpayment/service/PaymentService.class
-struts/tutorial/billpayment/service/PaymentServiceImpl.class
-struts/tutorial/billpayment/interceptor/LoggingInterceptor.class
-struts/tutorial/billpayment/action/PaymentAction.class
-struts/tutorial/billpayment/model/PaymentEvent.class
