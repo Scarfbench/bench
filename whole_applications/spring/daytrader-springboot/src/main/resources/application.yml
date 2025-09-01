@@ -17,7 +17,7 @@ server:
   # Use `keytool` to create the keystore:
   # keytool -genkey -alias defaultKeyStore -keyalg RSA -keystore src/main/resources/keystore.p12 -storetype PKCS12 -storepass yourPassword
   ssl:
-    enabled: false
+    enabled: true
     key-store: classpath:keystore.p12
     key-store-type: PKCS12
     key-store-password: yourPassword # match your Liberty <keyStore ... password="..."/>
@@ -43,7 +43,7 @@ spring:
 
   mvc:
     view:
-      prefix: /WEB-INF/jsp/
+      prefix: /
       suffix: .jsp
 
 logging:
