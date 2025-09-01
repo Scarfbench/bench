@@ -49,7 +49,11 @@
             <interceptor-ref name="user-submit" />
         </action>
 
-        <action name="Subscription_*" method="{1}" class="org.apache.struts.examples.mailreader2.SubscriptionAction" />
+        <action name="Subscription_edit" method="editEntry" class="org.apache.struts.examples.mailreader2.SubscriptionAction">
+        </action>
+
+        <action name="Subscription_*" method="{1}" class="org.apache.struts.examples.mailreader2.SubscriptionAction">
+        </action>
 
     </package>
 

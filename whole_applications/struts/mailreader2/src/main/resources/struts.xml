@@ -7,6 +7,7 @@
 
     <constant name="struts.action.extension" value="do" />
     <constant name="struts.devMode" value="true" />
+    <constant name="struts.allowlist.packageNames" value="org.apache.struts.examples.mailreader2" />
 
     <include file="mailreader-default.xml"/>
 
