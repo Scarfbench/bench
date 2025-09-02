@@ -1,0 +1,25 @@
+{#include _layout}
+  {#title}{i18n['ViewContactTitle']}{/title}
+  {#body}
+    <p><a href="/contacts">{i18n['ViewContactShowAllLink']}</a></p>
+
+    <dl>
+      <dt>{i18n['ViewContactLabel_id']}</dt><dd>{c.id}</dd>
+      <dt>{i18n['ViewContactLabel_firstName']}</dt><dd>{c.firstName}</dd>
+      <dt>{i18n['ViewContactLabel_lastName']}</dt><dd>{c.lastName}</dd>
+      <dt>{i18n['ViewContactLabel_birthday']}</dt><dd>{birthdayText}</dd>
+      <dt>{i18n['ViewContactLabel_homePhone']}</dt><dd>{c.homePhone}</dd>
+      <dt>{i18n['ViewContactLabel_mobilePhone']}</dt><dd>{c.mobilePhone}</dd>
+      <dt>{i18n['ViewContactLabel_email']}</dt><dd>{c.email}</dd>
+    </dl>
+
+    <p>
+      <form action="/contacts/{c.id}/delete" method="post" style="display:inline">
+        <button type="submit">{i18n['ViewContactDestroyLink']}</button>
+      </form>
+      &nbsp;<a href="/contacts/{c.id}/edit">{i18n['ViewContactEditLink']}</a>
+      &nbsp;<a href="/contacts/new">{i18n['ViewContactCreateLink']}</a>
+      &nbsp;<a href="/contacts">{i18n['ViewContactIndexLink']}</a>
+    </p>
+  {/body}
+{/include}
