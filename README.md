@@ -21,8 +21,8 @@ Install / enable the following before running any examples.
 
 3. Docker Compose
    - Used for multi-service examples.
-   - Modern Docker includes the `docker compose` plugin. If you still need the v1 binary follow: https://docs.docker.com/compose/
-   - Verify: `docker compose version`
+   - Modern Docker includes the `docker-compose` plugin. If you still need the v1 binary follow: https://docs.docker.com/compose/
+   - Verify: `docker-compose version`
 
 4. Java (multiple toolchains via SDKMAN!)
    - Some projects target different LTS versions (11, 17, 21).
@@ -46,6 +46,11 @@ Install / enable the following before running any examples.
 
 # Transformation Matrix (arranged by benchmark folder structure)
 
+## Legend
+- 🛑: Not started
+- ✅: Complete
+- 🏗️: In progress
+
 ## 1. Whole Applications (`/whole_applications/`)
 
 | Application  | Spring | Jakarta | Quarkus | Struts |
@@ -53,18 +58,11 @@ Install / enable the following before running any examples.
 | cargotracker | ✅      | ✅       | ✅       | 🛑      |
 | coffeeshop   | 🛑      | 🛑       | ✅       | 🛑      |
 | daytrader    | ✅      | ✅       | 🛑       | 🛑      |
-| realworld    | ✅      | ✅       | ✅       | ✅      |
+| realworld    | ✅      | ✅       | ✅       | 🛑      |
 | petclinic    | ✅      | 🛑       | ✅       | 🛑      |
 | mailreader2  | 🛑      | 🛑       | 🛑       | ✅      |
 
-🛑: Start
-
-✅: Complete
-
-🏗️: In progress
-.: Not Started
-
-NOTE: RECORD TIME AND EFFORT
+---
 
 ## 2. Dependency Injection (`/dependency_injection/`)
 
@@ -78,6 +76,7 @@ NOTE: RECORD TIME AND EFFORT
 | producermethods | 🛑      | ✅       | 🛑       | 🛑      |
 | simplegreeting  | 🛑      | ✅       | 🛑       | 🛑      |
 
+---
 ## 3. Persistence (`/persistence/`)
 
 | Application  | Spring | Jakarta | Quarkus | Struts |
@@ -85,6 +84,8 @@ NOTE: RECORD TIME AND EFFORT
 | address-book | 🛑      | ✅       | 🛑       | 🛑      |
 | order        | 🛑      | ✅       | 🛑       | 🛑      |
 | roster       | 🛑      | ✅       | 🛑       | 🛑      |
+
+---
 
 ## 4. Presentation (`/presentation/`)
 
@@ -96,15 +97,55 @@ NOTE: RECORD TIME AND EFFORT
 | hello-servlet | 🛑      | ✅       | 🛑       | 🛑      |
 | mood          | 🛑      | ✅       | 🛑       | 🛑      |
 | websocketbot  | 🛑      | ✅       | 🛑       | 🛑      |
+| jaxrs-hello   | 🛑      | ✅       | 🛑       | 🛑      |
+| jaxrs-rsvp    | 🛑      | ✅       | 🛑       | 🛑      |
+| jaxrs-customer| 🛑      | ✅       | 🛑       | 🛑      |
+
+---
 
 ## 5. Business Domain (`/business_domain/`)
 
-| Application           | Spring | Jakarta | Quarkus | Struts |
-| --------------------- | ------ | ------- | ------- | ------ |
-| *No applications yet* | 🛑      | 🛑       | 🛑       | 🛑      |
+| Application   | Spring | Jakarta | Quarkus | Struts |
+| ------------- | ------ | ------- | ------- | ------ |
+| cart          | 🛑      | ✅       | 🛑       | 🛑      |
+| converter     | 🛑      | ✅       | 🛑       | 🛑      |
+| counter       | 🛑      | ✅       | 🛑       | 🛑      |
+| helloservice  | 🛑      | ✅       | 🛑       | 🛑      |
+| standalone    | 🛑      | ✅       | 🛑       | 🛑      |
+
+---
 
 ## 6. Integration (`/integration/`)
 
-| Application           | Spring | Jakarta | Quarkus | Struts |
-| --------------------- | ------ | ------- | ------- | ------ |
-| *No applications yet* | 🛑      | 🛑       | 🛑       | 🛑      |
+| Application             | Spring | Jakarta | Quarkus | Struts |
+| ----------------------- | ------ | ------- | ------- | ------ |
+| jms-simple              | 🛑      | ✅       | 🛑       | 🛑      |
+| jms-simplemessage       | 🛑      | ✅       | 🛑       | 🛑      |
+| jms-clientmdbentity     | 🛑      | ✅       | 🛑       | 🛑      |
+| jms-clientsessionmdb    | 🛑      | ✅       | 🛑       | 🛑      |
+| jms-durablesubscription | 🛑      | ✅       | 🛑       | 🛑      |
+| jms-transactedexample   | 🛑      | ✅       | 🛑       | 🛑      |
+| jms-websimplemessage    | 🛑      | ✅       | 🛑       | 🛑      |
+| jaxws-hello-appclient   | 🛑      | ✅       | 🛑       | 🛑      |
+| jaxws-hello-webclient   | 🛑      | ✅       | 🛑       | 🛑      |
+| connectors-trading      | 🛑      | ✅       | 🛑       | 🛑      |
+| connectors-traffic      | 🛑      | ✅       | 🛑       | 🛑      |
+| batch-phonebilling      | 🛑      | ✅       | 🛑       | 🛑      |
+| batch-webserverlog      | 🛑      | ✅       | 🛑       | 🛑      |
+
+---
+
+## 7. Infrastructure (`/infrastructure/`)
+
+| Application    | Spring | Jakarta | Quarkus | Struts |
+| -------------- | ------ | ------- | ------- | ------ |
+| ejb-async      | 🛑      | ✅       | 🛑       | 🛑      |
+| ejb-timersession| 🛑     | ✅       | 🛑       | 🛑      |
+| ejb-interceptor| 🛑      | ✅       | 🛑       | 🛑      |
+| concurrency-jobs       | 🛑      | ✅       | 🛑       | 🛑      |
+| concurrency-taskcreator| 🛑      | ✅       | 🛑       | 🛑      |
+| security-cart-secure    | 🛑      | ✅       | 🛑       | 🛑      |
+| security-converter-secure| 🛑     | ✅       | 🛑       | 🛑      |
+| security-hello1-formauth| 🛑      | ✅       | 🛑       | 🛑      |
+| security-hello2-basicauth| 🛑     | ✅       | 🛑       | 🛑      |
+| security-api            | 🛑      | ✅       | 🛑       | 🛑      |

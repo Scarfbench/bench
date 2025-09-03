@@ -37,34 +37,34 @@ docker-build:
 # Start application with Docker Compose
 up:
     @echo "Starting application with Docker Compose..."
-    docker compose up -d
+    docker-compose up -d
 
 # Stop Docker Compose services
 down:
     @echo "Stopping Docker Compose services..."
-    docker compose down
+    docker-compose down
 
 # View Docker Compose logs
 logs:
     @echo "Viewing application logs..."
-    docker compose logs -f
+    docker-compose logs -f
 
 # Restart Docker Compose services
 restart:
     @echo "Restarting services..."
-    docker compose restart
+    docker-compose restart
 
 # Build and deploy (build + docker-build + up)
 deploy: build docker-build up
     @echo "Application deployed successfully!"
     @echo ""
-    @echo "Access the application at: http://localhost:8080/billpayment/"
-    @echo "Access GlassFish admin console at: http://localhost:4848/"
+    @echo "Access the application at: http://localhost:9001/billpayment/"
+    @echo "Access GlassFish admin console at: http://localhost:9101/"
 
 # Show application status
 status:
     @echo "Docker Compose services status:"
-    docker compose ps
+    docker-compose ps
     @echo ""
     @echo "Docker images:"
     docker images | grep billpayment
@@ -72,13 +72,13 @@ status:
 # View application in browser (requires xdg-open)
 open:
     @echo "Opening application in browser..."
-    xdg-open http://localhost:8080/billpayment/ || echo "Please open http://localhost:8080/billpayment/ manually"
+    xdg-open http://localhost:9001/billpayment/ || echo "Please open http://localhost:9001/billpayment/ manually"
 
 # Complete dedeployment - stops containers, removes images, and frees all resources
 dedeploy:
     @echo "dedeploying application..."
     @echo "Stopping all containers..."
-    docker compose down -v || echo "No containers to stop"
+    docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
     docker rmi billpayment-glassfish7:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
@@ -90,15 +90,15 @@ dedeploy:
 # Clean Docker resources
 docker-clean:
     @echo "Cleaning Docker resources..."
-    docker compose down -v
+    docker-compose down -v
     docker rmi billpayment-glassfish7:latest || echo "Image not found"
     docker system prune -f
 
 # Development workflow - clean, build, and deploy
 dev: clean build docker-build up
     @echo "Development environment ready!"
-    @echo "Application: http://localhost:8080/billpayment/"
-    @echo "Admin console: http://localhost:4848/"
+    @echo "Application: http://localhost:9001/billpayment/"
+    @echo "Admin console: http://localhost:9101/"
 
 # Show project information
 info:
@@ -110,8 +110,8 @@ info:
     @echo "Application Server: GlassFish 7"
     @echo ""
     @echo "URLs when running:"
-    @echo "  Application: http://localhost:8082/billpayment/"
-    @echo "  Admin Console: http://localhost:4849/"
+    @echo "  Application: http://localhost:9001/billpayment/"
+    @echo "  Admin Console: http://localhost:9101/"
     @echo ""
     @echo "Key files:"
     @echo "  WAR file: target/billpayment.war"
@@ -122,15 +122,15 @@ info:
 check-docker:
     @echo "Checking Docker status..."
     docker --version
-    docker compose --version
+    docker-compose --version
     docker ps
 
 # Follow application logs in real-time
 tail-logs:
     @echo "Following application logs (Ctrl+C to stop)..."
-    docker compose logs -f glassfish
+    docker-compose logs -f glassfish
 
 # Execute bash shell in running container
 shell:
     @echo "Opening shell in running container..."
-    docker compose exec glassfish bash
+    docker-compose exec glassfish bash

@@ -69,13 +69,13 @@ and [PostgreSQL](https://github.com/spring-projects/spring-petclinic/blob/main/s
 Instead of vanilla `docker` you can also use the provided `docker-compose.yml` file to start the database containers. Each one has a service named after the Spring profile:
 
 ```bash
-docker compose up mysql
+docker-compose up mysql
 ```
 
 or
 
 ```bash
-docker compose up postgres
+docker-compose up postgres
 ```
 
 ## Test Applications

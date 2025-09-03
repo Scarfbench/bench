@@ -34,7 +34,7 @@ docker-build:
     just build
     docker build -t producermethods-glassfish7:latest .
 
-# Run Docker container directly (no docker compose)
+# Run Docker container directly (no docker-compose)
 run:
     @echo "Running Docker container..."
     docker run -d -p 8080:8080 -p 4848:4848 --name producermethods-container producermethods-glassfish7:latest
@@ -55,11 +55,11 @@ restart: stop run
     @echo "Container restarted!"
 
 # Build and deploy (build + docker-build + run)
-deploy: build docker-build run
+deploy: build docker-build up
     @echo "Application deployed successfully!"
     @echo ""
-    @echo "Access the application at: http://localhost:8085/producermethods/"
-    @echo "Access GlassFish admin console at: http://localhost:4853/"
+    @echo "Access the application at: http://localhost:9006/producermethods/"
+    @echo "Access GlassFish admin console at: http://localhost:9106/"
 
 # Show application status
 status:
@@ -72,13 +72,13 @@ status:
 # View application in browser (requires xdg-open)
 open:
     @echo "Opening application in browser..."
-    xdg-open http://localhost:8085/producermethods/ || echo "Please open http://localhost:8085/producermethods/ manually"
+    xdg-open http://localhost:9006/producermethods/ || echo "Please open http://localhost:9006/producermethods/ manually"
 
 # Complete dedeployment - stops containers, removes images, and frees all resources
 dedeploy:
     @echo "dedeploying application..."
     @echo "Stopping all containers..."
-    docker compose down -v || echo "No containers to stop"
+    docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
     docker rmi producermethods-glassfish7:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
@@ -96,10 +96,10 @@ docker-clean:
     docker system prune -f
 
 # Development workflow - clean, build, and deploy
-dev: clean build docker-build run
+dev: clean build docker-build up
     @echo "Development environment ready!"
-    @echo "Application: http://localhost:8080/producermethods/"
-    @echo "Admin console: http://localhost:4848/"
+    @echo "Application: http://localhost:9006/producermethods/"
+    @echo "Admin console: http://localhost:9106/"
 
 # Show project information
 info:
@@ -111,8 +111,8 @@ info:
     @echo "Application Server: GlassFish 7"
     @echo ""
     @echo "URLs when running:"
-    @echo "  Application: http://localhost:8087/producermethods/"
-    @echo "  Admin Console: http://localhost:4854/"
+    @echo "  Application: http://localhost:9006/producermethods/"
+    @echo "  Admin Console: http://localhost:9106/"
     @echo ""
     @echo "Key files:"
     @echo "  WAR file: target/producermethods.war"

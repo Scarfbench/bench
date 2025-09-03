@@ -33,22 +33,22 @@ dev: db-start
 # Start application with Docker Compose
 up: down
     @echo "Starting application with Docker Compose..."
-    docker compose up -d
+    docker-compose up -d
 
 # Stop Docker Compose services
 down:
     @echo "Stopping Docker Compose services..."
-    docker compose down
+    docker-compose down
 
 # View Docker Compose logs
 logs:
     @echo "Viewing application logs..."
-    docker compose logs -f
+    docker-compose logs -f
 
 # Restart Docker Compose services
 restart:
     @echo "Restarting services..."
-    docker compose restart
+    docker-compose restart
 
 # Build and deploy (build + docker-build + up)
 deploy: up
@@ -60,7 +60,7 @@ deploy: up
 # Show application status
 status:
     @echo "Docker Compose services status:"
-    docker compose ps
+    docker-compose ps
     @echo ""
     @echo "Docker images:"
     docker images | grep coffeeshop
@@ -74,7 +74,7 @@ open:
 dedeploy:
     @echo "Dedeploying application..."
     @echo "Stopping all containers..."
-    docker compose down -v || echo "No containers to stop"
+    docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
     docker rmi coffeeshop-quarkus:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."

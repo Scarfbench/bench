@@ -21,8 +21,8 @@ Manual (without just):
 ```
 ./mvnw clean package -DskipTests
 docker build -t coffeeshop-quarkus:latest .
-docker compose down
-docker compose up -d
+docker-compose down
+docker-compose up -d
 ```
 Application: http://localhost:9080/
 
@@ -30,7 +30,7 @@ To stop & clean everything:
 ```
 just dedeploy
 # or
-docker compose down -v
+docker-compose down -v
 ```
 
 ## Available just Recipes
@@ -45,7 +45,7 @@ just dedeploy   # full teardown (containers, image, networks)
 If you want hot reload instead of the containerized app:
 1. Start only required services:
 ```
-docker compose up -d coffeeshop-db redpanda
+docker-compose up -d coffeeshop-db redpanda
 ```
 2. Run Quarkus dev mode:
 ```
@@ -81,11 +81,11 @@ Native (optional):
 ## Cleanup Snippets
 Remove only containers (keep volumes):
 ```
-docker compose down
+docker-compose down
 ```
 Full reset (containers + volumes):
 ```
-docker compose down -v
+docker-compose down -v
 ```
 Remove the built image:
 ```

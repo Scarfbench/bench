@@ -37,22 +37,22 @@ docker-build:
 # Start application with Docker Compose
 up:
     @echo "Starting application with Docker Compose..."
-    docker compose up -d
+    docker-compose up -d
 
 # Stop Docker Compose services
 down:
     @echo "Stopping Docker Compose services..."
-    docker compose down
+    docker-compose down
 
 # View Docker Compose logs
 logs:
     @echo "Viewing application logs..."
-    docker compose logs -f
+    docker-compose logs -f
 
 # Restart Docker Compose services
 restart:
     @echo "Restarting services..."
-    docker compose restart
+    docker-compose restart
 
 # Build and deploy (build + docker-build + up)
 deploy: build docker-build up
@@ -64,7 +64,7 @@ deploy: build docker-build up
 # Show application status
 status:
     @echo "Docker Compose services status:"
-    docker compose ps
+    docker-compose ps
     @echo ""
     @echo "Docker images:"
     docker images | grep simplegreeting
@@ -78,7 +78,7 @@ open:
 dedeploy:
     @echo "dedeploying application..."
     @echo "Stopping all containers..."
-    docker compose down -v || echo "No containers to stop"
+    docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
     docker rmi simplegreeting-glassfish7:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
@@ -90,7 +90,7 @@ dedeploy:
 # Clean Docker resources
 docker-clean:
     @echo "Cleaning Docker resources..."
-    docker compose down -v
+    docker-compose down -v
     docker rmi simplegreeting-glassfish7:latest || echo "Image not found"
     docker system prune -f
 
@@ -122,15 +122,15 @@ info:
 check-docker:
     @echo "Checking Docker status..."
     docker --version
-    docker compose --version
+    docker-compose --version
     docker ps
 
 # Follow application logs in real-time
 tail-logs:
     @echo "Following application logs (Ctrl+C to stop)..."
-    docker compose logs -f glassfish
+    docker-compose logs -f glassfish
 
 # Execute bash shell in running container
 shell:
     @echo "Opening shell in running container..."
-    docker compose exec glassfish bash
+    docker-compose exec glassfish bash

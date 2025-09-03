@@ -16,19 +16,20 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>jakarta.examples.tutorial.web</groupId>
-    <artifactId>parent</artifactId>
+    <groupId>jakarta.examples.tutorial</groupId>
+    <artifactId>examples</artifactId>
     <version>10-SNAPSHOT</version>
   </parent>
 
-  <groupId>jakarta.examples.tutorial.web.websocket</groupId>
+  <groupId>jakarta.examples.tutorial.jaxrs</groupId>
   <artifactId>parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>websocket</name>
+  <name>jaxrs</name>
 
   <modules>
-    <module>dukeetf2</module>
-    <module>websocketbot</module>
+    <module>customer</module>
+    <module>hello</module>
+    <module>rsvp</module>
   </modules>
 </project>
