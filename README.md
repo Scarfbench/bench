@@ -56,19 +56,20 @@ Install / enable the following before running any examples.
 | Application  | Spring | Jakarta | Quarkus | Struts |
 | ------------ | ------ | ------- | ------- | ------ |
 | cargotracker | ✅      | ✅       | ✅       | 🛑      |
-| coffeeshop   | 🛑      | 🛑       | ✅       | 🛑      |
-| daytrader    | ✅      | ✅       | 🛑       | 🛑      |
+| coffeeshop   | ✅      | 🛑       | ✅       | 🛑      |
+| daytrader    | ✅      | ✅       | ✅       | 🛑      |
 | realworld    | ✅      | ✅       | ✅       | 🛑      |
 | petclinic    | ✅      | 🛑       | ✅       | 🛑      |
-| mailreader2  | 🛑      | 🛑       | 🛑       | ✅      |
+| mailreader2*  | 🛑      | 🛑       | 🛑       | ✅      |
 
+*not in paper 
 ---
 
 ## 2. Dependency Injection (`/dependency_injection/`)
 
 | Application     | Spring | Jakarta | Quarkus | Struts |
 | --------------- | ------ | ------- | ------- | ------ |
-| billpayment     | ✅      | ✅       | 🛑       | ✅      |
+| billpayment     | ✅      | ✅       | 🛑       | 🛑      |
 | decorators      | 🛑      | ✅       | 🛑       | 🛑      |
 | encoder         | 🛑      | ✅       | 🛑       | 🛑      |
 | guessnumber     | 🛑      | ✅       | 🛑       | 🛑      |
@@ -81,9 +82,9 @@ Install / enable the following before running any examples.
 
 | Application  | Spring | Jakarta | Quarkus | Struts |
 | ------------ | ------ | ------- | ------- | ------ |
-| address-book | 🛑      | ✅       | 🛑       | 🛑      |
-| order        | 🛑      | ✅       | 🛑       | 🛑      |
-| roster       | 🛑      | ✅       | 🛑       | 🛑      |
+| address-book | ✅      | ✅       | ✅       | 🛑      |
+| order        | ✅      | ✅       | 🛑       | 🛑      |
+| roster       | ✅      | ✅       | 🛑       | 🛑      |
 
 ---
 
