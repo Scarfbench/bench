@@ -31,4 +31,8 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>custom-identity-store</finalName>
+  </build>
 </project>

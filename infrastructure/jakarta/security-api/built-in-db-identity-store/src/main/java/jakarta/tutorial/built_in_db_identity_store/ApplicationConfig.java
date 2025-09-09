@@ -24,21 +24,18 @@ import jakarta.security.enterprise.identitystore.Pbkdf2PasswordHash;
     hashAlgorithm = Pbkdf2PasswordHash.class,
     priorityExpression = "#{100}",
     hashAlgorithmParameters = {
-        "Pbkdf2PasswordHash.Iterations=3072",
-        "${applicationConfig.dyna}"
+        "Pbkdf2PasswordHash.Iterations=3072", "${applicationConfig.dyna}",
     }
 )
-
-@BasicAuthenticationMechanismDefinition(
-        realmName = "file"
-)
-
+@BasicAuthenticationMechanismDefinition
 @ApplicationScoped
 @Named
 public class ApplicationConfig {
 
-     public String[] getDyna() {
-         return new String[]{"Pbkdf2PasswordHash.Algorithm=PBKDF2WithHmacSHA512", "Pbkdf2PasswordHash.SaltSizeBytes=64"};
-     }
-    
+    public String[] getDyna() {
+        return new String[] {
+            "Pbkdf2PasswordHash.Algorithm=PBKDF2WithHmacSHA512",
+            "Pbkdf2PasswordHash.SaltSizeBytes=64",
+        };
+    }
 }

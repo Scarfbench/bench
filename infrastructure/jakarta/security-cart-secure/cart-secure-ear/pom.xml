@@ -33,15 +33,18 @@
       <version>${project.version}</version>
       <type>ejb</type>
     </dependency>
+    <!-- Temporarily disabled due to jdk.security.jarsigner issue
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>cart-secure-appclient</artifactId>
       <version>${project.version}</version>
       <type>app-client</type>
     </dependency>
+    -->
   </dependencies>
 
   <build>
+    <finalName>cart-secure-ear</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -53,10 +56,12 @@
               <groupId>${project.groupId}</groupId>
               <artifactId>cart-secure-ejb</artifactId>
             </ejbModule>
+            <!-- Temporarily disabled due to jdk.security.jarsigner issue
             <appClientModule>
               <groupId>${project.groupId}</groupId>
               <artifactId>cart-secure-appclient</artifactId>
             </appClientModule>
+            -->
           </modules>
         </configuration>
       </plugin>

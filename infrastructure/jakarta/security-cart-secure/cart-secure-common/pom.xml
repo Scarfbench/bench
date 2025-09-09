@@ -24,4 +24,12 @@
   <artifactId>cart-secure-common</artifactId>
 
   <name>cart-secure-common</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

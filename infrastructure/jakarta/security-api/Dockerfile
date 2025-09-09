@@ -35,13 +35,13 @@ RUN curl -L -o /tmp/glassfish.zip https://github.com/eclipse-ee4j/glassfish/rele
 ENV GLASSFISH_HOME=/opt/glassfish
 ENV PATH=$PATH:$GLASSFISH_HOME/bin
 
-# Configure the default domain to use port 8080 (it already exists)
-# We don't need to create a new domain, just use the existing one
+    # Configure the default domain to use port 8080 (it already exists)
+    # We don't need to create a new domain, just use the existing one
 
-# Copy the built WAR file from the builder stage
-COPY --from=builder /app/built-in-db-identity-store/target/built-in-db-identity-store.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/
+    # Copy the built WAR file from the builder stage
+    COPY --from=builder /app/built-in-db-identity-store/target/built-in-db-identity-store.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/
 
-# Expose ports
+    # Expose ports
 EXPOSE 8080 4848 8181
 
 # Create a startup script

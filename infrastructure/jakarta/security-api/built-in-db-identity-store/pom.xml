@@ -31,4 +31,8 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <finalName>built-in-db-identity-store</finalName>
+  </build>
 </project>

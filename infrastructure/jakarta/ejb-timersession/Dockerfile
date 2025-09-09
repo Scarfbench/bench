@@ -39,7 +39,7 @@ ENV PATH=$PATH:$GLASSFISH_HOME/bin
 # We don't need to create a new domain, just use the existing one
 
 # Copy the built WAR file from the builder stage
-COPY --from=builder /app/target/timersession-10-SNAPSHOT.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/timersession.war
+COPY --from=builder /app/target/timersession.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/timersession.war
 
 # Expose ports
 EXPOSE 8080 4848 8181

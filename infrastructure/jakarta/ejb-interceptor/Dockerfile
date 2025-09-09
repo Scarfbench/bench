@@ -39,7 +39,7 @@ ENV PATH=$PATH:$GLASSFISH_HOME/bin
 # We don't need to create a new domain, just use the existing one
 
 # Copy the built WAR file from the builder stage
-COPY --from=builder /app/target/interceptor-10-SNAPSHOT.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/
+COPY --from=builder /app/target/interceptor.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/
 
 # Expose ports
 EXPOSE 8080 4848 8181
@@ -49,7 +49,7 @@ RUN echo '#!/bin/bash\n\
 echo "Starting GlassFish domain1..."\n\
 asadmin start-domain domain1\n\
 echo "GlassFish started successfully"\n\
-echo "Application should be available at http://localhost:8080/interceptor-10-SNAPSHOT/"\n\
+echo "Application should be available at http://localhost:8080/interceptor/"\n\
 echo "Admin console available at http://localhost:4848/"\n\
 tail -f $GLASSFISH_HOME/glassfish/domains/domain1/logs/server.log' > /start-glassfish.sh && \
     chmod +x /start-glassfish.sh
