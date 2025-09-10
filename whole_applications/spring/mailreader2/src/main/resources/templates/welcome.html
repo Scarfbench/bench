@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{index.title}">Page Title</title>
+    <link rel="stylesheet" th:href="@{/css/mailreader.css}" />
+</head>
+
+<body>
+
+    <h3 th:text="#{index.heading}">Welcome Heading</h3>
+
+    <ul>
+        <li><a th:href="@{/registration}" th:text="#{index.registration}">Register</a></li>
+        <li><a th:href="@{/login}" th:text="#{index.login}">Login</a></li>
+    </ul>
+
+    <h3>Language Options</h3>
+    <ul>
+        <li><a th:href="@{/?lang=en}">English</a></li>
+        <li><a th:href="@{/?lang=ja}">Japanese</a></li>
+        <li><a th:href="@{/?lang=ru}">Russian</a></li>
+    </ul>
+
+    <hr />
+
+    <p>
+        <a href="http://struts.apache.org/">
+            <img th:src="@{#{struts.logo.path}}" th:alt="#{struts.logo.alt}" border="0" />
+        </a>
+    </p>
+
+</body>
+
+</html>

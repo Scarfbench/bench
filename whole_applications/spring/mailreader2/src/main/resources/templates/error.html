@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Unexpected Error</title>
+</head>
+
+<body>
+    <h2>An unexpected error has occurred</h2>
+
+    <p>
+        Please report this error to your system administrator
+        or appropriate technical support personnel.
+        Thank you for your cooperation.
+    </p>
+
+    <hr />
+
+    <h3>Error Message</h3>
+
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <hr />
+
+    <h3>Technical Details</h3>
+
+    <div th:if="${stackTrace}">
+        <pre th:text="${stackTrace}"></pre>
+    </div>
+
+    <!-- Footer inclusion -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+
+</html>
