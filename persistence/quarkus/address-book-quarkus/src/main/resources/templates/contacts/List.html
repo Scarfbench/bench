@@ -1,0 +1,61 @@
+{#include _layout}
+  {#title}{bundle.getString('ListContactTitle')}{/title}
+  {#body}
+
+  <div class="jsfcrud_list_form">
+    {#if items.size == 0}
+      <p>{bundle.getString('ListContactEmpty')}</p>
+    {#else}
+
+      <p>
+        {start}..{end}/{total}
+        {#if hasPrev}
+          &nbsp;<a href="/contacts?page={prevPage}&size={size}">{bundle.getString('Previous')} {size}</a>
+        {/if}
+        {#if hasNext}
+          &nbsp;<a href="/contacts?page={nextPage}&size={size}">{bundle.getString('Next')} {size}</a>
+        {/if}
+      </p>
+
+      <table border="1" cellpadding="2" cellspacing="0">
+        <thead>
+          <tr>
+            <th>{bundle.getString('ListContactTitle_id')}</th>
+            <th>{bundle.getString('ListContactTitle_lastName')}</th>
+            <th>{bundle.getString('ListContactTitle_firstName')}</th>
+            <th>{bundle.getString('ListContactTitle_birthday')}</th>
+            <th>{bundle.getString('ListContactTitle_homePhone')}</th>
+            <th>{bundle.getString('ListContactTitle_mobilePhone')}</th>
+            <th>{bundle.getString('ListContactTitle_email')}</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#for item in items}
+          <tr>
+            <td>{item.id}</td>
+            <td>{item.lastName}</td>
+            <td>{item.firstName}</td>
+            <td>{item.birthday}</td>
+            <td>{item.homePhone}</td>
+            <td>{item.mobilePhone}</td>
+            <td>{item.email}</td>
+            <td>
+              <a href="/contacts/{item.id}">{bundle.getString('ListContactViewLink')}</a>
+              &nbsp;<a href="/contacts/{item.id}/edit">{bundle.getString('ListContactEditLink')}</a>
+              &nbsp;<form action="/contacts/{item.id}/delete" method="post" style="display:inline">
+                <button type="submit" class="linklike">{bundle.getString('ListContactDestroyLink')}</button>
+              </form>
+            </td>
+          </tr>
+          {/for}
+        </tbody>
+      </table>
+    {/if}
+  </div>
+
+  <p><a href="/contacts/new">{bundle.getString('ListContactCreateLink')}</a></p>
+  <p><a href="/contacts">{bundle.getString('ListContactIndexLink')}</a></p>
+
+  {/body}
+{/include}
