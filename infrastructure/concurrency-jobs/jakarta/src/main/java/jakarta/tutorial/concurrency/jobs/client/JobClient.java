@@ -37,7 +37,7 @@ public class JobClient implements Serializable {
     private String token;
     private int jobID;
 
-    private final String serviceEndpoint = "http://localhost:8080/jobs/webapi/JobService/process";
+    private final String serviceEndpoint = "http://localhost:9080/jobs/webapi/JobService/process";
 
     public String submit() {
         final Client client = ClientBuilder.newClient();

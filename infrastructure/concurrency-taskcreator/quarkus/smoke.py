@@ -23,8 +23,8 @@ BASE_CANDIDATES = [
     os.getenv("TASKCREATOR_BASE_URL"),
     "http://localhost:9080/taskcreator",
     "http://localhost:9080",
-    "http://localhost:10002/taskcreator",
-    "http://localhost:10002"
+    "http://localhost:10022/taskcreator",
+    "http://localhost:10022"
 ]
 DEFAULT_ENDPOINT = "/taskinfo"
 
