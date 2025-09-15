@@ -1,8 +1,8 @@
 ### TaskCreator (Liberty-only) Justfile
-APP_NAME       := "jobs-liberty"
-LIBERTY_IMAGE   := "jobs-liberty:latest"
+APP_NAME       := "jobs-quarkus"
+LIBERTY_IMAGE   := "jobs-quarkus:latest"
 LIBERTY_PORT    := "9080"               # Liberty internal HTTP
-HOST_PORT      := "10011"               # Host port to map to Liberty internal HTTP
+HOST_PORT      := "10012"               # Host port to map to Liberty internal HTTP
 
 build:
 	docker build -f Dockerfile -t {{LIBERTY_IMAGE}} .
@@ -13,24 +13,24 @@ rebuild:
 	@echo "[INFO] Rebuilt image (no cache): {{LIBERTY_IMAGE}}"
 
 up: build
-	@if docker ps --all --quiet --filter name=^/jobs-liberty$ | grep -q .; then \
+	@if docker ps --all --quiet --filter name=^/jobs-quarkus$ | grep -q .; then \
 		echo "[INFO] Removing existing container"; \
-		docker rm -f jobs-liberty >/dev/null; \
+		docker rm -f jobs-quarkus >/dev/null; \
 	fi
-	docker run -d --name jobs-liberty -p {{HOST_PORT}}:{{LIBERTY_PORT}} {{LIBERTY_IMAGE}}
-	@echo "[INFO] Started jobs-liberty, waiting for app to start..."
-	@until docker logs jobs-liberty 2>&1 | grep -q "CWWKF0011I"; do sleep 1; done
+	docker run -d --name jobs-quarkus -p {{HOST_PORT}}:{{LIBERTY_PORT}} {{LIBERTY_IMAGE}}
+	@echo "[INFO] Started jobs-quarkus, waiting for app to start..."
+	@until docker logs jobs-quarkus 2>&1 | grep -q "CWWKF0011I"; do sleep 1; done
 	@echo "[INFO] Liberty app started, port {{HOST_PORT}} is ready."
 
 logs:
-	docker logs -f jobs-liberty
+	docker logs -f jobs-quarkus
 
 down:
-	- docker rm -f jobs-liberty
+	- docker rm -f jobs-quarkus
 	@echo "[INFO] Container removed (if it existed)"
 
 test: up
     @docker exec {{APP_NAME}} sh -c 'python3 /app/smoke.py'
 
 local:
-	./mvnw clean package liberty:run
+	./mvnw clean package quarkus:run
