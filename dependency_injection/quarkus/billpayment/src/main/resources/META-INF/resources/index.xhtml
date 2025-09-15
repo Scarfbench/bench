@@ -26,7 +26,7 @@
         <h3>Bill Payment Options</h3>
         <p>Enter an amount, select Debit Card or Credit Card, 
             then click Pay.</p>
-        <h:form>
+        <h:form id="paymentForm">
             <p>
             <h:outputLabel value="Amount: $" for="amt"/>
             <h:inputText id="amt" value="#{paymentBean.value}" 

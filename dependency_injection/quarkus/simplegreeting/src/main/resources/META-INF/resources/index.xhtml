@@ -26,7 +26,7 @@
             <h:form id="greetme">
                <p><h:outputLabel value="Enter your name: " for="name"/>
                   <h:inputText id="name" value="#{printer.name}"/></p>
-               <p><h:commandButton value="Say Hello" 
+               <p><h:commandButton id="submit" value="Say Hello"
                                    action="#{printer.createSalutation}"/></p>
                <p><h:outputText value="#{printer.salutation}"/> </p>
             </h:form>

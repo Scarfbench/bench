@@ -28,10 +28,10 @@
             <h:inputText id="inputString" value="#{listBean.inputString}" required="true" />
         </p>
         <p>
-            <h:commandButton value="Submit" action="#{listBean.createTask()}" />
+            <h:commandButton id="submit" value="Submit" action="#{listBean.createTask()}" />
         </p>
         <p>
-            <h:commandButton value="Show Items" action="todolist" />
+            <h:commandButton id="list" value="Show Items" action="todolist" />
         </p>
     </h:form>
     <div class="messagecolor">

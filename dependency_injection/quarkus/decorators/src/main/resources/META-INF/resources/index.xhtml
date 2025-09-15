@@ -33,7 +33,7 @@
                 <h:outputLabel value="Enter the number of letters to shift by: "
                                for="transVal"/>
                 <h:inputText id="transVal" value="#{coderBean.transVal}"/></p>
-            <p><h:commandButton value="Encode"
+            <p><h:commandButton id="submit" value="Encode"
                                 action="#{coderBean.encodeString()}"/></p>
             <p><h:outputLabel value="Result: " for="outputString"/>
                 <h:outputText id="outputString" 
