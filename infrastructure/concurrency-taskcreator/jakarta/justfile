@@ -1,7 +1,8 @@
 ### TaskCreator (Liberty-only) Justfile
+APP_NAME       := "taskcreator-liberty"
 LIBERTY_IMAGE   := "taskcreator-liberty:latest"
 LIBERTY_PORT    := "9080"               # Liberty internal HTTP
-HOST_PORT      := "10002"               # Host port to map to Liberty internal HTTP
+HOST_PORT      := "10021"               # Host port to map to Liberty internal HTTP
 
 build:
 	docker build -f Dockerfile -t {{LIBERTY_IMAGE}} .
@@ -28,8 +29,8 @@ down:
 	- docker rm -f taskcreator-liberty
 	@echo "[INFO] Container removed (if it existed)"
 
-smoke: up
-    @docker exec taskcreator-liberty sh -c 'python3 /app/smoke.py'
+test: up
+    @docker exec {{APP_NAME}} sh -c 'python3 /app/smoke.py'
 
 local:
 	./mvnw clean package liberty:run

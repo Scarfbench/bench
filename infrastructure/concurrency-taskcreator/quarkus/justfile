@@ -1,45 +1,36 @@
-APP_NAME := "taskcreator-quarkus"
-IMAGE := "taskcreator-quarkus:latest"
+### TaskCreator (Quarkus-only) Justfile
+APP_NAME       := "taskcreator-quarkus"
+QUARKUS_IMAGE   := "taskcreator-quarkus:latest"
+QUARKUS_PORT    := "9080"               # Quarkus internal HTTP
+HOST_PORT      := "10022"               # Host port to map to Quarkus internal HTTP
 
-_default: help
+build:
+	docker build -f Dockerfile -t {{QUARKUS_IMAGE}} .
+	@echo "[INFO] Built image: {{QUARKUS_IMAGE}}"
 
-help:
-	@echo "Targets: up, test, logs, down, clean";
+rebuild:
+	docker build --no-cache -f Dockerfile -t {{QUARKUS_IMAGE}} .
+	@echo "[INFO] Rebuilt image (no cache): {{QUARKUS_IMAGE}}"
 
-# up: build jar, build image, run container
-up:
-	mvn -q -DskipTests clean package
-	docker build -t {{IMAGE}} .
-	docker run --rm -d -p 8080:8080 --name {{APP_NAME}} {{IMAGE}}
-	@echo "Container started: http://localhost:8080/"
-
-# test: run smoke test (starts container if missing)
-test:
-	@if ! docker ps --all --quiet --filter name=^/{{APP_NAME}}$ | grep -q .; then \
-		echo "[INFO] Container not present; building & starting"; \
-		just up; \
-		sleep 5; \
-	else \
-		if ! docker ps --quiet --filter name=^/{{APP_NAME}}$ | grep -q .; then \
-			echo "[INFO] Container exists but not running; starting"; \
-			docker start {{APP_NAME}} >/dev/null; \
-			sleep 3; \
-		else \
-			echo "[INFO] Using existing running container"; \
-			sleep 2; \
-		fi; \
+up: build
+	@if docker ps --all --quiet --filter name=^/taskcreator-quarkus$ | grep -q .; then \
+		echo "[INFO] Removing existing container"; \
+		docker rm -f taskcreator-quarkus >/dev/null; \
 	fi
-	( \
-	  BASE_URL=${BASE_URL:-http://localhost:8080}; \
-	  echo "[INFO] Running smoke: BASE_URL=$BASE_URL"; \
-	  BASE_URL="$BASE_URL" python3 smoke.py; \
-	)
+	docker run -d --name taskcreator-quarkus -p {{HOST_PORT}}:{{QUARKUS_PORT}} {{QUARKUS_IMAGE}}
+	@echo "[INFO] Started taskcreator-quarkus, waiting for app to start..."
+	@until docker logs taskcreator-quarkus 2>&1 | grep -q '\"loggerName\":\"io.quarkus\".*started in .*Listening on:'; do sleep 1; done
+	@echo "[INFO] Quarkus app started, port {{HOST_PORT}} is ready."
 
 logs:
-	docker logs -f {{APP_NAME}}
+	docker logs -f taskcreator-quarkus
 
 down:
-	- docker rm -f {{APP_NAME}}
+	- docker rm -f taskcreator-quarkus
+	@echo "[INFO] Container removed (if it existed)"
 
-clean: down
-	mvn -q clean
+test: up
+    @docker exec {{APP_NAME}} sh -c 'python3 /app/smoke.py'
+
+local:
+	./mvnw clean package quarkus:run

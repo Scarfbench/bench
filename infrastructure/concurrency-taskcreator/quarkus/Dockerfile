@@ -1,25 +1,22 @@
-# Simple single-stage build (larger image, but straightforward)
-FROM maven:3.9.9-eclipse-temurin-17
+FROM eclipse-temurin:21-jdk
+
+USER root
+RUN apt-get update && apt-get install -y python3 curl && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -u 1001 liberty
+
+USER liberty
 WORKDIR /app
 
-# Copy build definition first for dependency layer caching
-COPY pom.xml .
-RUN --mount=type=cache,target=/root/.m2 mvn -q -DskipTests dependency:go-offline
+# Copy all project files
+COPY --chown=1001:1001 pom.xml .
+COPY --chown=1001:1001 .mvn .mvn
+COPY --chown=1001:1001 mvnw .
+COPY --chown=1001:1001 src src
+COPY --chown=1001:1001 smoke.py .
 
-# Copy sources and build
-COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 mvn -q -DskipTests package
+RUN chmod +x mvnw
 
-ENV VERBOSE=1
+EXPOSE 9080
 
-# Copy Python smoke test utility (optional use inside container)
-RUN apt-get update -qq \
-	&& apt-get install -y -qq --no-install-recommends python3 \
-	&& rm -rf /var/lib/apt/lists/*
-COPY smoke.py ./smoke.py
-RUN chmod +x ./smoke.py
-
-EXPOSE 8080
-
-# Run the assembled Quarkus jar from the quarkus-app directory
-ENTRYPOINT ["sh","-c","java -jar target/quarkus-app/quarkus-run.jar"]
+# Default command matches your local workflow
+CMD ["./mvnw", "clean", "package", "quarkus:run"]
