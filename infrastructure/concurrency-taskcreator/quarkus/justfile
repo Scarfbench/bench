@@ -1,0 +1,45 @@
+APP_NAME := "taskcreator-quarkus"
+IMAGE := "taskcreator-quarkus:latest"
+
+_default: help
+
+help:
+	@echo "Targets: up, test, logs, down, clean";
+
+# up: build jar, build image, run container
+up:
+	mvn -q -DskipTests clean package
+	docker build -t {{IMAGE}} .
+	docker run --rm -d -p 8080:8080 --name {{APP_NAME}} {{IMAGE}}
+	@echo "Container started: http://localhost:8080/"
+
+# test: run smoke test (starts container if missing)
+test:
+	@if ! docker ps --all --quiet --filter name=^/{{APP_NAME}}$ | grep -q .; then \
+		echo "[INFO] Container not present; building & starting"; \
+		just up; \
+		sleep 5; \
+	else \
+		if ! docker ps --quiet --filter name=^/{{APP_NAME}}$ | grep -q .; then \
+			echo "[INFO] Container exists but not running; starting"; \
+			docker start {{APP_NAME}} >/dev/null; \
+			sleep 3; \
+		else \
+			echo "[INFO] Using existing running container"; \
+			sleep 2; \
+		fi; \
+	fi
+	( \
+	  BASE_URL=${BASE_URL:-http://localhost:8080}; \
+	  echo "[INFO] Running smoke: BASE_URL=$BASE_URL"; \
+	  BASE_URL="$BASE_URL" python3 smoke.py; \
+	)
+
+logs:
+	docker logs -f {{APP_NAME}}
+
+down:
+	- docker rm -f {{APP_NAME}}
+
+clean: down
+	mvn -q clean
