@@ -2,9 +2,9 @@ FROM eclipse-temurin:21-jdk
 
 USER root
 RUN apt-get update && apt-get install -y python3 curl && rm -rf /var/lib/apt/lists/*
-RUN useradd -m -u 1001 quarkus
+RUN useradd -m -u 1001 springboot
 
-USER quarkus
+USER springboot
 WORKDIR /app
 
 # Copy all project files
@@ -18,4 +18,5 @@ RUN chmod +x mvnw
 
 EXPOSE 9080
 
-CMD ["./mvnw", "clean", "package", "quarkus:run"]
+# Default command matches your local workflow
+CMD ["./mvnw", "clean", "package", "spring-boot:run"]

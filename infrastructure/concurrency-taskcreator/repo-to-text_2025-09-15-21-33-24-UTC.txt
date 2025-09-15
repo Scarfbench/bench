@@ -1,0 +1,358 @@
+<repo-to-text>
+Directory: taskcreator
+
+Directory Structure:
+<directory_structure>
+.
+spring/src/main/java/jakarta/tutorial/taskcreator
+├── spring/src/main/java/jakarta/tutorial/taskcreator/InfoEndpoint.java
+├── spring/src/main/java/jakarta/tutorial/taskcreator/Task.java
+├── spring/src/main/java/jakarta/tutorial/taskcreator/TaskCreatorBean.java
+├── spring/src/main/java/jakarta/tutorial/taskcreator/TaskRestPoster.java
+├── spring/src/main/java/jakarta/tutorial/taskcreator/TaskService.java
+└── spring/src/main/java/jakarta/tutorial/taskcreator/TaskUpdateEvents.java
+
+</directory_structure>
+
+<content full_path="TaskRestPoster.java">
+package jakarta.tutorial.taskcreator;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import org.jboss.logging.Logger;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+/** Simple REST poster to avoid bringing in heavy client. */
+@ApplicationScoped
+public class TaskRestPoster {
+    private static final Logger log = Logger.getLogger(TaskRestPoster.class);
+
+    public void post(String msg) throws IOException {
+        URL url = new URL("http://localhost:8080/taskinfo");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Content-Type", "text/html; charset=utf-8");
+        byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
+        conn.setFixedLengthStreamingMode(bytes.length);
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(bytes);
+        }
+        int code = conn.getResponseCode();
+        if (code >= 300) {
+            log.warnf("Non-success response posting task update: %d", code);
+        }
+        conn.disconnect();
+    }
+}
+
+</content>
+
+<content full_path="TaskCreatorBean.java">
+package jakarta.tutorial.taskcreator;
+
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import java.io.Serializable;
+import java.util.Set;
+
+@Named("taskCreatorBean")
+@SessionScoped
+public class TaskCreatorBean implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    @Inject
+    TaskService taskService;
+
+    private String taskMessages = "";
+    private String taskType = "IMMEDIATE";
+    private String taskName = "";
+    private String periodicTask = "";
+
+    public String getTaskMessages() {
+        return taskService.getInfoField();
+    }
+
+    public void setTaskMessages(String msg) {
+        this.taskMessages = msg;
+    }
+
+    public String getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(String t) {
+        this.taskType = t;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String n) {
+        this.taskName = n;
+    }
+
+    public String getPeriodicTask() {
+        return periodicTask;
+    }
+
+    public void setPeriodicTask(String t) {
+        this.periodicTask = t;
+    }
+
+    public Set<String> getPeriodicTasks() {
+        return taskService.getPeriodicTasks();
+    }
+
+    public void submitTask() {
+        if (!taskService.getPeriodicTasks().contains(taskName)) {
+            Task task = new Task(taskName, taskType);
+            taskService.submitTask(task, taskType);
+            taskType = "IMMEDIATE";
+            taskName = "";
+        }
+    }
+
+    public void cancelTask() {
+        taskService.cancelPeriodicTask(periodicTask);
+    }
+
+    public void clearInfoField() {
+        taskService.clearInfoField();
+    }
+}
+
+</content>
+
+<content full_path="Task.java">
+package jakarta.tutorial.taskcreator;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+/**
+ * Adapted Task runnable. Posts updates to REST endpoint using simple client.
+ */
+@Dependent
+public class Task implements Runnable {
+    private static final Logger log = Logger.getLogger(Task.class);
+    private static final String WS_URL = "http://localhost:8080/taskinfo";
+
+    private final String name;
+    private final String type;
+    private final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    private int counter = 1;
+
+    @Inject
+    TaskRestPoster restPoster;
+
+    public Task() {
+        this.name = "unknown";
+        this.type = "IMMEDIATE";
+    }
+
+    public Task(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
+    @Override
+    public void run() {
+        if ("PERIODIC".equals(type))
+            sendToWebService("started run #" + counter);
+        else
+            sendToWebService("started");
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        if ("PERIODIC".equals(type))
+            sendToWebService("finished run #" + (counter++));
+        else
+            sendToWebService("finished");
+    }
+
+    private void sendToWebService(String details) {
+        String time = dateFormat.format(Calendar.getInstance().getTime());
+        String msg = time + " - " + type + " Task " + name + " " + details;
+        try {
+            restPoster.post(msg);
+        } catch (Exception e) {
+            log.errorf(e, "Failed posting task update: %s", msg);
+        }
+    }
+
+    public String getName() {
+        return name;
+    }
+}
+
+</content>
+
+<content full_path="TaskUpdateEvents.java">
+package jakarta.tutorial.taskcreator;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
+
+/** Helper to decouple direct injection of Event<String>. */
+@ApplicationScoped
+public class TaskUpdateEvents {
+    @Inject
+    Event<String> event;
+
+    public void fire(String name) {
+        event.fire(name);
+    }
+}
+
+</content>
+
+<content full_path="TaskService.java">
+package jakarta.tutorial.taskcreator;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import org.jboss.logging.Logger;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.*;
+
+/**
+ * Replacement for the original EJB. Uses standard executors managed inside an
+ * application scoped bean. Provides REST endpoint for task updates.
+ */
+@ApplicationScoped
+@Path("/taskinfo")
+public class TaskService {
+
+    private static final Logger log = Logger.getLogger(TaskService.class);
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+
+    private final Map<String, ScheduledFuture<?>> periodicTasks = new ConcurrentHashMap<>();
+    private volatile String infoField = "";
+
+    @Inject
+    TaskUpdateEvents events;
+
+    public void submitTask(Task task, String type) {
+        switch (type) {
+            case "IMMEDIATE" -> executor.submit(task);
+            case "DELAYED" -> scheduler.schedule(task, 3, TimeUnit.SECONDS);
+            case "PERIODIC" -> {
+                ScheduledFuture<?> fut = scheduler.scheduleAtFixedRate(task, 0, 8, TimeUnit.SECONDS);
+                periodicTasks.put(task.getName(), fut);
+            }
+        }
+    }
+
+    public void cancelPeriodicTask(String name) {
+        if (periodicTasks.containsKey(name)) {
+            log.infof("[TaskService] Cancelling task %s", name);
+            periodicTasks.get(name).cancel(true);
+            periodicTasks.remove(name);
+            events.fire("tasklist");
+        }
+    }
+
+    @POST
+    @Consumes({ MediaType.TEXT_HTML, MediaType.TEXT_PLAIN })
+    public void addToInfoField(String msg) {
+        infoField = msg + "\n" + infoField;
+        log.infof("[TaskService] Added message %s", msg);
+        events.fire("infobox");
+    }
+
+    public String getInfoField() {
+        return infoField;
+    }
+
+    public void clearInfoField() {
+        infoField = "";
+    }
+
+    public Set<String> getPeriodicTasks() {
+        return periodicTasks.keySet();
+    }
+
+    void shutdown() {
+        periodicTasks.values().forEach(f -> f.cancel(true));
+        executor.shutdownNow();
+        scheduler.shutdownNow();
+    }
+}
+
+</content>
+
+<content full_path="InfoEndpoint.java">
+package jakarta.tutorial.taskcreator;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
+import org.jboss.logging.Logger;
+
+import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+@ApplicationScoped
+@ServerEndpoint("/wsinfo")
+public class InfoEndpoint {
+    private static final Logger log = Logger.getLogger(InfoEndpoint.class);
+    private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
+
+    @OnOpen
+    public void onOpen(Session session) {
+        sessions.add(session);
+        log.info("[InfoEndpoint] Connection opened");
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        sessions.remove(session);
+    }
+
+    @OnMessage
+    public void onMessage(String msg) {
+    }
+
+    public void pushAlert(@Observes String event) {
+        for (Session s : sessions) {
+            if (s.isOpen()) {
+                try {
+                    s.getBasicRemote().sendText(event);
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+}
+
+</content>
+
+</repo-to-text>
