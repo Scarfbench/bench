@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html">
+<h:head><title>Async Mail – Response</title></h:head>
+<h:body>
+    <h:outputText value="Status: #{mailerManagedBean.status}"/>
+    <h:form>
+        <h:commandButton value="Refresh" action="response?faces-redirect=true"/>
+    </h:form>
+    <h:link outcome="index" value="Back"/>
+</h:body>
+</html>
