@@ -5,7 +5,7 @@ LIBERTY_PORT    := "9080"               # Liberty internal HTTP
 HOST_PORT      := "10012"               # Host port to map to Liberty internal HTTP
 
 build:
-	docker build -f Dockerfile -t {{LIBERTY_IMAGE}} .
+	docker build -t {{LIBERTY_IMAGE}} .
 	@echo "[INFO] Built image: {{LIBERTY_IMAGE}}"
 
 rebuild:
@@ -19,7 +19,7 @@ up: build
 	fi
 	docker run -d --name jobs-quarkus -p {{HOST_PORT}}:{{LIBERTY_PORT}} {{LIBERTY_IMAGE}}
 	@echo "[INFO] Started jobs-quarkus, waiting for app to start..."
-	@until docker logs jobs-quarkus 2>&1 | grep -q "CWWKF0011I"; do sleep 1; done
+	@until docker logs jobs-quarkus 2>&1 | grep -q '\"loggerName\":\"io.quarkus\".*started in .*Listening on:'; do sleep 1; done
 	@echo "[INFO] Liberty app started, port {{HOST_PORT}} is ready."
 
 logs:
