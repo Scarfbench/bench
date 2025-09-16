@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 # Run everything as root (per request)
 USER root
@@ -28,12 +28,12 @@ RUN chmod +x mvnw
 # Copy root pom and module poms for dependency layer caching
 COPY pom.xml ./
 COPY async-smtpd/pom.xml async-smtpd/pom.xml
-COPY async-war/pom.xml async-war/pom.xml
-RUN ./mvnw -q -DskipTests dependency:go-offline || true
+COPY async-service/pom.xml async-service/pom.xml
+RUN ./mvnw -DskipTests dependency:go-offline || true
 
 # Copy full module sources
 COPY async-smtpd async-smtpd
-COPY async-war async-war
+COPY async-service async-service
 
 # Copy unified smoke test (includes Playwright logic)
 COPY smoke.py .

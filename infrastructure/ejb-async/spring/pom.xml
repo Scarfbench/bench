@@ -1,91 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (c), Eclipse Foundation, Inc. and its licensors.
-
-    All rights reserved.
-
-    This program and the accompanying materials are made available under the
-    terms of the Eclipse Distribution License v1.0, which is available at
-    https://www.eclipse.org/org/documents/edl-v10.php
-
-    SPDX-License-Identifier: BSD-3-Clause
-
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  
-  <groupId>jakarta.examples.tutorial.ejb.async</groupId>
-  <artifactId>parent</artifactId>
-  <version>10-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>async</name>
-  <description>Jakarta EE EJB Async Example Parent</description>
+    <modelVersion>4.0.0</modelVersion>
 
-  <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Upgraded to Jakarta EE 10 to match server feature jakartaee-10.0 -->
-    <jakarta.jakartaee-api.version>10.0.0</jakarta.jakartaee-api.version>
-    <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
-    <maven.war.plugin.version>3.3.1</maven.war.plugin.version>
-    <failOnMissingWebXml>false</failOnMissingWebXml>
-    <!-- Liberty plugin central version + default skip at aggregator -->
-    <liberty-maven-plugin.version>3.10.3</liberty-maven-plugin.version>
-    <liberty.skip>false</liberty.skip>
-  </properties>
+    <groupId>jakarta.examples.tutorial.ejb.async</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>async (Spring)</name>
+    <description>Spring Boot version of EJB Async Example</description>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>jakarta.platform</groupId>
-        <artifactId>jakarta.jakartaee-api</artifactId>
-        <version>${jakarta.jakartaee-api.version}</version>
-        <scope>provided</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Pin your Spring Boot line here -->
+        <spring-boot.version>3.3.0</spring-boot.version>
+        <maven.compiler.release>17</maven.compiler.release>
+        <compiler-plugin.version>3.13.0</compiler-plugin.version>
+    </properties>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>${maven.compiler.plugin.version}</version>
-          <configuration>
-            <source>11</source>
-            <target>11</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-war-plugin</artifactId>
-          <version>${maven.war.plugin.version}</version>
-          <configuration>
-            <failOnMissingWebXml>false</failOnMissingWebXml>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    <plugins>
-      <!-- Declare Liberty plugin so prefix 'liberty' resolves at root; skipped here -->
-      <plugin>
-        <groupId>io.openliberty.tools</groupId>
-        <artifactId>liberty-maven-plugin</artifactId>
-        <version>${liberty-maven-plugin.version}</version>
-        <configuration>
-          <skip>${liberty.skip}</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
+    <!-- Align dependency versions with Spring Boot's BOM -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.joinfaces</groupId>
+                <artifactId>joinfaces-dependencies</artifactId>
+                <version>5.5.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-  <modules>
-    <module>async-war</module>
-    <module>async-smtpd</module>
-  </modules>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Spring Boot plugin (children will reference it without a version) -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+
+                <!-- Java 17 compiler settings -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${compiler-plugin.version}</version>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <modules>
+        <module>async-service</module>
+        <module>async-smtpd</module>
+    </modules>
 </project>

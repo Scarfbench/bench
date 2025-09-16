@@ -1,6 +1,6 @@
 ### TaskCreator (Liberty-only) Justfile
-APP_NAME       := "ejb-async-liberty"
-LIBERTY_IMAGE   := "ejb-async-liberty:latest"
+APP_NAME       := "async-quarkus"
+LIBERTY_IMAGE   := "async-quarkus:latest"
 LIBERTY_PORT    := "9080"               # Liberty internal HTTP
 HOST_PORT      := "10011"               # Host port to map to Liberty internal HTTP
 
@@ -13,17 +13,17 @@ rebuild:
 	@echo "[INFO] Rebuilt image (no cache): {{LIBERTY_IMAGE}}"
 
 up: build
-	@if docker ps --all --quiet --filter name=^/ejb-async-liberty$ | grep -q .; then \
+	@if docker ps --all --quiet --filter name=^/async-quarkus | grep -q .; then \
 		echo "[INFO] Removing existing container"; \
-		docker rm -f ejb-async-liberty >/dev/null; \
+		docker rm -f async-quarkus >/dev/null; \
 	fi
-	docker run --name ejb-async-liberty -p {{HOST_PORT}}:{{LIBERTY_PORT}} {{LIBERTY_IMAGE}}
+	docker run --name async-quarkus -p {{HOST_PORT}}:{{LIBERTY_PORT}} {{LIBERTY_IMAGE}}
 
 logs:
-	docker logs -f ejb-async-liberty
+	docker logs -f async-quarkus
 
 down:
-	- docker rm -f ejb-async-liberty
+	- docker rm -f async-quarkus
 	@echo "[INFO] Container removed (if it existed)"
 
 test: up
