@@ -9,7 +9,7 @@
     <relativePath/>
   </parent>
 
-  <groupId>jakarta.tutorial</groupId>
+  <groupId>spring.tutorial</groupId>
   <artifactId>hello</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
