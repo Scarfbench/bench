@@ -1,13 +1,13 @@
-package jakarta.tutorial.order.service;
+package quarkus.tutorial.order.service;
 
-import jakarta.tutorial.order.repository.CustomerOrderRepository;
-import jakarta.tutorial.order.repository.LineItemRepository;
-import jakarta.tutorial.order.repository.PartRepository;
-import jakarta.tutorial.order.repository.VendorPartRepository;
-import jakarta.tutorial.order.repository.VendorRepository;
+import quarkus.tutorial.order.repository.CustomerOrderRepository;
+import quarkus.tutorial.order.repository.LineItemRepository;
+import quarkus.tutorial.order.repository.PartRepository;
+import quarkus.tutorial.order.repository.VendorPartRepository;
+import quarkus.tutorial.order.repository.VendorRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import java.util.logging.Logger;
 
 @ApplicationScoped
@@ -25,9 +25,9 @@ public class OrderConfigService {
     @Inject
     private LineItemRepository lineItemRepository;
 
-    @PostConstruct
+    @Transactional
     public void createData() {
-        logger.info("Initializing order data");
+        logger.info("Starting dataset initialization");
 
         // Create Parts
         partRepository.createPart("1234-5678-01", 1, "ABC PART", new java.util.Date(), "PARTQWERTYUIOPASXDCFVGBHNJMKL", null);
@@ -66,6 +66,6 @@ public class OrderConfigService {
         lineItemRepository.addLineItem(orderId, "ABCD-XYZW-FF", 5, 3);
         lineItemRepository.addLineItem(orderId, "1234-5678-01", 1, 15);
 
-        logger.info("Order data initialization completed");
+        logger.info("Order data initialization completed successfully");
     }
 }

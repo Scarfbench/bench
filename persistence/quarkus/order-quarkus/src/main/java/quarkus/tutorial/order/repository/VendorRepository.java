@@ -1,12 +1,13 @@
-package jakarta.tutorial.order.repository;
+package quarkus.tutorial.order.repository;
 
-import jakarta.tutorial.order.entity.Vendor;
+import quarkus.tutorial.order.entity.Vendor;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class VendorRepository {
@@ -15,6 +16,7 @@ public class VendorRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional
     public void createVendor(int vendorId, String name, String address, String contact, String phone) {
         try {
             Vendor vendor = new Vendor(vendorId, name, address, contact, phone);

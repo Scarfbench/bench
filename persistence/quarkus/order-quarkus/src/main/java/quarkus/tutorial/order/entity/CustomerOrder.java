@@ -9,11 +9,12 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package jakarta.tutorial.order.entity;
+package quarkus.tutorial.order.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -24,6 +25,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+
 
 @Entity
 @Table(name="PERSISTENCE_ORDER_CUSTOMERORDER")
@@ -39,7 +41,7 @@ public class CustomerOrder implements java.io.Serializable {
     private Date lastUpdate;
     private int discount;
     private String shipmentInfo;
-    private Collection<LineItem> lineItems;
+    private Collection<LineItem> lineItems = new ArrayList<>();
     
     public CustomerOrder() {
         this.lastUpdate = new Date();

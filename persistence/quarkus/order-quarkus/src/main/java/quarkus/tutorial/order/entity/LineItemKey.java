@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package jakarta.tutorial.order.entity;
+package quarkus.tutorial.order.entity;
 
 import java.io.Serializable;
 

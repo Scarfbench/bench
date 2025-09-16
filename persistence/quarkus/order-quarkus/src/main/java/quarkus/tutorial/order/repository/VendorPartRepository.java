@@ -1,14 +1,15 @@
-package jakarta.tutorial.order.repository;
+package quarkus.tutorial.order.repository;
 
-import jakarta.tutorial.order.entity.Part;
-import jakarta.tutorial.order.entity.PartKey;
-import jakarta.tutorial.order.entity.Vendor;
-import jakarta.tutorial.order.entity.VendorPart;
+import quarkus.tutorial.order.entity.Part;
+import quarkus.tutorial.order.entity.PartKey;
+import quarkus.tutorial.order.entity.Vendor;
+import quarkus.tutorial.order.entity.VendorPart;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Logger;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class VendorPartRepository {
@@ -17,6 +18,7 @@ public class VendorPartRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional
     public void createVendorPart(String partNumber, int revision, String description, double price, int vendorId) {
         try {
             PartKey pkey = new PartKey();

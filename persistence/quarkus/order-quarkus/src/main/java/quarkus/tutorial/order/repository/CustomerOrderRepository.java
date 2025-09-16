@@ -1,11 +1,12 @@
-package jakarta.tutorial.order.repository;
+package quarkus.tutorial.order.repository;
 
-import jakarta.tutorial.order.entity.CustomerOrder;
+import quarkus.tutorial.order.entity.CustomerOrder;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Logger;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class CustomerOrderRepository {
@@ -14,6 +15,7 @@ public class CustomerOrderRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional
     public void createOrder(Integer orderId, char status, int discount, String shipmentInfo) {
         try {
             CustomerOrder order = new CustomerOrder(orderId, status, discount, shipmentInfo);
@@ -34,6 +36,7 @@ public class CustomerOrderRepository {
         }
     }
 
+    @Transactional
     public void removeOrder(Integer orderId) {
         try {
             CustomerOrder order = em.find(CustomerOrder.class, orderId);
@@ -60,6 +63,7 @@ public class CustomerOrderRepository {
         }
     }
 
+    @Transactional
     public void adjustOrderDiscount(int adjustment) {
         try {
             List<CustomerOrder> orders = em.createNamedQuery("findAllOrders", CustomerOrder.class).getResultList();

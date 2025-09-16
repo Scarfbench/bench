@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-package jakarta.tutorial.order.entity;
+package quarkus.tutorial.order.entity;
 
 import java.util.Collection;
 
@@ -21,6 +21,7 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 
 @Entity
 @Table(name="PERSISTENCE_ORDER_VENDOR")
@@ -46,7 +47,7 @@ public class Vendor implements java.io.Serializable {
     private String address;
     private String contact;
     private String phone;
-    private Collection<VendorPart> vendorParts;
+    private Collection<VendorPart> vendorParts = new ArrayList<>();
     
     public Vendor() {}
     

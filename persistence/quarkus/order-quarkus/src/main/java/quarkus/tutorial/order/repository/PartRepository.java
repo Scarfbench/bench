@@ -1,8 +1,8 @@
-package jakarta.tutorial.order.repository;
+package quarkus.tutorial.order.repository;
 
-import jakarta.tutorial.order.entity.Part;
-import jakarta.tutorial.order.entity.PartKey;
-import jakarta.tutorial.order.entity.VendorPart;
+import quarkus.tutorial.order.entity.Part;
+import quarkus.tutorial.order.entity.PartKey;
+import quarkus.tutorial.order.entity.VendorPart;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class PartRepository {
@@ -18,6 +19,7 @@ public class PartRepository {
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional
     public void createPart(String partNumber, int revision, String description,
                           Date revisionDate, String specification, Serializable drawing) {
         try {
@@ -39,6 +41,7 @@ public class PartRepository {
         }
     }
 
+    @Transactional
     public void addPartToBillOfMaterial(String bomPartNumber, int bomRevision, String partNumber, int revision) {
         try {
             PartKey bomKey = new PartKey();
