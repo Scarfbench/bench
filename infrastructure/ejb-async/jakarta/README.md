@@ -1,13 +1,12 @@
-To run the async example, open a terminal in this directory and run the following commands:
-```
-mvn install
-cd async-smtpd
-mvn exec:java
-```
-Launch http://localhost:8080/async-war/
+To test this app, 
 
-To stop the example, press `CTRL+C` in the terminal to close the `async-smtpd` application, then undeploy the `async-war` application, run the following commands:
+```bash
+pip install playwright
+playwright install --with-deps chromium
 ```
-cd ..
-mvn cargo:undeploy
+
+Then run:
+
+```bash
+./smoke.py
 ```

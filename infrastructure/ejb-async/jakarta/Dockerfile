@@ -1,58 +1,43 @@
-# Multi-stage build: Build stage
-FROM eclipse-temurin:11-jdk AS builder
+FROM eclipse-temurin:17-jdk
 
-# Install Maven
-RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+# Run everything as root (per request)
+USER root
 
-# Set working directory
+# Install Python and needed tools (add python3-venv for virtual environment support)
+RUN apt-get update && apt-get install -y python3 python3-venv python3-pip curl && rm -rf /var/lib/apt/lists/*
+
+# Create and activate virtual environment for Python dependencies (PEP 668 safe)
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+# Shared browsers path so Chromium is cached once
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN mkdir -p /ms-playwright && chmod 755 /ms-playwright
+
+# Install Playwright and Chromium dependencies inside venv
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+ && pip install --no-cache-dir playwright==1.47.0 \
+ && playwright install --with-deps chromium
+
 WORKDIR /app
 
-# Copy source code and Maven wrapper
-COPY . .
-
-# Make Maven wrapper executable
+# Copy Maven wrapper first (cache efficient)
+COPY .mvn .mvn
+COPY mvnw .
 RUN chmod +x mvnw
 
-# Build the project
-RUN ./mvnw clean package -DskipTests
+# Copy root pom and module poms for dependency layer caching
+COPY pom.xml ./
+COPY async-smtpd/pom.xml async-smtpd/pom.xml
+COPY async-war/pom.xml async-war/pom.xml
+RUN ./mvnw -q -DskipTests dependency:go-offline || true
 
-# Runtime stage
-FROM eclipse-temurin:11-jre
+# Copy full module sources
+COPY async-smtpd async-smtpd
+COPY async-war async-war
 
-# Install curl and unzip
-RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+# Copy unified smoke test (includes Playwright logic)
+COPY smoke.py .
+RUN chmod +x smoke.py
 
-# Set GlassFish version
-ENV GLASSFISH_VERSION=7.0.16
-
-# Download and install GlassFish
-RUN curl -L -o /tmp/glassfish.zip https://github.com/eclipse-ee4j/glassfish/releases/download/${GLASSFISH_VERSION}/glassfish-${GLASSFISH_VERSION}.zip && \
-    unzip /tmp/glassfish.zip -d /opt && \
-    rm /tmp/glassfish.zip && \
-    mv /opt/glassfish7 /opt/glassfish
-
-# Set environment variables
-ENV GLASSFISH_HOME=/opt/glassfish
-ENV PATH=$PATH:$GLASSFISH_HOME/bin
-
-# Configure the default domain to use port 8080 (it already exists)
-# We don't need to create a new domain, just use the existing one
-
-# Copy the built WAR file from the builder stage
-COPY --from=builder /app/async-war/target/async-war.war $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/
-
-# Expose ports
-EXPOSE 8080 4848 8181
-
-# Create a startup script
-RUN echo '#!/bin/bash\n\
-echo "Starting GlassFish domain1..."\n\
-asadmin start-domain domain1\n\
-echo "GlassFish started successfully"\n\
-echo "Application should be available at http://localhost:8080/async-war/"\n\
-echo "Admin console available at http://localhost:4848/"\n\
-tail -f $GLASSFISH_HOME/glassfish/domains/domain1/logs/server.log' > /start-glassfish.sh && \
-    chmod +x /start-glassfish.sh
-
-# Start GlassFish
-CMD ["/start-glassfish.sh"]
+EXPOSE 9080
+CMD ["python3", "smoke.py"]
