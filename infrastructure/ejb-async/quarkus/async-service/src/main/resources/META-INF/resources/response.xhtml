@@ -3,7 +3,11 @@
       xmlns:h="jakarta.faces.html">
 <h:head><title>Async Mail – Response</title></h:head>
 <h:body>
-    <h:outputText value="Status: #{mailerManagedBean.status}"/>
+    <h:panelGroup>
+        <h:outputText value="Status: " />
+        <h:outputText id="messageStatus" value="#{mailerManagedBean.status}" />
+    </h:panelGroup>
+
     <h:form>
         <h:commandButton value="Refresh" action="response?faces-redirect=true"/>
     </h:form>

@@ -23,6 +23,10 @@
                                          action="index"
                                          value="Cancel"/>
                     </h:panelGroup>
+                    <h:panelGroup>
+                        <h:outputText value="Status: " />
+                        <h:outputText id="messageStatus" value="#{mailerManagedBean.status}" />
+                    </h:panelGroup>
                 </f:facet>
             </h:panelGrid>
         </h:form>

@@ -13,7 +13,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <quarkus.platform.version>3.26.3</quarkus.platform.version>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <compiler-plugin.version>3.13.0</compiler-plugin.version>
         <!-- keep if you still need this elsewhere -->
         <myfaces-quarkus.version>4.0.2</myfaces-quarkus.version>

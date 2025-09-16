@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 # Run everything as root (per request)
 USER root
@@ -29,7 +29,7 @@ RUN chmod +x mvnw
 COPY pom.xml ./
 COPY async-smtpd/pom.xml async-smtpd/pom.xml
 COPY async-service/pom.xml async-service/pom.xml
-RUN ./mvnw -q -DskipTests dependency:go-offline || true
+RUN ./mvnw -DskipTests dependency:go-offline || true
 
 # Copy full module sources
 COPY async-smtpd async-smtpd
