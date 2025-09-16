@@ -47,6 +47,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-ear-plugin</artifactId>
         <configuration>
+          <outputFileNameMapping>@{artifactId}@.@{extension}@</outputFileNameMapping>
           <defaultLibBundleDir>lib</defaultLibBundleDir>
           <modules>
             <ejbModule>
@@ -68,56 +69,10 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>jakarta.examples.tutorial.cart.client.CartClient</mainClass>
+              <mainClass>jakarta.tutorial.cart.client.CartClient</mainClass>
             </manifest>
           </archive>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>get-client-stubs</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${glassfish.home}/bin/asadmin${glassfish.executables.suffix}</executable>
-              <successCodes>
-                <successCode>0</successCode>
-                <successCode>1</successCode>
-              </successCodes>
-              <!-- optional -->
-              <arguments>
-                <argument>get-client-stubs</argument>
-                <argument>--appname</argument>
-                <argument>${project.build.finalName}</argument>
-                <argument>./target</argument>
-              </arguments>
-            </configuration>
-          </execution>
-          <execution>
-            <id>run-appclient</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>${glassfish.home}/glassfish/bin/appclient${glassfish.executables.suffix}</executable>
-              <successCodes>
-                <successCode>0</successCode>
-                <successCode>1</successCode>
-              </successCodes>
-              <!-- optional -->
-              <arguments>
-                <argument>-client</argument>
-                <argument>./target/${project.build.finalName}Client.jar</argument>
-              </arguments>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
