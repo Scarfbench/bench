@@ -20,16 +20,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JoinFaces: MyFaces integration for Spring Boot -->
+        <!-- JoinFaces: MyFaces 4 integration for Spring Boot 3 -->
         <dependency>
-            <groupId>org.apache.myfaces.core</groupId>
-            <artifactId>myfaces-spring-boot-starter</artifactId>
-            <version>4.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.myfaces.core</groupId>
-            <artifactId>myfaces-api</artifactId>
-            <version>4.0.2</version>
+            <groupId>org.joinfaces</groupId>
+            <artifactId>myfaces4-spring-boot-starter</artifactId>
+            <version>5.5.0</version>
         </dependency>
 
         <!-- Jakarta Mail impl (Eclipse Angus) -->
