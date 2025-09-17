@@ -1,58 +1,31 @@
-package jakarta.tutorial.web.dukeetf;
+package quarkus.tutorial.web.dukeetf;
 
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.inject.Inject;
-import jakarta.servlet.AsyncContext;
-import jakarta.servlet.AsyncEvent;
-import jakarta.servlet.AsyncListener;
-import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
+import quarkus.tutorial.web.dukeetf.PriceVolumeService;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet(urlPatterns = {"/dukeetf"}, asyncSupported = true)
-public class DukeETFServlet extends HttpServlet {
-    private static final Logger logger = Logger.getLogger("DukeETFServlet");
-    private static final long serialVersionUID = 2114153638027156979L;
+@Path("/dukeetf")
+public class DukeETFServlet {
+
+    private static final Logger logger = Logger.getLogger("DukeETFResource");
 
     @Inject
     PriceVolumeService service;
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        logger.log(Level.INFO, "Servlet initialized.");
-    }
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public CompletableFuture<Response> getETFData() {
+        CompletableFuture<Response> future = new CompletableFuture<>();
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        response.setContentType("text/html"); // keep original type
-        final AsyncContext acontext = request.startAsync();
-        acontext.setTimeout(0);
+        service.register(future);
 
-        acontext.addListener(new AsyncListener() {
-            @Override
-            public void onComplete(AsyncEvent ae) {
-                logger.log(Level.INFO, "Connection closed.");
-            }
-            @Override
-            public void onTimeout(AsyncEvent ae) {
-                logger.log(Level.INFO, "Connection timeout.");
-            }
-            @Override
-            public void onError(AsyncEvent ae) {
-                logger.log(Level.INFO, "Connection error.");
-            }
-            @Override
-            public void onStartAsync(AsyncEvent ae) { }
-        });
+        logger.log(Level.INFO, "Connection open (queued).");
 
-        // hand the pending response to the scheduler service
-        service.register(acontext);
+        return future;
     }
 }
