@@ -26,6 +26,10 @@
 
   <name>cart-ejb</name>
 
+  <properties>
+    <jakarta.ejb.version>3.2</jakarta.ejb.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
@@ -39,12 +43,8 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-ejb-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
         <configuration>
-          <skip>true</skip>
+            <ejbVersion>${jakarta.ejb.version}</ejbVersion>
         </configuration>
       </plugin>
     </plugins>
