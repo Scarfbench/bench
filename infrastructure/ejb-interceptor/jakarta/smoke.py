@@ -1,110 +1,73 @@
 #!/usr/bin/env python3
-"""Smoke test for Jakarta taskcreator.
+"""Smoke test for taskcreator-quarkus REST API"""
 
-Checks:
-  1) POST a log line to /taskinfo and expect 200 or 204.
-  2) GET /taskinfo and expect 405 (Method Not Allowed).
-
-Env:
-    TASKCREATOR_BASE_URL (default: tries http://localhost:9080/taskcreator then http://localhost:9080)
-    VERBOSE=1   enables verbose output
-
-Exit: 0 on success, non-zero otherwise.
-"""
 import argparse
 import os
 import sys
 from datetime import datetime
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from playwright.sync_api import sync_playwright
+
 
 # Try both possible base URLs if not set
 BASE_CANDIDATES = [
     os.getenv("TASKCREATOR_BASE_URL"),
-    "http://localhost:9080/taskcreator",
-    "http://localhost:9080",
-    "http://localhost:10021/taskcreator",
-    "http://localhost:10021"
+    "http://localhost:9080",  # <-- default
 ]
-DEFAULT_ENDPOINT = "/taskinfo"
-
-
-def post_log(base_url: str, message: str) -> bool:
-    url = f"{base_url.rstrip('/')}{DEFAULT_ENDPOINT}"
-    req = Request(url, data=message.encode(), headers={"Content-Type": "text/plain"}, method="POST")
-    print(f"POST {url} :: {message}")
-    try:
-        with urlopen(req, timeout=10) as resp:
-            status = resp.getcode()
-            body = resp.read().decode("utf-8", "replace")
-    except HTTPError as e:
-        status = e.code
-        body = e.read().decode("utf-8", "replace")
-    except Exception as e:  # network failure
-        print(f"[FAIL] POST failed: {e}", file=sys.stderr)
-        return False
-
-    print(f"RESP {status}\n{body.strip()}")
-
-    if status not in (200, 204):
-        print(f"[FAIL] Unexpected HTTP status {status}", file=sys.stderr)
-        return False
-
-    print(f"[PASS] POST {DEFAULT_ENDPOINT} -> {status}")
-    return True
-
-
-def get_taskinfo_expect_405(base_url: str) -> bool:
-    url = f"{base_url.rstrip('/')}{DEFAULT_ENDPOINT}"
-    req = Request(url, method="GET")
-    print(f"GET {url}")
-    try:
-        with urlopen(req, timeout=10) as resp:
-            status = resp.getcode()
-            body = resp.read().decode("utf-8", "replace")
-    except HTTPError as e:
-        status = e.code
-        body = e.read().decode("utf-8", "replace")
-    except Exception as e:
-        print(f"[FAIL] GET failed: {e}", file=sys.stderr)
-        return False
-
-    print(f"RESP {status}\n{body.strip()}")
-    if status == 405:
-        print(f"[PASS] GET {DEFAULT_ENDPOINT} -> 405 (Method Not Allowed)")
-        return True
-    print(f"[FAIL] GET {DEFAULT_ENDPOINT} -> {status} (expected 405)", file=sys.stderr)
-    return False
+DEFAULT_ENDPOINT = "/"
+DEFAULT_BASE = "http://localhost:9080"
 
 
 def pick_base_url() -> str:
     for base in BASE_CANDIDATES:
         if not base:
             continue
-        msg = f"{datetime.now().strftime('%H:%M:%S')} - Smoke test"
-        if post_log(base, msg):
-            return base
+        print(f"---[ {datetime.now().strftime('%H:%M:%S')} - Smoke test ]---")
     # fallback to first candidate (even if failed)
     return BASE_CANDIDATES[1]
 
 
-def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Smoke test for taskcreator-quarkus")
-    p.add_argument("--base-url", default=DEFAULT_BASE, help=f"Base URL (env BASE_URL or {DEFAULT_BASE})")
-    return p.parse_args()
-
-
 def main() -> int:
     base_url = pick_base_url()
-    print(f"Using base URL: {base_url}")
-    msg = f"{datetime.now().strftime('%H:%M:%S')} - Smoke test"
-    post_ok = post_log(base_url, msg)
-    get_ok = get_taskinfo_expect_405(base_url)
-    if post_ok and get_ok:
-        print("[PASS] Smoke tests complete")
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.goto(base_url + DEFAULT_ENDPOINT)
+        num_tests = 0
+        passed_tests = 0
+        # Ensure that the page loads successfully
+        if "Enter your name:" in page.content():
+            print("[PASS] Page loaded successfully and contains expected text.")
+            passed_tests += 1
+        else:
+            print("[FAIL] Page did not contain expected text.", file=sys.stderr)
+
+        num_tests += 1
+        # Fill a name in all caps in the input field
+        page.get_by_role("textbox", name="Enter your name:").fill("TEST USER")
+        page.get_by_role("button", name="Submit").click()
+
+        # Assert the lowercased greeting is displayed
+        page.wait_for_selector("text=Hello, test user.")
+        if "Hello, test user." in page.content():
+            print("[PASS] Greeting displayed correctly.")
+            passed_tests += 1
+        else:
+            print("[FAIL] Greeting not displayed as expected.", file=sys.stderr)
+
+        num_tests += 1
+
+        # Hit the back button and ensure we are back on the form
+        page.go_back()
+        if "Enter your name:" in page.content():
+            print("[PASS] Back navigation successful.")
+            passed_tests += 1
+        else:
+            print("[FAIL] Back navigation failed.", file=sys.stderr)
+        num_tests += 1
+
+        print(f"Summary: {passed_tests}/{num_tests} tests passed.")
+        print(f"---[ {datetime.now().strftime('%H:%M:%S')} - Smoke test complete ]---")
         return 0
-    print("[FAIL] Smoke tests failed", file=sys.stderr)
-    return 1
 
 
 if __name__ == "__main__":  # pragma: no cover

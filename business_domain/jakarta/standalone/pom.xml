@@ -15,25 +15,32 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>jakarta.examples.tutorial.ejb</groupId>
-    <artifactId>parent</artifactId>
-    <version>10-SNAPSHOT</version>
-  </parent>
-
+  <groupId>jakarta.examples.tutorial.ejb</groupId>
   <artifactId>standalone</artifactId>
+  <version>10-SNAPSHOT</version>
+  
   <packaging>ejb</packaging>
-
   <name>standalone</name>
 
-  <!-- Temporarily skipping test since glassfish-embedded-all is not yet 
-    available in maven central. Remove this when it is available -->
   <properties>
-    <skipTests>true</skipTests>
+    <junit.version>4.13.1</junit.version>
+    <glassfish.embedded.version>6.2.5</glassfish.embedded.version>
     <maven.surefire.plugin.version>3.0.0-M5</maven.surefire.plugin.version>
+    <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
+    <maven.ejb.plugin.version>3.1.0</maven.ejb.plugin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jakarta.jakartaee-api.version>9.0.0</jakarta.jakartaee-api.version>
+    <jakarta.ejb.version>3.2</jakarta.ejb.version>
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+      <version>${jakarta.jakartaee-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -49,23 +56,29 @@
   </dependencies>
 
   <build>
+    <finalName>${project.artifactId}</finalName>
     <plugins>
       <plugin>
-        <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <skip>true</skip>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
-      <!-- Temporarily skipping test since glassfish-embedded-all is not 
-        yet available in maven central. Remove this when it is available -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-ejb-plugin</artifactId>
+        <version>${maven.ejb.plugin.version}</version>
+        <configuration>
+            <ejbVersion>${jakarta.ejb.version}</ejbVersion>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven.surefire.plugin.version}</version>
-        <configuration>
-          <skipTests>${skipTests}</skipTests>
-        </configuration>
       </plugin>
     </plugins>
   </build>
