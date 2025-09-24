@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1ee7126b-78f1-470b-be83-9e9fc3ae3ab8" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/.dockerignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/.mvn/wrapper/maven-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejb-async/jakarta/.mvn/wrapper/maven-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejb-async/jakarta/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/justfile" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejb-async/jakarta/justfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/mvnw" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejb-async/jakarta/mvnw" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejb-async/jakarta/mvnw.cmd" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejb-async/jakarta/mvnw.cmd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smoke.py" beforeDir="false" afterPath="$PROJECT_DIR$/smoke.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/resources/index.xhtml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/resources/index.xhtml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,29 +26,36 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$MAVEN_REPOSITORY$/org/eclipse/microprofile/context-propagation/microprofile-context-propagation-api/1.3/microprofile-context-propagation-api-1.3.jar!/org/eclipse/microprofile/context/ManagedExecutor.class" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="32ktyAvlOpcgLrXwdOOcbKy5VvU" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources/META-INF/resources" />
@@ -123,10 +128,16 @@
       <option name="presentableId" value="Default" />
       <updated>1757976649679</updated>
       <workItem from="1757976650760" duration="5534000" />
+      <workItem from="1758136278948" duration="1736000" />
+      <workItem from="1758673564128" duration="315000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

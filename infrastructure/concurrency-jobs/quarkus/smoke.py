@@ -10,10 +10,12 @@ Checks:
 Exit codes:
   0 success, non-zero on first failure encountered.
 """
+
 import os
 import re
 import sys
 import time
+from typing import Union
 from datetime import datetime
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
@@ -25,8 +27,9 @@ VERBOSE = os.getenv("VERBOSE") == "1"
 
 CANDIDATES = [
     os.getenv("JOBS_BASE_URL"),
+    "http://localhost:8080/jobs/webapi/JobService/",
     "http://localhost:9080/jobs/webapi/JobService/",
-    "http://localhost:10012/jobs/webapi/JobService/"
+    "http://localhost:10012/jobs/webapi/JobService/",
 ]
 
 
@@ -73,7 +76,7 @@ def try_get_token(base: str):
     return token
 
 
-def discover_base() -> str:
+def discover_base() -> Union[str, None]:
     for cand in CANDIDATES:
         if not cand:
             continue
