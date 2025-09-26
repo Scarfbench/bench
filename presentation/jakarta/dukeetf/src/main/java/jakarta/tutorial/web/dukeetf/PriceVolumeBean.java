@@ -41,7 +41,7 @@ public class PriceVolumeBean {
         logger.log(Level.INFO, "Initializing EJB.");
         random = new Random();
         servlet = null;
-        tservice.createIntervalTimer(1000, 1000, new TimerConfig());
+        tservice.createIntervalTimer(1000, 1000, new TimerConfig(null, false));
     }
     
     public void registerServlet(DukeETFServlet servlet) {

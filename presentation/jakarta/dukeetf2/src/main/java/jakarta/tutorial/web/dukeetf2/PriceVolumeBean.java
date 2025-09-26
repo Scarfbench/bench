@@ -39,7 +39,7 @@ public class PriceVolumeBean {
         /* Initialize the EJB and create a timer */
         logger.log(Level.INFO, "Initializing EJB.");
         random = new Random();
-        tservice.createIntervalTimer(1000, 1000, new TimerConfig());
+        tservice.createIntervalTimer(1000, 1000, new TimerConfig(null, false));
     }
     
     @Timeout

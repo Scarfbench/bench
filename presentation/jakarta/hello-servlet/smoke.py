@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Smoke test for Spring Boot Hello Servlet application.
+Smoke test for Hello Servlet application.
 
 Checks:
   1) GET /greeting?name=<NAME> returns 200 and includes <NAME> in the body.

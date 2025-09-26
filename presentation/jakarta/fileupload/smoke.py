@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Smoke test for Spring Boot FileUpload application.
+Smoke test for FileUpload application.
 
 Checks:
   1) GET /index.html returns 200.

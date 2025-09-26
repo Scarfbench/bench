@@ -1,39 +1,48 @@
-<!doctype html>
-<html lang="en">
+<!--
+
+    Copyright (c), Eclipse Foundation, Inc. and its licensors.
+
+    All rights reserved.
+
+    This program and the accompanying materials are made available under the
+    terms of the Eclipse Distribution License v1.0, which is available at
+    https://www.eclipse.org/org/documents/edl-v10.php
+
+    SPDX-License-Identifier: BSD-3-Clause
+
+-->
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="utf-8">
   <title>Duke's WebSocket ETF</title>
-  <link rel="stylesheet" href="/css/default.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { margin: 2rem; font-family: Georgia, serif; }
-    h1 { font-size: 4rem; margin-bottom: 2rem; }
-    .grid { display: grid; grid-template-columns: 200px 1fr; row-gap: 2rem; column-gap: 3rem; align-items: baseline; }
-    .ticker { font-size: 3rem; font-weight: 700; }
-    .value { font-size: 2rem; }
-  </style>
+  <link rel="stylesheet" type="text/css" href="/css/default.css" />
+  <script type="text/javascript">
+      var wsocket;
+      function connect() {
+          wsocket = new WebSocket("ws://localhost:8080/dukeetf");
+          wsocket.onmessage = onMessage;
+      }
+      function onMessage(evt) {
+          var arraypv = evt.data.split("/");
+          document.getElementById("price").innerHTML = arraypv[0];
+          document.getElementById("volume").innerHTML = arraypv[1];
+      }
+      window.addEventListener("load", connect, false);
+  </script>
 </head>
 <body>
-  <h1>Duke's WebSocket ETF</h1>
-  <div class="grid">
-    <div>Ticker</div><div>Price <span id="price" class="value">--.--</span></div>
-    <div class="ticker">DKEJ</div><div>Volume <span id="volume" class="value">--</span></div>
-  </div>
-
-  <script>
-    const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/dukeetf';
-    const ws = new WebSocket(wsUrl);
-    ws.onmessage = (e) => {
-      const parts = e.data.split('/');
-      if (parts.length === 2) {
-        document.getElementById('price').textContent = parts[0].trim();
-        document.getElementById('volume').textContent = parts[1].trim();
-      }
-    };
-    ws.onclose = () => {
-      document.getElementById('price').textContent = '--.--';
-      document.getElementById('volume').textContent = '--';
-    };
-  </script>
+    <h1>Duke's WebSocket ETF</h1>
+    <table>
+        <tr>
+            <td style="width:100px">Ticker</td>
+            <td style="text-align:center">Price</td>
+            <td id="price" style="font-size:24pt;font-weight:bold;">--.--</td>
+        </tr>
+        <tr>
+            <td style="font-size:18pt;font-weight:bold;width:100px">DKEJ</td>
+            <td style="text-align:center">Volume</td>
+            <td id="volume" align="right">--</td>
+        </tr>
+    </table>
 </body>
 </html>
