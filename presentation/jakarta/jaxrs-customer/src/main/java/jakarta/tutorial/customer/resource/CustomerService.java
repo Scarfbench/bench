@@ -197,11 +197,15 @@ public class CustomerService {
     private Customer findById(String customerId) {
         Customer customer = null;
         try {
-            customer = em.find(Customer.class, customerId);
+            int id = Integer.parseInt(customerId);
+            customer = em.find(Customer.class, id);
             return customer;
+        } catch (NumberFormatException ex) {
+            logger.log(Level.WARNING, 
+                    "Invalid customer ID format: {0}", customerId);
         } catch (Exception ex) {
             logger.log(Level.WARNING, 
-                    "Couldn't fine customer with ID of {0}", customerId);
+                    "Couldn't find customer with ID of {0}", customerId);
         }
         return customer;
     }
@@ -226,11 +230,19 @@ public class CustomerService {
     private boolean remove(String customerId) {
         Customer customer;
         try {
-            customer = em.find(Customer.class, customerId);
+            int id = Integer.parseInt(customerId);
+            customer = em.find(Customer.class, id);
+            if (customer == null) {
+                logger.log(Level.WARNING, "Customer with ID {0} not found", customerId);
+                return false;
+            }
             Address address = customer.getAddress();
             em.remove(address);
             em.remove(customer);
             return true;
+        } catch (NumberFormatException ex) {
+            logger.log(Level.WARNING, "Invalid customer ID format: {0}", customerId);
+            return false;
         } catch (Exception ex) {
             logger.log(Level.WARNING, "Couldn't remove customer with ID {0}", customerId);
             return false;

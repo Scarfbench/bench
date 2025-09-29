@@ -13,6 +13,7 @@ package jakarta.tutorial.customer.data;
 
 import java.io.Serializable;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
