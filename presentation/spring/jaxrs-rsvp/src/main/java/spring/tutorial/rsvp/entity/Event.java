@@ -33,6 +33,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 
 @NamedQuery(
@@ -68,6 +69,7 @@ public class Event implements Serializable {
     @OneToMany(mappedBy = "event")
     @XmlElementWrapper(name = "responses")
     @XmlElement(name = "response")
+    @JsonManagedReference
     private List<Response> responses;
 
     public Event() {

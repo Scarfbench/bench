@@ -9,7 +9,7 @@ Checks:
   5) Test bot response
 
 Environment:
-  WEBSOCKETBOT_BASE   Base app URL (default: http://localhost:8080/websocketbot-10-SNAPSHOT)
+  WEBSOCKETBOT_BASE   Base app URL (default: http://localhost:8080/)
   VERBOSE=1           Verbose logging
 
 Exit codes:
@@ -30,7 +30,7 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
-BASE = os.getenv("WEBSOCKETBOT_BASE", "http://localhost:8080/websocketbot-10-SNAPSHOT").rstrip("/")
+BASE = os.getenv("WEBSOCKETBOT_BASE", "http://localhost:8080").rstrip("/")
 VERBOSE = os.getenv("VERBOSE") == "1"
 HTTP_TIMEOUT = 12
 WS_TIMEOUT = 10
@@ -117,18 +117,24 @@ def _ws_connect(url: str, timeout: int = WS_TIMEOUT):
     return raw, leftover  
 
 def _ws_send_text(sock, message: str):
-    """Send a text frame."""
+    """Send a text frame (client frames must be masked)."""
     payload = message.encode('utf-8')
     length = len(payload)
     
-    if length < 126:
-        header = bytes([0x81, length])  
-    elif length < 65536:
-        header = bytes([0x81, 126]) + length.to_bytes(2, 'big')
-    else:
-        header = bytes([0x81, 127]) + length.to_bytes(8, 'big')
+    # Generate random mask
+    mask = os.urandom(4)
     
-    sock.sendall(header + payload)
+    # Mask the payload
+    masked_payload = bytes(b ^ mask[i % 4] for i, b in enumerate(payload))
+    
+    if length < 126:
+        header = bytes([0x81, 0x80 | length]) + mask
+    elif length < 65536:
+        header = bytes([0x81, 0x80 | 126]) + length.to_bytes(2, 'big') + mask
+    else:
+        header = bytes([0x81, 0x80 | 127]) + length.to_bytes(8, 'big') + mask
+    
+    sock.sendall(header + masked_payload)
 
 def _ws_recv_text(sock, leftover=b"", timeout: int = WS_TIMEOUT) -> str:
     """Read a single unfragmented text frame."""
