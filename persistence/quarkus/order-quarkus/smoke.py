@@ -3,30 +3,32 @@
 Smoke tests for order-quarkus web application.
 """
 import asyncio
-from playwright.async_api import async_playwright
+import aiohttp
 import sys
 import time
-import socket
 import os
+from playwright.async_api import async_playwright
 
 BASE_URL = "http://localhost:8082/"
 START_TIMEOUT = int(os.getenv("START_TIMEOUT", "90"))
 
 async def wait_for_http(host: str, port: int, timeout: int):
-    async def _try():
-        try:
-            _, writer = await asyncio.open_connection(host, port)
-            writer.close()
-            await writer.wait_closed()
-            return True
-        except OSError:
-            return False
-    end = time.time() + timeout
-    while time.time() < end:
-        if await _try():
-            return
-        await asyncio.sleep(0.5)
-    raise TimeoutError(f"Timed out waiting for HTTP port {port} after {timeout}s")
+    url = f"http://{host}:{port}/orders"
+    async with aiohttp.ClientSession() as session:
+        end = time.time() + timeout
+        while time.time() < end:
+            try:
+                async with session.get(url, timeout=5) as response:
+                    print(f"[DEBUG] HTTP {response.status} from {url}")
+                    if response.status == 200:
+                        print(f"[DEBUG] Successfully connected to {url}")
+                        return
+                    else:
+                        print(f"[DEBUG] Non-200 response: {response.status} from {url}")
+            except (aiohttp.ClientError, asyncio.TimeoutError) as e:
+                print(f"[DEBUG] Waiting for {url}, error: {str(e)}")
+            await asyncio.sleep(0.5)
+        raise TimeoutError(f"Timed out waiting for HTTP port {port} after {timeout}s")
 
 async def test_orders_page(page):
     await page.goto(f"{BASE_URL}orders")
