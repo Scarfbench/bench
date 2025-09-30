@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Smoke test for Hello Servlet application.
 
@@ -69,13 +68,11 @@ def must_fail_without_name(base: str):
         print(f"[FAIL] {url} -> {err}", file=sys.stderr)
         sys.exit(4)
     status, body = resp
-    # Expect a 4xx (usually 400) and a hint mentioning 'name'
     if status < 400 or status >= 500:
         print(f"[FAIL] GET {url} expected 4xx, got {status}", file=sys.stderr)
         sys.exit(3)
     hint = "name" in body.lower()
     if not hint:
-        # Not fatal, but warn—some frameworks return empty error bodies
         print(f"[WARN] Missing 'name' hint in error body (status {status})", file=sys.stderr)
     print(f"[PASS] GET /greeting (no name) -> {status}")
 

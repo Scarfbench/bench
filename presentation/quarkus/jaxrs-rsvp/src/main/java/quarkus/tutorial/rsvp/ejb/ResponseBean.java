@@ -37,7 +37,7 @@ import jakarta.transaction.Transactional;
 @ApplicationScoped
 @Transactional
 @Produces({MediaType.APPLICATION_JSON})
-@Consumes({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
 public class ResponseBean {
 
     @Inject
@@ -57,7 +57,7 @@ public class ResponseBean {
     }
 
     @POST
-    @Consumes({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
     public void putResponse(String userResponse,
             @PathParam("eventId") Long eventId,
             @PathParam("inviteId") Long personId) {

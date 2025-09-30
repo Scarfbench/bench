@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Smoke test for FileUpload application.
 
@@ -51,15 +50,12 @@ def get_upload_optional():
     url = BASE.rstrip("/") + "/upload"
     vprint(f"GET {url} (optional info endpoint)")
     s, b = http_request("GET", url)
-    # Accept 200 outright
     if s == 200:
         print("[PASS] GET /upload -> 200")
         return
-    # Accept common 'not allowed/unsupported media type' semantics
     if s in (400, 401, 403, 404, 405, 415):
         print(f"[PASS] GET /upload -> {s} (acceptable for endpoints that only support multipart POST)")
         return
-    # Accept the known Liberty-style 500 message
     if s == 500 and "not of type multipart" in b.lower():
         print(f"[PASS] GET /upload -> 500 with 'not multipart' message (acceptable)")
         return
@@ -103,16 +99,12 @@ def post_upload(destination: str, filename: str, data: bytes, fail_code: int, ex
     return b
 
 def main():
-    # 1) index
     must_get("/index.html", 2)
 
-    # 2) GET info endpoint (optional/lenient)
     get_upload_optional()
 
-    # 3) happy path upload
     post_upload("/tmp", "sample.txt", b"hello world\n", 4)
 
-    # 4) blank destination hint
     b = post_upload("", "sample.txt", b"x", 6)
     if "destination" not in b.lower() and "location" not in b.lower():
         print("[FAIL] Expected helpful 'destination/location' hint for blank destination", file=sys.stderr)

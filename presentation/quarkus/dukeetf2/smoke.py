@@ -167,7 +167,7 @@ def assert_ws_changes_stdlib():
 
 def main():
     must_get_ok("/index.html", 2)
-    soft_get_ok("/css/default.css")
+    soft_get_ok("/resources/css/default.css")
     assert_ws_changes_stdlib()
     print("[PASS] Smoke sequence complete"); return 0
 

@@ -119,7 +119,6 @@ def assert_long_poll():
     print("[FAIL] Long-poll endpoint did not respond with 200 + non-empty body within timeout.", file=sys.stderr)
     sys.exit(4)
 
-# --- NEW: numeric change assertion ---
 
 _num_re = re.compile(r"\s*(-?\d+(?:\.\d+)?)\s*/\s*(-?\d+)\s*")
 
@@ -149,7 +148,6 @@ def assert_price_changes():
     url = canonical_dukeetf_url()
     vprint(f"Change-check URL: {url}")
 
-    # First read
     resp1, err1 = http_request("GET", url, timeout=LONG_TIMEOUT)
     if err1:
         print(f"[FAIL] change-check first read -> {err1}", file=sys.stderr)
@@ -163,10 +161,8 @@ def assert_price_changes():
         print(f"[FAIL] change-check first read: could not parse numbers from body: {b1!r}", file=sys.stderr)
         sys.exit(6)
 
-    # Wait ~5 seconds
     time.sleep(5.0)
 
-    # Second read
     resp2, err2 = http_request("GET", url, timeout=LONG_TIMEOUT)
     if err2:
         print(f"[FAIL] change-check second read -> {err2}", file=sys.stderr)
@@ -180,7 +176,6 @@ def assert_price_changes():
         print(f"[FAIL] change-check second read: could not parse numbers from body: {b2!r}", file=sys.stderr)
         sys.exit(6)
 
-    # Compare
     (p1, v1) = pv1
     (p2, v2) = pv2
     if p1 != p2 or v1 != v2:
@@ -191,13 +186,12 @@ def assert_price_changes():
     print(f"[FAIL] DukeETF values unchanged after 5s: {p1:.2f}/{v1}", file=sys.stderr)
     sys.exit(6)
 
-# --- main ---
 
 def main():
     must_get_ok("/main.xhtml", 2)
     soft_get_ok("/resources/css/default.css")
     assert_long_poll()
-    assert_price_changes()  # NEW check
+    assert_price_changes()  
     print("[PASS] Smoke sequence complete")
     return 0
 

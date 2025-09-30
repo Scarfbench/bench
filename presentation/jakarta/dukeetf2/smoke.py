@@ -27,7 +27,6 @@ _NUM_RE = re.compile(r"\s*(-?\d+(?:\.\d+)?)\s*/\s*(-?\d+)\s*")
 def vprint(*args):
     if VERBOSE: print(*args)
 
-# --------- HTTP helpers ----------
 def http_request(method: str, url: str, timeout: int = HTTP_TIMEOUT):
     req = Request(url, method=method, headers={})
     try:
@@ -59,7 +58,6 @@ def soft_get_ok(path: str):
     if err: print(f"[WARN] {path} -> {err}", file=sys.stderr); return
     print(f"[{'PASS' if resp[0]==200 else 'WARN'}] GET {path} -> {resp[0]}")
 
-# --------- Minimal stdlib WebSocket client ----------
 GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 
 def http_to_ws_url(http_base: str) -> str:
@@ -77,7 +75,6 @@ def _ws_connect(url: str, timeout: int = WS_TIMEOUT):
     if scheme == "wss":
         ctx = ssl.create_default_context()
         raw = ctx.wrap_socket(raw, server_hostname=host)
-    # Handshake
     key = base64.b64encode(os.urandom(16)).decode()
     headers = [
         f"GET {path} HTTP/1.1",
@@ -91,7 +88,6 @@ def _ws_connect(url: str, timeout: int = WS_TIMEOUT):
     raw.sendall("\r\n".join(headers).encode())
     raw.settimeout(timeout)
     resp = b""
-    # Read header
     while b"\r\n\r\n" not in resp:
         chunk = raw.recv(4096)
         if not chunk: break
@@ -99,7 +95,7 @@ def _ws_connect(url: str, timeout: int = WS_TIMEOUT):
     header, leftover = resp.split(b"\r\n\r\n", 1)
     if b" 101 " not in header:
         raise RuntimeError(f"WS handshake failed: {header.decode(errors='replace')}")
-    return raw, leftover  # return socket and any leftover bytes
+    return raw, leftover  
 
 def _ws_recv_text(sock, leftover=b"", timeout: int = WS_TIMEOUT) -> str:
     """Read a single unfragmented text frame."""
@@ -111,7 +107,6 @@ def _ws_recv_text(sock, leftover=b"", timeout: int = WS_TIMEOUT) -> str:
             if not chunk: raise RuntimeError("WS closed while reading")
             buf.extend(chunk)
 
-    # Frame header: 2 bytes + optional ext length
     need(2)
     b1, b2 = buf[0], buf[1]
     fin = (b1 & 0x80) != 0
@@ -129,9 +124,9 @@ def _ws_recv_text(sock, leftover=b"", timeout: int = WS_TIMEOUT) -> str:
         mask = None
     need(idx+length)
     payload = bytes(buf[idx:idx+length])
-    del buf[:idx+length]  # consume
+    del buf[:idx+length]  
     if mask: payload = bytes(b ^ mask[i%4] for i, b in enumerate(payload))
-    if opcode == 0x8:  # close
+    if opcode == 0x8:  
         raise RuntimeError("WS closed by server")
     if opcode != 0x1 or not fin:
         raise RuntimeError(f"Unsupported WS frame (opcode={opcode}, fin={fin})")
@@ -170,7 +165,6 @@ def assert_ws_changes_stdlib():
         try: sock.close()
         except Exception: pass
 
-# --------- main ----------
 def main():
     must_get_ok("/index.html", 2)
     soft_get_ok("/resources/css/default.css")

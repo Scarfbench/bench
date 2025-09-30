@@ -231,7 +231,7 @@ def get_response_status(event_id: int, person_id: int):
 
 def main():
     must_get("/index.xhtml", 2)
-    soft_get("/css/default.css")
+    soft_get("/resources/css/default.css")
     ids, fmt, events_resp = get_status_all()
     
     event_found = False
