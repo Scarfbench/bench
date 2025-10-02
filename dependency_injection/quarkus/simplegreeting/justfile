@@ -111,3 +111,8 @@ tail-logs:
 shell:
     @echo "Opening shell in running container..."
     docker-compose exec simplegreeting-quarkus bash
+
+# Execute smoke test in running container
+smoke-test:
+    @echo "Executing smoke test in running container..."
+    docker-compose exec simplegreeting-quarkus bash -c 'python3 /opt/smoke-test/smoke.py'

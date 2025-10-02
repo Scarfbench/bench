@@ -30,13 +30,20 @@ docker-build:
     docker build -t billpayment-spring .
 
 # Run with Docker Compose
-docker-run:
-    just docker-build
-    docker-compose up
+docker-run: docker-build
+    docker-compose up -d
 
 # Stop Docker containers
 docker-stop:
     docker-compose down
+
+# Clean Docker resources
+docker-clean:
+    @echo "Cleaning Docker resources..."
+    docker-compose down -v
+    docker rmi billpayment-spring:latest || echo "Image not found"
+    docker rmi billpayment-billpayment-spring:latest || echo "Image not found"
+    docker system prune -f
 
 # Show application logs
 logs:
@@ -45,3 +52,8 @@ logs:
 # Development mode with auto-reload
 dev:
     mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.profiles.active=dev"
+
+# Execute smoke test in running container
+smoke-test:
+    @echo "Executing smoke test in running container..."
+    docker-compose exec billpayment-spring bash -c 'python3 /opt/smoke-test/smoke.py'
