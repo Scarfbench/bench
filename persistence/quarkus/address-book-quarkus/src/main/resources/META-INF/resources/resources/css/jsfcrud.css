@@ -120,6 +120,3 @@ tr.jsfcrud_even_row {
     left: 50%;
     top: 50%;
 }
-
-.flash.success { color: green; }
-.flash.error   { color: #d20005; }

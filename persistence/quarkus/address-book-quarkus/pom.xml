@@ -50,13 +50,15 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-h2</artifactId>
         </dependency>
+        <!-- JSF Dependencies -->
         <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-qute</artifactId>
+            <groupId>org.apache.myfaces.core.extensions.quarkus</groupId>
+            <artifactId>myfaces-quarkus</artifactId>
+            <version>4.1.1</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-qute</artifactId>
+            <artifactId>quarkus-undertow</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

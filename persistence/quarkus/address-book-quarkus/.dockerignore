@@ -1,4 +1,15 @@
+# Exclude everything by default
 *
+
+# Include necessary build files
+!pom.xml
+!mvnw
+!mvnw.cmd
+!.mvn/
+!src/
+!smoke.py
+
+# Include target artifacts
 !target/*-runner
 !target/*-runner.jar
 !target/lib/*
