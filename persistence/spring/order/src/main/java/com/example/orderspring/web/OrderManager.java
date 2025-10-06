@@ -33,6 +33,11 @@ public class OrderManager implements Serializable {
     private Integer newOrderDiscount = 0;
     private String vendorName;
     private boolean findVendorTableDisabled = true;
+    
+    private List<Part> newOrderParts;
+    private String selectedPartNumber;
+    private Integer selectedPartRevision;
+    private Long selectedVendorPartNumber;
 
     public List<CustomerOrder> getOrders() {
         if (orders == null) {
@@ -84,6 +89,23 @@ public class OrderManager implements Serializable {
 
     public boolean isFindVendorTableDisabled() { return findVendorTableDisabled; }
     public void setFindVendorTableDisabled(boolean findVendorTableDisabled) { this.findVendorTableDisabled = findVendorTableDisabled; }
+
+    public List<Part> getNewOrderParts() {
+        if (newOrderParts == null) {
+            newOrderParts = orderService.getAllParts();
+        }
+        return newOrderParts;
+    }
+    public void setNewOrderParts(List<Part> newOrderParts) { this.newOrderParts = newOrderParts; }
+
+    public String getSelectedPartNumber() { return selectedPartNumber; }
+    public void setSelectedPartNumber(String selectedPartNumber) { this.selectedPartNumber = selectedPartNumber; }
+
+    public Integer getSelectedPartRevision() { return selectedPartRevision; }
+    public void setSelectedPartRevision(Integer selectedPartRevision) { this.selectedPartRevision = selectedPartRevision; }
+
+    public Long getSelectedVendorPartNumber() { return selectedVendorPartNumber; }
+    public void setSelectedVendorPartNumber(Long selectedVendorPartNumber) { this.selectedVendorPartNumber = selectedVendorPartNumber; }
 
     public String submitOrder() {
         try {
@@ -142,6 +164,19 @@ public class OrderManager implements Serializable {
             e.printStackTrace();
             findVendorTableDisabled = true;
             return "order";
+        }
+    }
+
+    public String addLineItem() {
+        try {
+            if (currentOrder != null && selectedPartNumber != null && selectedPartRevision != null) {
+                orderService.addLineItem(currentOrder, selectedPartNumber, selectedPartRevision, 1);
+                lineItems = null;
+            }
+            return "lineItem";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "lineItem";
         }
     }
 

@@ -127,12 +127,12 @@
                          value="#{orderManager.vendorSearchResults}"
                          rules="all"
                          cellpadding="5"
-                         rendered="#{orderManager.findVendorTableDisabled}">
+                         rendered="#{!orderManager.findVendorTableDisabled}">
                 <h:column>
                     <f:facet name="header">
                         <h:outputText value="Vendor" />
                     </f:facet>
-                    <h:outputText value="#{vendor}" />
+                    <h:outputText value="#{vendor.name}" />
                 </h:column>
             </h:dataTable>
 
