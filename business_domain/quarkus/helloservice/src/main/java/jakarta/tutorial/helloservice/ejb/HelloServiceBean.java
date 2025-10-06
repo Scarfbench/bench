@@ -1,10 +1,8 @@
-package quarkus.tutorial.helloservice;
+package jakarta.tutorial.helloservice.ejb;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 
-@ApplicationScoped
 @WebService
 public class HelloServiceBean {
     private final String message = "Hello, ";

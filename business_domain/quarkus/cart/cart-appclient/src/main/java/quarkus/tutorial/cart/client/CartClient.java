@@ -35,7 +35,11 @@ public class CartClient implements QuarkusApplication {
             cart.clearCart();
 
         } catch (WebApplicationException | BookException ex) {
-            System.err.println("Caught a BookException: " + ex.getMessage());
+            String msg = ex.getMessage();
+            if (ex instanceof WebApplicationException) {
+                msg = ((WebApplicationException) ex).getResponse().readEntity(String.class);
+            }
+            System.err.println("Caught a BookException: " + msg);
         }
 
         return 0;

@@ -134,3 +134,8 @@ tail-logs:
 shell:
     @echo "Opening shell in running container..."
     docker-compose exec glassfish bash
+
+# Execute smoke test
+smoke-test:
+    @echo "Executing smoke test..."
+    ./smoke-test.sh

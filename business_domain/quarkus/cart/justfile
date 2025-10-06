@@ -116,3 +116,8 @@ shell:
 client-test: build
     @echo "Starting the client..."
     ./mvnw -f cart-appclient/pom.xml quarkus:dev
+
+# Execute smoke test
+smoke-test:
+    @echo "Executing smoke test..."
+    ./smoke-test.sh

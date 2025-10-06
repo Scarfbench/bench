@@ -121,3 +121,8 @@ client-test:
     ./mvnw clean package
     @echo "Starting the client..."
     ./mvnw -f cart-appclient/pom.xml spring-boot:run
+
+# Execute smoke test
+smoke-test:
+    @echo "Executing smoke test..."
+    ./smoke-test.sh

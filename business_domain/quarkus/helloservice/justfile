@@ -56,7 +56,7 @@ restart:
 deploy: build docker-build up
     @echo "Application deployed successfully!"
     @echo ""
-    @echo "Access the application at: http://localhost:8080/services/hello?wsdl"
+    @echo "Access the application at: http://localhost:8080//HelloServiceBeanService/HelloServiceBean?wsdl"
 
 # Show application status
 status:
@@ -69,7 +69,7 @@ status:
 # View application in browser (requires xdg-open)
 open:
     @echo "Opening application in browser..."
-    xdg-open http://localhost:8080/services/hello?wsdl || echo "Please open http://localhost:8080/services/hello?wsdl manually"
+    xdg-open http://localhost:8080//HelloServiceBeanService/HelloServiceBean?wsdl || echo "Please open http://localhost:8080//HelloServiceBeanService/HelloServiceBean?wsdl manually"
 
 # Complete dedeployment - stops containers, removes images, and frees all resources
 dedeploy:
@@ -111,3 +111,8 @@ tail-logs:
 shell:
     @echo "Opening shell in running container..."
     docker-compose exec helloservice-quarkus bash
+
+# Execute smoke test
+smoke-test:
+    @echo "Executing smoke test..."
+    ./smoke-test.sh

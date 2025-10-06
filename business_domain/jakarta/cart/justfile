@@ -141,3 +141,8 @@ remote-client:
     docker-compose exec glassfish /opt/glassfish/glassfish/bin/asadmin get-client-stubs --appname cart-ear /tmp/
     @echo "Launch remote client..."
     docker-compose exec glassfish /opt/glassfish/glassfish/bin/appclient -client /tmp/cart-earClient.jar
+
+# Execute smoke test
+smoke-test:
+    @echo "Executing smoke test..."
+    ./smoke-test.sh

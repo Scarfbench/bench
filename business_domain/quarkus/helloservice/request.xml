@@ -1,0 +1,9 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:hel="http://ejb.helloservice.tutorial.jakarta/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <hel:sayHello>
+         <arg0>John</arg0>
+      </hel:sayHello>
+   </soapenv:Body>
+</soapenv:Envelope>
