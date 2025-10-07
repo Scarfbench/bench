@@ -1,31 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    Copyright (c), Eclipse Foundation, Inc. and its licensors.
-
-    All rights reserved.
-
-    This program and the accompanying materials are made available under the
-    terms of the Eclipse Distribution License v1.0, which is available at
-    https://www.eclipse.org/org/documents/edl-v10.php
-
-    SPDX-License-Identifier: BSD-3-Clause
-
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>jakarta.examples.tutorial.persistence</groupId>
-    <artifactId>parent</artifactId>
-    <version>10-SNAPSHOT</version>
-  </parent>
-
-  <groupId>jakarta.examples.tutorial.persistence.roster</groupId>
-  <artifactId>parent</artifactId>
+  <groupId>jakarta.tutorial</groupId>
+  <artifactId>roster</artifactId>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
-
   <name>roster</name>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <modules>
     <module>roster-common</module>
