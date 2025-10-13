@@ -15,21 +15,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>jakarta.examples.tutorial</groupId>
-    <artifactId>examples</artifactId>
-    <version>10-SNAPSHOT</version>
-  </parent>
-
   <groupId>jakarta.examples.tutorial.persistence</groupId>
   <artifactId>parent</artifactId>
+  <version>10-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <name>persistence</name>
 
   <modules>
     <module>address-book</module>
     <module>order</module>
     <module>roster</module>
+    <!-- keep order/roster if you care -->
   </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <!-- If you use dependencyManagement, keep it here -->
+  </properties>
 </project>

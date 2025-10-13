@@ -4,35 +4,29 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import org.springframework.context.annotation.Scope;
+import jakarta.faces.context.FacesContext;
 import jakarta.validation.Valid;
 
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.BindingResult;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.example.addressbookspring.entity.Contact;
 import com.example.addressbookspring.service.ContactService;
-import org.springframework.web.context.WebApplicationContext;
 
-@Controller
-@Scope(WebApplicationContext.SCOPE_SESSION) 
-@RequestMapping("/contacts")
+@Component("contactController")
+@Scope("session")
 public class ContactController implements Serializable {
 
     private static final long serialVersionUID = -8163374738411860012L;
 
-    private final ContactService ejbFacade;
+    @Autowired
+    private ContactService ejbFacade;
 
     private Contact current;
     private List<Contact> items = null;
     private PaginationHelper pagination;
     private int selectedItemIndex;
-
-    public ContactController(ContactService ejbFacade) {
-        this.ejbFacade = ejbFacade;
-    }
 
     public Contact getSelected() {
         if (current == null) {
@@ -117,114 +111,89 @@ public class ContactController implements Serializable {
         return pagination;
     }
 
-    @GetMapping({"", "/list"})
-    public String prepareList(Model model) {
+    public String prepareList() {
         recreateModel();
-        model.addAttribute("items", getItems());
-        model.addAttribute("pagination", getPagination());
         return "List";
     }
 
-    @GetMapping("/view/{id}")
-    public String prepareView(@PathVariable Long id, Model model) {
-        current = getFacade().find(id);
-        if (current == null) {
-            return prepareList(model);
-        }
-        List<Contact> page = getItems();
-        selectedItemIndex = getPagination().getPageFirstItem()
-                + Math.max(0, page.indexOf(current));
-        model.addAttribute("contact", current);
+    public String prepareView(Contact contact) {
+        current = contact;
+        selectedItemIndex = getItems().indexOf(contact);
         return "View";
     }
 
-    @GetMapping("/create")
-    public String prepareCreate(Model model) {
+    public String prepareCreate() {
         current = new Contact();
         selectedItemIndex = -1;
-        model.addAttribute("contact", current);
         return "Create";
     }
 
-    @PostMapping
-    public String create(@ModelAttribute("contact") @Valid Contact contact,
-                     BindingResult br,
-                     Model model) {
+    public String create() {
         try {
-            current = contact;
             getFacade().create(current);
-            model.addAttribute("success",
-                ResourceBundle.getBundle("Bundle").getString("ContactCreated"));
-            return prepareCreate(model);
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new jakarta.faces.application.FacesMessage(
+                    ResourceBundle.getBundle("Bundle").getString("ContactCreated")));
+            return prepareCreate();
         } catch (Exception e) {
-            model.addAttribute("error",
-                ResourceBundle.getBundle("Bundle").getString("PersistenceErrorOccured"));
-            return "Create";
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new jakarta.faces.application.FacesMessage(
+                    ResourceBundle.getBundle("Bundle").getString("PersistenceErrorOccured")));
+            return null;
         }
     }
 
-    @GetMapping("/edit/{id}")
-    public String prepareEdit(@PathVariable Long id, Model model) {
-        current = getFacade().find(id);
-        if (current == null) return prepareList(model);
-        List<Contact> page = getItems();
-        selectedItemIndex = getPagination().getPageFirstItem()
-                + Math.max(0, page.indexOf(current));
-        model.addAttribute("contact", current);
+    public String prepareEdit(Contact contact) {
+        current = contact;
+        selectedItemIndex = getItems().indexOf(contact);
         return "Edit";
     }
 
-    @PostMapping("/{id}")
-    public String update(@PathVariable Long id,
-                     @ModelAttribute("contact") @Valid Contact contact,
-                     BindingResult br,
-                     Model model) {
+    public String update() {
         try {
-            current = contact;
-            current.setId(id);
             getFacade().edit(current);
-            model.addAttribute("contact", current);
-            model.addAttribute("success",
-                ResourceBundle.getBundle("Bundle").getString("ContactUpdated"));
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new jakarta.faces.application.FacesMessage(
+                    ResourceBundle.getBundle("Bundle").getString("ContactUpdated")));
             return "View";
         } catch (Exception e) {
-            model.addAttribute("error",
-                ResourceBundle.getBundle("Bundle").getString("PersistenceErrorOccured"));
-            return "Edit";
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new jakarta.faces.application.FacesMessage(
+                    ResourceBundle.getBundle("Bundle").getString("PersistenceErrorOccured")));
+            return null;
         }
     }
 
-    @PostMapping("/delete/{id}")
-    public String destroy(@PathVariable Long id, Model model) {
-        current = getFacade().find(id);
-        if (current != null) performDestroy(model);
+    public String destroy(Contact contact) {
+        current = contact;
+        selectedItemIndex = getItems().indexOf(contact);
+        performDestroy();
         recreateModel();
         return "List";
     }
 
-    @PostMapping("/delete-and-view/{id}")
-    public String destroyAndView(@PathVariable Long id, Model model) {
-        current = getFacade().find(id);
-        if (current != null) performDestroy(model);
+    public String destroyAndView() {
+        performDestroy();
         recreateModel();
         updateCurrentItem();
         if (selectedItemIndex >= 0) {
-            current = getFacade().findRange(new int[]{ selectedItemIndex, selectedItemIndex + 1 }).get(0);
-            model.addAttribute("contact", current);
             return "View";
         } else {
+            recreateModel();
             return "List";
         }
     }
 
-    private void performDestroy(Model model) {
+    private void performDestroy() {
         try {
             getFacade().remove(current);
-            model.addAttribute("success",
-                ResourceBundle.getBundle("Bundle").getString("ContactDeleted"));
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new jakarta.faces.application.FacesMessage(
+                    ResourceBundle.getBundle("Bundle").getString("ContactDeleted")));
         } catch (Exception e) {
-            model.addAttribute("error",
-                ResourceBundle.getBundle("Bundle").getString("PersistenceErrorOccured"));
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new jakarta.faces.application.FacesMessage(
+                    ResourceBundle.getBundle("Bundle").getString("PersistenceErrorOccured")));
         }
     }
 
@@ -237,8 +206,7 @@ public class ContactController implements Serializable {
             }
         }
         if (selectedItemIndex >= 0) {
-            List<Contact> one = getFacade().findRange(new int[]{ selectedItemIndex, selectedItemIndex + 1 });
-            if (!one.isEmpty()) current = one.get(0);
+            current = getFacade().findRange(new int[]{ selectedItemIndex, selectedItemIndex + 1 }).get(0);
         } else {
             current = null;
         }
@@ -255,26 +223,22 @@ public class ContactController implements Serializable {
         items = null;
     }
 
-    @GetMapping("/next")
-    public String next(Model model) {
+    public String next() {
         getPagination().nextPage();
         recreateModel();
-        return prepareList(model);
+        return "List";
     }
 
-    @GetMapping("/previous")
-    public String previous(Model model) {
+    public String previous() {
         getPagination().previousPage();
         recreateModel();
-        return prepareList(model);
+        return "List";
     }
     
-    @ModelAttribute("itemsAvailableSelectMany")
     public List<Contact> getItemsAvailableSelectMany() {
         return getFacade().findAll();
     }
 
-    @ModelAttribute("itemsAvailableSelectOne")
     public List<Contact> getItemsAvailableSelectOne() {
         return getFacade().findAll();
     }
