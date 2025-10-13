@@ -58,8 +58,8 @@ restart:
 deploy: build docker-build up
     @echo "Application deployed successfully!"
     @echo ""
-    @echo "Access the application at: http://localhost:9002/decorators/"
-    @echo "Access GlassFish admin console at: http://localhost:9102/"
+    @echo "Access the application at: http://localhost:8081/decorators/"
+    @echo "Access GlassFish admin console at: http://localhost:4849/"
 
 # Show application status
 status:
@@ -72,7 +72,7 @@ status:
 # View application in browser (requires xdg-open)
 open:
     @echo "Opening application in browser..."
-    xdg-open http://localhost:9002/decorators/ || echo "Please open http://localhost:9002/decorators/ manually"
+    xdg-open http://localhost:8081/decorators/ || echo "Please open http://localhost:8081/decorators/ manually"
 
 # Complete dedeployment - stops containers, removes images, and frees all resources
 dedeploy:
@@ -81,6 +81,7 @@ dedeploy:
     docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
     docker rmi decorators-glassfish7:latest || echo "Image not found"
+    docker rmi decorators-glassfish:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
     docker container prune -f
     @echo "Cleaning up networks..."
@@ -92,13 +93,14 @@ docker-clean:
     @echo "Cleaning Docker resources..."
     docker-compose down -v
     docker rmi decorators-glassfish7:latest || echo "Image not found"
+    docker rmi decorators-glassfish:latest || echo "Image not found"
     docker system prune -f
 
 # Development workflow - clean, build, and deploy
 dev: clean build docker-build up
     @echo "Development environment ready!"
-    @echo "Application: http://localhost:9002/decorators/"
-    @echo "Admin console: http://localhost:9102/"
+    @echo "Application: http://localhost:8081/decorators/"
+    @echo "Admin console: http://localhost:4849/"
 
 # Show project information
 info:
@@ -110,8 +112,8 @@ info:
     @echo "Application Server: GlassFish 7"
     @echo ""
     @echo "URLs when running:"
-    @echo "  Application: http://localhost:9002/decorators/"
-    @echo "  Admin Console: http://localhost:9102/"
+    @echo "  Application: http://localhost:8081/decorators/"
+    @echo "  Admin Console: http://localhost:4849/"
     @echo ""
     @echo "Key files:"
     @echo "  WAR file: target/decorators.war"
@@ -134,3 +136,8 @@ tail-logs:
 shell:
     @echo "Opening shell in running container..."
     docker-compose exec glassfish bash
+
+# Execute smoke test in running container
+smoke-test:
+    @echo "Executing smoke test in running container..."
+    docker-compose exec glassfish bash -c 'python3 /opt/smoke-test/smoke.py'

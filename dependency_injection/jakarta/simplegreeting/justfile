@@ -81,6 +81,7 @@ dedeploy:
     docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
     docker rmi simplegreeting-glassfish7:latest || echo "Image not found"
+    docker rmi simplegreeting-glassfish:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
     docker container prune -f
     @echo "Cleaning up networks..."
@@ -92,6 +93,7 @@ docker-clean:
     @echo "Cleaning Docker resources..."
     docker-compose down -v
     docker rmi simplegreeting-glassfish7:latest || echo "Image not found"
+    docker rmi simplegreeting-glassfish:latest || echo "Image not found"
     docker system prune -f
 
 # Development workflow - clean, build, and deploy
@@ -134,3 +136,8 @@ tail-logs:
 shell:
     @echo "Opening shell in running container..."
     docker-compose exec glassfish bash
+
+# Execute smoke test in running container
+smoke-test:
+    @echo "Executing smoke test in running container..."
+    docker-compose exec glassfish bash -c 'python3 /opt/smoke-test/smoke.py'

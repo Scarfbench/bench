@@ -82,12 +82,42 @@ FROM registry.access.redhat.com/ubi9/openjdk-21:1.23
 
 ENV LANGUAGE='en_US:en'
 
+# set smoke test env variables
+ENV ENCODER_BASE_URL=http://localhost:8080
+ENV ENCODER_HOME_URI=/encoder
+
+# Install Python 3
+USER root
+RUN microdnf install -y python3 python3-pip && \
+    microdnf clean all
+
+# Install playwright dependencies
+RUN microdnf install -y \
+    libXcomposite libXdamage libXrandr alsa-lib \
+    atk cairo cups-libs dbus-glib \
+    fontconfig gtk3 libX11 libXcursor \
+    libXext libXi libXrender libXtst \
+    pango \
+    && microdnf clean all
+
+# Create and activate virtual environment for Python dependencies (PEP 668 safe)
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+# Shared browsers path so Chromium is cached once
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN mkdir -p /ms-playwright && chmod 755 /ms-playwright
+
+# Install Playwright and Chromium dependencies inside venv
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+ && pip install --no-cache-dir playwright==1.47.0 \
+ && playwright install chromium
 
 # We make four distinct layers so if there are application changes the library layers can be re-used
 COPY --chown=185 target/quarkus-app/lib/ /deployments/lib/
 COPY --chown=185 target/quarkus-app/*.jar /deployments/
 COPY --chown=185 target/quarkus-app/app/ /deployments/app/
 COPY --chown=185 target/quarkus-app/quarkus/ /deployments/quarkus/
+COPY --chown=185 smoke.py /opt/smoke-test/smoke.py
 
 EXPOSE 8080
 USER 185
