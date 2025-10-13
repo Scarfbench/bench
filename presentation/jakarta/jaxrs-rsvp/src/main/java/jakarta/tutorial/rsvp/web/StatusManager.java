@@ -46,7 +46,7 @@ public class StatusManager implements Serializable {
     private Event event;
     private List<Event> events;
     private Client client;
-    private final String baseUri = "http://localhost:8080/rsvp/webapi";
+    private final String baseUri = "http://localhost:8080/jaxrs-rsvp-10-SNAPSHOT/webapi";
     private WebTarget target;
 
     /**

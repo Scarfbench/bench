@@ -53,15 +53,16 @@ public class StatusManager implements Serializable {
     public List<Event> getEvents() {
         List<Event> returnedEvents = null;
         try {
-            returnedEvents = client.get()
+            Event[] eventsArray = client.get()
                     .uri("/status/all")
                     .accept(MediaType.APPLICATION_XML)
                     .retrieve()
-                    .body(List.class);
-            if (returnedEvents == null) {
+                    .body(Event[].class);
+            if (eventsArray == null) {
                 logger.log(Level.SEVERE, "Returned events null.");
             } else {
-                logger.log(Level.INFO, "Events have been returned.");
+                returnedEvents = java.util.Arrays.asList(eventsArray);
+                logger.log(Level.INFO, "Events have been returned: {0}", returnedEvents.size());
             }
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Error retrieving all events.");

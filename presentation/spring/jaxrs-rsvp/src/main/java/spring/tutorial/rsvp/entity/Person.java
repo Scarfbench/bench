@@ -25,6 +25,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @XmlRootElement(name = "Person")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -33,11 +34,14 @@ public class Person implements Serializable {
     private static final long serialVersionUID = -6639818335218185860L;
     @OneToMany(mappedBy = "person")
     @XmlTransient
+    @JsonIgnore
     private List<Response> responses;
     @OneToMany(mappedBy = "owner")
     @XmlTransient
+    @JsonIgnore
     private List<Event> ownedEvents;
     @XmlTransient
+    @JsonIgnore
     @ManyToMany(mappedBy = "invitees")
     private List<Event> events;
     @Id

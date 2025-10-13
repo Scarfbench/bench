@@ -26,6 +26,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 @NamedQuery(name="rsvp.entity.Response.findResponseByEventAndPerson",
             query="SELECT r " + 
@@ -44,6 +45,7 @@ public class Response implements Serializable {
     private Long id;
     @ManyToOne
     @XmlTransient
+    @JsonbTransient
     private Event event;
     @ManyToOne
     private Person person;

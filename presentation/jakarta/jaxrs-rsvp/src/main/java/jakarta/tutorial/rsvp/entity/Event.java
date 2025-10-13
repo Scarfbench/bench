@@ -29,6 +29,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 
 @NamedQuery(name="rsvp.entity.Event.getAllUpcomingEvents",
@@ -47,6 +48,7 @@ public class Event implements Serializable {
     protected List<Person> invitees;
     protected String name;
     @ManyToOne
+    @JsonbTransient
     private Person owner;
     protected String location;
     @Temporal(TemporalType.DATE)

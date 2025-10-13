@@ -11,7 +11,8 @@ public class Greeting {
     @Produces(MediaType.TEXT_PLAIN)
     public Response greet(@QueryParam("name") String name) {
         if (name == null || name.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Error: 'name' parameter is required").build();
         }
 
         String greeting = "Hello, " + name + "!";

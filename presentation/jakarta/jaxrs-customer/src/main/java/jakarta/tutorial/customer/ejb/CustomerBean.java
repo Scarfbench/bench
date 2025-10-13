@@ -59,7 +59,7 @@ public class CustomerBean {
         }
         String navigation;
         Response response = 
-                client.target("http://localhost:8080/customer/webapi/Customer")
+                client.target("http://localhost:8080/jaxrs-customer-10-SNAPSHOT/webapi/Customer")
                 .request(MediaType.APPLICATION_XML)
                 .post(Entity.entity(customer, MediaType.APPLICATION_XML),
                         Response.class);
@@ -80,7 +80,7 @@ public class CustomerBean {
     public String retrieveCustomer(String id) {
         String navigation;
         Customer customer = 
-                client.target("http://localhost:8080/customer/webapi/Customer")
+                client.target("http://localhost:8080/jaxrs-customer-10-SNAPSHOT/webapi/Customer")
                 .path(id)
                 .request(MediaType.APPLICATION_XML)
                 .get(Customer.class);
@@ -94,7 +94,7 @@ public class CustomerBean {
 
     public List<Customer> retrieveAllCustomers() {
         List<Customer> customers = 
-                client.target("http://localhost:8080/customer/webapi/Customer")
+                client.target("http://localhost:8080/jaxrs-customer-10-SNAPSHOT/webapi/Customer")
                 .path("all")
                 .request(MediaType.APPLICATION_XML)
                 .get(new GenericType<List<Customer>>() {

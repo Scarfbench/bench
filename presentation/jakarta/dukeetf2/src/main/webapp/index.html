@@ -19,7 +19,7 @@
   <script type="text/javascript">
       var wsocket;
       function connect() {
-          wsocket = new WebSocket("ws://localhost:8080/dukeetf2/dukeetf");
+          wsocket = new WebSocket("ws://localhost:9080/dukeetf2-10-SNAPSHOT/dukeetf");
           wsocket.onmessage = onMessage;
       }
       function onMessage(evt) {

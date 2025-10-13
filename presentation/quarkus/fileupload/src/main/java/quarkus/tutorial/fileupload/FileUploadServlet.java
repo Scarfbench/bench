@@ -23,6 +23,10 @@ public class FileUploadServlet {
         String fileName = form.filename != null ? form.filename : "uploaded_file";
         byte[] fileContent = form.file;
 
+\        if (path == null || path.trim().isEmpty()) {
+            return Response.ok("Please specify a destination directory for the file upload.").build();
+        }
+
         try (OutputStream out = new FileOutputStream(new File(path + File.separator + fileName))) {
             out.write(fileContent);
             LOGGER.log(Level.INFO, "File {0} uploaded to {1}", new Object[]{fileName, path});

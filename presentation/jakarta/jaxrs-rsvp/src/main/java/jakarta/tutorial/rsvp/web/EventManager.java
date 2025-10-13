@@ -40,7 +40,7 @@ public class EventManager implements Serializable {
     protected Event currentEvent;
     private Response currentResponse;
     private Client client;
-    private final String baseUri = "http://localhost:8080/rsvp/webapi/status/";
+    private final String baseUri = "http://localhost:8080/jaxrs-rsvp-10-SNAPSHOT/webapi/status/";
     private WebTarget target;
 
     /**

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/{eventId}/{inviteId}")
+@RequestMapping("/webapi/{eventId}/{inviteId}")
 public class ResponseController {
 
     @PersistenceContext
