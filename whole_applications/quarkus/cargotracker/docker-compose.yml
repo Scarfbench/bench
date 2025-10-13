@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  artemis:
+    image: quay.io/artemiscloud/activemq-artemis-broker:1.0.32
+    container_name: artemis
+    environment:
+      AMQ_USER: quarkus
+      AMQ_PASSWORD: quarkus
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+      - "5672:5672"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -u quarkus:quarkus -f http://$(hostname -i):8161/console || exit 1",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  cargotracker-quarkus:
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: .
+    environment:
+      QUARKUS_PROFILE: docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      artemis:
+        condition: service_healthy

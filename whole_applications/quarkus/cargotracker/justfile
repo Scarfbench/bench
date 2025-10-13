@@ -30,7 +30,7 @@ test:
 # Build Docker image
 docker-build: build
     @echo "Building Docker image..."
-    docker build -t cargotracker-spring:latest .
+    docker build -f src/main/docker/Dockerfile.jvm -t cargotracker-quarkus:latest .
 
 # Start application with Docker Compose
 up:
@@ -69,7 +69,7 @@ status:
 # View application in browser (requires xdg-open)
 open:
     @echo "Opening application in browser..."
-    xdg-open http://localhost:8080/cargo-tracker/index.xhtml || echo "Please open http://localhost:8080/cargo-tracker/index.xhtml manually"
+    xdg-open http://localhost:8080//cargo-tracker/index.xhtml || echo "Please open http://localhost:8080//cargo-tracker/index.xhtml manually"
 
 # Complete dedeployment - stops containers, removes images, and frees all resources
 dedeploy:
@@ -77,7 +77,7 @@ dedeploy:
     @echo "Stopping all containers..."
     docker-compose down -v || echo "No containers to stop"
     @echo "Removing Docker image..."
-    docker rmi cargotracker-spring:latest || echo "Image not found"
+    docker rmi cargotracker-quarkus:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
     docker container prune -f
     @echo "Cleaning up networks..."
@@ -88,12 +88,12 @@ dedeploy:
 docker-clean:
     @echo "Cleaning Docker resources..."
     docker-compose down --rmi local --volumes --remove-orphans
-    docker rmi cargotracker-spring:latest || echo "Image not found"
+    docker rmi cargotracker-quarkus:latest || echo "Image not found"
     docker system prune -f
 
-# Development workflow - use the spring boot plugin
+# Development workflow - use quarkus:dev
 dev:
-    ./mvnw spring-boot:run
+    ./mvnw quarkus:dev
 
 # Check if Docker is running
 check-docker:
@@ -105,14 +105,14 @@ check-docker:
 # Follow application logs in real-time
 tail-logs:
     @echo "Following application logs (Ctrl+C to stop)..."
-    docker-compose logs -f cargotracker-spring
+    docker-compose logs -f cargotracker-quarkus
 
 # Execute bash shell in running container
 shell:
     @echo "Opening shell in running container..."
-    docker-compose exec cargotracker-spring bash
+    docker-compose exec cargotracker-quarkus bash
 
 # Execute smoke test in running container
 smoke-test:
     @echo "Executing smoke test in running container..."
-    docker-compose exec cargotracker-spring bash -c 'python3 /opt/app/smoke.py'
+    docker-compose exec cargotracker-quarkus bash -c 'python3 /opt/smoke-test/smoke.py'

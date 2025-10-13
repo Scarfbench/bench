@@ -1,0 +1,7 @@
+version: "3.8"
+
+services:
+  cargotracker-jakarta:
+    build: .
+    ports:
+      - "8080:8080"
