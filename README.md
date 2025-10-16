@@ -56,7 +56,7 @@ Install / enable the following before running any examples.
 | Application  | Spring | Jakarta | Quarkus | Struts |
 | ------------ | ------ | ------- | ------- | ------ |
 | cargotracker | ✅      | ✅       | ✅       | 🛑      |
-| coffeeshop   | ✅      | 🛑       | ✅       | 🛑      |
+| coffeeshop   | ✅      | ✅       | ✅       | 🛑      |
 | daytrader    | ✅      | ✅       | ✅       | 🛑      |
 | realworld    | ✅      | ✅       | ✅       | 🛑      |
 | petclinic    | ✅      | 🛑       | ✅       | 🛑      |
