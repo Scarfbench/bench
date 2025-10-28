@@ -1,0 +1,5 @@
+build:
+    docker build -f Dockerfile.smoke -t roster-quarkus:smoke .
+
+smoke:
+    docker run --rm -p 8080:8080 roster-quarkus:smoke
