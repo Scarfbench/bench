@@ -30,15 +30,15 @@
     <maven.acr.plugin.version>3.1.0</maven.acr.plugin.version>
     <maven.rar.plugin.version>2.4</maven.rar.plugin.version>
     <maven.exec.plugin.version>3.0.0</maven.exec.plugin.version>
+    <liberty.maven.plugin.version>3.10.3</liberty.maven.plugin.version>
+    <liberty.runtime.version>24.0.0.11</liberty.runtime.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jakarta.jakartaee-api.version>9.0.0</jakarta.jakartaee-api.version>
   </properties>
 
   <modules>
-    <module>cart-common</module>
     <module>cart-ejb</module>
-    <module>cart-appclient</module>
-    <module>cart-ear</module>
+    <module>cart-web</module>
   </modules>
 
   <dependencies>
@@ -88,6 +88,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-rar-plugin</artifactId>
           <version>${maven.rar.plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>io.openliberty.tools</groupId>
+          <artifactId>liberty-maven-plugin</artifactId>
+          <version>${liberty.maven.plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>

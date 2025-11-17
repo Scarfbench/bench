@@ -22,7 +22,7 @@
   </parent>
 
   <artifactId>cart-ejb</artifactId>
-  <packaging>ejb</packaging>
+  <packaging>jar</packaging>
 
   <name>cart-ejb</name>
 
@@ -30,23 +30,4 @@
     <jakarta.ejb.version>3.2</jakarta.ejb.version>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>cart-common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-ejb-plugin</artifactId>
-        <configuration>
-            <ejbVersion>${jakarta.ejb.version}</ejbVersion>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
 </project>

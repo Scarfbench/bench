@@ -7,8 +7,8 @@ Install / enable the following before running any examples.
 
 1. just
    - Project command runner used throughout the repository.
-   - Install (choose one):
      - With package manager (Debian/Ubuntu): `sudo apt install just` (may require adding a backport / latest repo)
+   - Install (choose one):
      - With Cargo: `cargo install just`
      - See latest instructions: https://github.com/casey/just
    - Verify: `just --version`

@@ -1,10 +1,13 @@
 # Run `just` to see available recipes
 
-# Set shell
-set shell := ["bash", "-c"]
+# Detect container runtime (docker or podman)
+CONTAINER_RUNTIME := `command -v docker >/dev/null 2>&1 && echo docker || (command -v podman >/dev/null 2>&1 && echo podman || echo none)`
+COMPOSE_CMD := "docker-compose"
 
 # Default recipe - shows available commands
 default:
+    @echo "Using container runtime: {{CONTAINER_RUNTIME}}"
+    @echo "Using compose command: {{COMPOSE_CMD}}"
     @just --list
 
 # Build the JAR file using Maven
@@ -29,28 +32,33 @@ test:
 
 # Build Docker image
 docker-build: build
-    @echo "Building Docker image..."
-    docker build -t cart-spring:latest .
+    @echo "Building container image with {{CONTAINER_RUNTIME}}..."
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{CONTAINER_RUNTIME}} build -t cart-spring:latest .
 
 # Start application with Docker Compose
 up:
-    @echo "Starting application with Docker Compose..."
-    docker-compose up -d
+    @echo "Starting application with {{COMPOSE_CMD}}..."
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} up -d
 
 # Stop Docker Compose services
 down:
-    @echo "Stopping Docker Compose services..."
-    docker-compose down
+    @echo "Stopping {{COMPOSE_CMD}} services..."
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} down
 
 # View Docker Compose logs
 logs:
     @echo "Viewing application logs..."
-    docker-compose logs -f
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} logs -f
 
 # Restart Docker Compose services
 restart:
     @echo "Restarting services..."
-    docker-compose restart
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} restart
 
 # Build and deploy (build + docker-build + up)
 deploy: build docker-build up
@@ -61,11 +69,12 @@ deploy: build docker-build up
 # Show application status
 
 status:
-    @echo "Docker Compose services status:"
-    docker-compose ps
+    @echo "Container services status:"
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} ps
     @echo ""
-    @echo "Docker images:"
-    docker images | grep cart
+    @echo "Container images:"
+    {{CONTAINER_RUNTIME}} images | grep cart
 
 # View application in browser (requires xdg-open)
 open:
@@ -75,22 +84,24 @@ open:
 # Complete dedeployment - stops containers, removes images, and frees all resources
 dedeploy:
     @echo "dedeploying application..."
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
     @echo "Stopping all containers..."
-    docker-compose down -v || echo "No containers to stop"
-    @echo "Removing Docker image..."
-    docker rmi cart-spring:latest || echo "Image not found"
+    {{COMPOSE_CMD}} down -v || echo "No containers to stop"
+    @echo "Removing container image..."
+    {{CONTAINER_RUNTIME}} rmi cart-spring:latest || echo "Image not found"
     @echo "Removing stopped containers and freeing ports..."
-    docker container prune -f
+    {{CONTAINER_RUNTIME}} container prune -f
     @echo "Cleaning up networks..."
-    docker network prune -f
+    {{CONTAINER_RUNTIME}} network prune -f
     @echo "dedeployment complete - all ports released!"
 
 # Clean Docker resources
 docker-clean:
-    @echo "Cleaning Docker resources..."
-    docker-compose down --rmi local --volumes --remove-orphans
-    docker rmi cart-spring:latest || echo "Image not found"
-    docker system prune -f
+    @echo "Cleaning container resources..."
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} down --rmi local --volumes --remove-orphans
+    {{CONTAINER_RUNTIME}} rmi cart-spring:latest || echo "Image not found"
+    {{CONTAINER_RUNTIME}} system prune -f
 
 # Development workflow - use the spring boot plugin
 dev:
@@ -101,20 +112,24 @@ dev:
 
 # Check if Docker is running
 check-docker:
-    @echo "Checking Docker status..."
-    docker --version
-    docker-compose --version
-    docker ps
+    @echo "Checking container runtime status..."
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    @echo "Container runtime: {{CONTAINER_RUNTIME}}"
+    {{CONTAINER_RUNTIME}} --version
+    {{COMPOSE_CMD}} --version
+    {{CONTAINER_RUNTIME}} ps
 
 # Follow application logs in real-time
 tail-logs:
     @echo "Following application logs (Ctrl+C to stop)..."
-    docker-compose logs -f cart-spring
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} logs -f cart-spring
 
 # Execute bash shell in running container
 shell:
     @echo "Opening shell in running container..."
-    docker-compose exec cart-spring bash
+    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
+    {{COMPOSE_CMD}} exec cart-spring bash
 
 # Run the client test, make sure the server is running
 client-test:
