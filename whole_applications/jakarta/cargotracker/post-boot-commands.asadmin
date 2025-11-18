@@ -1,2 +1,1 @@
-add-library /tmp/postgresql.jar
-deploy --name cargo-tracker --contextroot / /tmp/cargo-tracker.war
+deploy --name cargo-tracker --contextroot /cargo-tracker /tmp/cargo-tracker.war
