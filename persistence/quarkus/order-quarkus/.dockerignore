@@ -1,5 +1,10 @@
-*
+<!-- # Exclude everything by default -->
+<!-- * -->
+<!-- # Include essential files for build -->
+!pom.xml
+!mvnw
+!.mvn/
+!src/
+!smoke.py
+<!-- # Include necessary build artifacts for runtime stage -->
 !target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
