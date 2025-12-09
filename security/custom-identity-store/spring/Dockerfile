@@ -1,4 +1,4 @@
-FROM eclipse-temurin:11-jdk
+FROM eclipse-temurin:17-jdk
 
 USER root
 RUN apt-get update && apt-get install -y python3 python3-requests curl && rm -rf /var/lib/apt/lists/*
@@ -16,4 +16,4 @@ COPY --chown=root:root smoke.py .
 RUN chmod +x mvnw
 
 # Run Liberty from the cart-web module
-CMD ["./mvnw", "clean", "package", "liberty:run"]
+CMD ["./mvnw", "clean", "package", "spring-boot:run"]
