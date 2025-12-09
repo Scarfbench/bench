@@ -21,7 +21,7 @@ from datetime import datetime
 from playwright.sync_api import Page, sync_playwright
 
 
-DEFAULT_BASE = "http://localhost:8083"
+DEFAULT_BASE = "http://localhost:9080"
 BASE_URL = os.getenv("GUESS_NUMBER_BASE_URL", DEFAULT_BASE)
 DEFAULT_ENDPOINT = "/guessnumber-cdi"
 HOME_URI = os.getenv("GUESS_NUMBER_HOME_URI", DEFAULT_ENDPOINT)

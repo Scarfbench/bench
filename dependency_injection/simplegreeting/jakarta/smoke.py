@@ -16,7 +16,7 @@ from datetime import datetime
 from playwright.sync_api import Page, sync_playwright
 
 
-DEFAULT_BASE = "http://localhost:8086"
+DEFAULT_BASE = "http://localhost:9080"
 BASE_URL = os.getenv("SIMPLE_GREETING_BASE_URL", DEFAULT_BASE)
 DEFAULT_ENDPOINT = "/simplegreeting"
 HOME_URI = os.getenv("SIMPLE_GREETING_HOME_URI", DEFAULT_ENDPOINT)
