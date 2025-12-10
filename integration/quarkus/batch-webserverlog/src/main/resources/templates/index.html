@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The webserverlog Example Application</title>
+    <link rel="stylesheet" href="resources/css/default.css"/>
+</head>
+<body>
+    <h1>The webserverlog Example Application</h1>
+    <h2>Log file</h2>
+    <p>The batch job analyzes the following log file to determine
+        what percentage of page views from tablet devices are purchases:</p>
+    <textarea cols="90" rows="25" readonly>{jobBean.inputLog}</textarea>
+    <p></p>
+
+    <form action="/start-job" method="post">
+        <button type="submit">Start Batch Job</button>
+    </form>
+</body>
+</html>

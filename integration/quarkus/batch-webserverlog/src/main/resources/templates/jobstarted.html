@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The webserverlog Example Application</title>
+    <link rel="stylesheet" href="resources/css/default.css"/>
+</head>
+<body>
+    <h1>The webserverlog Example Application</h1>
+    <h2>Job Submitted</h2>
+    <p>Current Status of the Job: <b>{jobBean.jobStatus}</b></p>
+    <p>{jobBean.resultText}</p>
+
+    {#if !jobBean.completed}
+        <form action="/jobstarted" method="get">
+            <button type="submit">Check Status</button>
+        </form>
+    {/if}
+</body>
+</html>
