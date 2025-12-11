@@ -14,8 +14,8 @@ COPY --chown=1001:1001 src src
 
 RUN chmod +x mvnw
 
-RUN ./mvnw clean package -Dmaven.test.skip=true
+RUN ./mvnw clean package -Dmaven.test.skip=true -Pliberty
 
 EXPOSE 8080
 
-CMD ["./mvnw", "spring-boot:run"]
+CMD ["./mvnw", "liberty:dev"]

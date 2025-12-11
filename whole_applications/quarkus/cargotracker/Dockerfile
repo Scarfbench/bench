@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 USER root
 RUN apt-get update && apt-get install -y python3 curl && rm -rf /var/lib/apt/lists/*
@@ -18,4 +18,4 @@ RUN ./mvnw clean package -Dmaven.test.skip=true
 
 EXPOSE 8080
 
-CMD ["./mvnw", "spring-boot:run"]
+CMD ["./mvnw", "quarkus:dev"]
