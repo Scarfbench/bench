@@ -1,33 +1,21 @@
-FROM icr.io/appcafe/open-liberty:kernel-slim-java21-openj9-ubi-minimal
-
-ARG VERSION=1.0
-ARG REVISION=SNAPSHOT
-
-LABEL \
-  org.opencontainers.image.authors="appiepollo14" \
-  org.opencontainers.image.version="$VERSION" \
-  org.opencontainers.image.revision="$REVISION" \
-  name="realworld-example" \
-  version="$VERSION-$REVISION" \
-  summary="The OpenLiberty Realworld example" \
-  description="This image contains the Realworld API implementation running with the Open Liberty runtime."
+FROM eclipse-temurin:21-jdk
 
 USER root
+RUN apt-get update && apt-get install -y python3 curl && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -u 1001 appuser
 
-COPY --chown=1001:0 \
-    src/main/liberty/config/ \
-    /config/
+USER appuser
+WORKDIR /app
 
-RUN features.sh
+COPY --chown=1001:1001 pom.xml .
+COPY --chown=1001:1001 .mvn .mvn
+COPY --chown=1001:1001 mvnw .
+COPY --chown=1001:1001 src src
 
-COPY --chown=1001:0 \
-    target/realworld-liberty/WEB-INF/lib/postgresql*.jar \
-    /config/jdbc/
+RUN chmod +x mvnw
 
-COPY --chown=1001:0 \
-    target/realworld-liberty.war \
-    /config/dropins
+RUN ./mvnw clean package -Dmaven.test.skip=true
 
-USER 1001
+EXPOSE 8080
 
-RUN configure.sh
+CMD ["./mvnw", "liberty:dev"]
