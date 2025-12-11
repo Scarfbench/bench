@@ -19,7 +19,7 @@ from datetime import datetime
 from playwright.sync_api import Page, sync_playwright
 
 
-DEFAULT_BASE = "http://localhost:8085"
+DEFAULT_BASE = "http://localhost:9080"
 BASE_URL = os.getenv("PRODUCER_METHODS_BASE_URL", DEFAULT_BASE)
 DEFAULT_ENDPOINT = "/producermethods"
 HOME_URI = os.getenv("PRODUCER_METHODS_HOME_URI", DEFAULT_ENDPOINT)
