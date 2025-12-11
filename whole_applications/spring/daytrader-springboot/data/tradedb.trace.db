@@ -1,3 +1,0 @@
-2025-09-01 11:50:08.587639-04:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "ACCOUNTPROFILEEJB" not found (this database is empty); SQL statement:
-select * from accountprofileejb ap where ap.userid = (select profile_userid from accountejb a where a.profile_userid=?) [42104-232]
