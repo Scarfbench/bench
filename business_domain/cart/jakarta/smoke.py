@@ -293,7 +293,7 @@ def main():
     remove_book(base, "Gravity's Rainbow", should_fail=True)
 
     # Clear cart
-    # clear_cart(base)
+    clear_cart(base)
 
     elapsed = time.time() - start
     print(f"[PASS] Smoke sequence complete in {elapsed:.2f}s")
