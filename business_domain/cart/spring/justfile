@@ -1,139 +1,56 @@
 # Run `just` to see available recipes
 
-# Detect container runtime (docker or podman)
-CONTAINER_RUNTIME := `command -v docker >/dev/null 2>&1 && echo docker || (command -v podman >/dev/null 2>&1 && echo podman || echo none)`
-COMPOSE_CMD := "docker-compose"
+APP_NAME       := "cart-spring"
+IMAGE_NAME   := APP_NAME + ":latest"
+SERVER_PORT    := "8080"               # Application server internal HTTP
+HOST_PORT      := "10013"               # Host port to map to Application server's internal HTTP
+
+# Set shell
+set shell := ["bash", "-c"]
 
 # Default recipe - shows available commands
 default:
-    @echo "Using container runtime: {{CONTAINER_RUNTIME}}"
-    @echo "Using compose command: {{COMPOSE_CMD}}"
     @just --list
 
-# Build the JAR file using Maven
+# Build the docker image
 build:
-    @echo "Building the cart JAR file..."
-    ./mvnw clean package
+    docker build -f Dockerfile -t {{IMAGE_NAME}} .
+    @echo "[INFO] Built image: {{IMAGE_NAME}}"
 
-# Clean build artifacts
-clean:
-    @echo "Cleaning build artifacts..."
-    ./mvnw clean
+# Rebuild the docker image, without cache
+rebuild:
+	docker build --no-cache -f Dockerfile -t {{IMAGE_NAME}} .
+	@echo "[INFO] Rebuilt image (no cache): {{IMAGE_NAME}}"
 
-# Compile without packaging
-compile:
-    @echo "Compiling Java sources..."
-    ./mvnw compile
+# Run the app in a docker container
+up: build
+	@if docker ps --all --quiet --filter name=^/{{APP_NAME}}$ | grep -q .; then \
+		echo "[INFO] Removing existing container"; \
+		docker rm -f {{APP_NAME}} >/dev/null; \
+	fi
+	docker run -d --name {{APP_NAME}} -p {{HOST_PORT}}:{{SERVER_PORT}} {{IMAGE_NAME}}
+	@echo "[INFO] Started {{APP_NAME}}, waiting for app to start..."
+	@until docker logs {{APP_NAME}} 2>&1 | grep -Eq "Tomcat started on port {{SERVER_PORT}}|Started .* in .* seconds"; do sleep 1; done
+	@echo "[INFO] Application server started, port {{HOST_PORT}} is ready."
 
-# Run tests
-test:
-    @echo "Running tests..."
-    ./mvnw test
-
-# Build Docker image
-docker-build: build
-    @echo "Building container image with {{CONTAINER_RUNTIME}}..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{CONTAINER_RUNTIME}} build -t cart-spring:latest .
-
-# Start application with Docker Compose
-up:
-    @echo "Starting application with {{COMPOSE_CMD}}..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} up -d
-
-# Stop Docker Compose services
-down:
-    @echo "Stopping {{COMPOSE_CMD}} services..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} down
-
-# View Docker Compose logs
+# See the app logs
 logs:
-    @echo "Viewing application logs..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} logs -f
+    docker logs -f {{APP_NAME}}
 
-# Restart Docker Compose services
-restart:
-    @echo "Restarting services..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} restart
+# Stop the app
+down:
+	docker rm -f {{APP_NAME}}
+	@echo "[INFO] Container removed (if it existed)"
 
-# Build and deploy (build + docker-build + up)
-deploy: build docker-build up
-    @echo "Application deployed successfully!"
-    @echo ""
-    @echo "Access the application at: http://localhost:8080/cart/"
+# Clean up
+clean: down
+	docker rmi {{APP_NAME}}
+	@echo "[INFO] Image removed (if it existed)"
 
-# Show application status
+# Run the smoke tests
+test: up
+    @docker exec {{APP_NAME}} sh -c 'python3 /app/smoke.py'
 
-status:
-    @echo "Container services status:"
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} ps
-    @echo ""
-    @echo "Container images:"
-    {{CONTAINER_RUNTIME}} images | grep cart
-
-# View application in browser (requires xdg-open)
-open:
-    @echo "Opening application in browser..."
-    xdg-open http://localhost:8080/cart/ || echo "Please open http://localhost:8080/cart/ manually"
-
-# Complete dedeployment - stops containers, removes images, and frees all resources
-dedeploy:
-    @echo "dedeploying application..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    @echo "Stopping all containers..."
-    {{COMPOSE_CMD}} down -v || echo "No containers to stop"
-    @echo "Removing container image..."
-    {{CONTAINER_RUNTIME}} rmi cart-spring:latest || echo "Image not found"
-    @echo "Removing stopped containers and freeing ports..."
-    {{CONTAINER_RUNTIME}} container prune -f
-    @echo "Cleaning up networks..."
-    {{CONTAINER_RUNTIME}} network prune -f
-    @echo "dedeployment complete - all ports released!"
-
-# Clean Docker resources
-docker-clean:
-    @echo "Cleaning container resources..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} down --rmi local --volumes --remove-orphans
-    {{CONTAINER_RUNTIME}} rmi cart-spring:latest || echo "Image not found"
-    {{CONTAINER_RUNTIME}} system prune -f
-
-# Development workflow - use the spring boot plugin
-dev:
-    @echo "Building the projects..."
-    ./mvnw clean package
-    @echo "Starting the server..."
-    ./mvnw -f cart-app/pom.xml spring-boot:run
-
-# Check if Docker is running
-check-docker:
-    @echo "Checking container runtime status..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    @echo "Container runtime: {{CONTAINER_RUNTIME}}"
-    {{CONTAINER_RUNTIME}} --version
-    {{COMPOSE_CMD}} --version
-    {{CONTAINER_RUNTIME}} ps
-
-# Follow application logs in real-time
-tail-logs:
-    @echo "Following application logs (Ctrl+C to stop)..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} logs -f cart-spring
-
-# Execute bash shell in running container
-shell:
-    @echo "Opening shell in running container..."
-    @test "{{CONTAINER_RUNTIME}}" != "none" || (echo "Error: Neither docker nor podman is installed!" && exit 1)
-    {{COMPOSE_CMD}} exec cart-spring bash
-
-# Run the client test, make sure the server is running
-client-test:
-    @echo "Building the projects..."
-    ./mvnw clean package
-    @echo "Starting the client..."
-    ./mvnw -f cart-appclient/pom.xml spring-boot:run
+# Run the app locally
+local:
+	./mvnw clean package && java -jar cart-web/target/cart-web.jar

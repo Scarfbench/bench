@@ -1,48 +1,26 @@
-# Multi-stage build: Build stage
-FROM eclipse-temurin:11-jdk AS builder
+FROM eclipse-temurin:11-jdk
 
-# Install Maven
-RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+USER root
+RUN apt-get update && apt-get install -y python3 curl && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -u 1001 liberty
 
-# Set working directory
+# set smoke test env variables
+ENV HELLO_SERVICE_URL=http://localhost:9080/helloservice/HelloServiceBeanService
+
+USER liberty
 WORKDIR /app
 
-# Copy source code and Maven wrapper
-COPY . .
+# Copy parent POM and Maven wrapper
+COPY --chown=1001:1001 pom.xml .
+COPY --chown=1001:1001 .mvn .mvn
+COPY --chown=1001:1001 mvnw .
+COPY --chown=1001:1001 mvnw.cmd .
+COPY --chown=1001:1001 src src
+COPY --chown=1001:1001 smoke.py .
 
-# Make Maven wrapper executable
 RUN chmod +x mvnw
 
-# Build the project
-RUN ./mvnw clean package -DskipTests
+EXPOSE 9080
 
-# Runtime stage
-FROM eclipse-temurin:11-jre
-
-# Install curl and unzip
-RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
-
-# Set GlassFish version
-ENV GLASSFISH_VERSION=7.0.16
-
-# Download and install GlassFish
-RUN curl -L -o /tmp/glassfish.zip https://github.com/eclipse-ee4j/glassfish/releases/download/${GLASSFISH_VERSION}/glassfish-${GLASSFISH_VERSION}.zip && \
-    unzip /tmp/glassfish.zip -d /opt && \
-    rm /tmp/glassfish.zip && \
-    mv /opt/glassfish7 /opt/glassfish
-
-# Set environment variables
-ENV GLASSFISH_HOME=/opt/glassfish
-ENV PATH=$PATH:$GLASSFISH_HOME/bin
-
-# Configure the default domain to use port 8080 (it already exists)
-# We don't need to create a new domain, just use the existing one
-
-# Expose ports (default domain1 ports)
-EXPOSE 8080 4848 8181
-
-# Copy the WAR file from builder stage
-COPY --from=builder /app/target/helloservice.jar $GLASSFISH_HOME/glassfish/domains/domain1/autodeploy/
-
-# Start GlassFish
-CMD ["asadmin", "start-domain", "--verbose", "domain1"]
+# Default command matches your local workflow
+CMD ["./mvnw", "clean", "package", "liberty:run"]
