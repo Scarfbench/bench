@@ -1,10 +1,13 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 USER root
 RUN apt-get update && apt-get install -y python3 curl && rm -rf /var/lib/apt/lists/*
-RUN useradd -m -u 1001 spring
+RUN useradd -m -u 1001 quarkus
 
-USER spring
+# set smoke test env variables
+ENV CART_BASE_URL=http://localhost:8080/cart/api/cart
+
+USER quarkus
 WORKDIR /app
 
 # Copy all project files
@@ -22,5 +25,5 @@ RUN chmod +x mvnw
 
 EXPOSE 8080
 
-# Default command matches your local workflow, couldn't get it working with spring-boot:run
-CMD ["sh", "-c", "./mvnw clean package && java -jar cart-web/target/cart-web.jar"]
+# Default command matches your local workflow, couldn't get it working with quarkus:run
+CMD ["sh", "-c", "./mvnw clean package && java -jar cart-web/target/quarkus-app/quarkus-run.jar"]

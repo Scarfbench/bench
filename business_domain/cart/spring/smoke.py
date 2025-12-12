@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke test for Jakarta EE cart application on Open Liberty.
+"""Smoke test for Jakarta EE cart application on Quarkus.
 
 Checks:
   1) Discover reachable cart API base path.
@@ -18,8 +18,9 @@ import os
 import sys
 import time
 import json
-from urllib.request import Request, urlopen
+from urllib.request import Request, build_opener, HTTPCookieProcessor
 from urllib.error import HTTPError, URLError
+import http.cookiejar as cookiejar
 
 HEALTH_PATH = "/health"
 INITIALIZE_PATH = "/initialize"
@@ -32,6 +33,9 @@ CANDIDATES = [
     "http://localhost:9080/cart/api/cart",
     "http://localhost:8080/cart/api/cart",
 ]
+
+COOKIE_JAR = cookiejar.CookieJar()
+HTTP = build_opener(HTTPCookieProcessor(COOKIE_JAR))
 
 
 def vprint(msg: str):
@@ -48,7 +52,7 @@ def http_request(
 ):
     req = Request(url, data=data, method=method, headers=headers or {})
     try:
-        with urlopen(req, timeout=timeout) as resp:
+        with HTTP.open(req, timeout=timeout) as resp:
             status = resp.getcode()
             body = resp.read().decode("utf-8", "replace")
     except HTTPError as e:
@@ -293,7 +297,7 @@ def main():
     remove_book(base, "Gravity's Rainbow", should_fail=True)
 
     # Clear cart
-    # clear_cart(base)
+    clear_cart(base)
 
     elapsed = time.time() - start
     print(f"[PASS] Smoke sequence complete in {elapsed:.2f}s")

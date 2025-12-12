@@ -17,10 +17,8 @@
     </properties>
 
     <modules>
-        <module>cart-common</module>
-        <module>cart-service</module>
-        <module>cart-appclient</module>
-        <module>cart-app</module>
+        <module>cart-ejb</module>
+        <module>cart-web</module>
     </modules>
 
     <dependencyManagement>
@@ -37,14 +35,5 @@
 
     <build>
         <finalName>${project.artifactId}</finalName>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 </project>
