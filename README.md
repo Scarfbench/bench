@@ -1,4 +1,8 @@
-# Scarf Benchmark
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/Scarfbench/bench/blob/site/assets/images/scarf-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/Scarfbench/bench/blob/site/assets/images/scarf-light.png">
+  <img alt="Logo">
+</picture>
 
 [![Read Paper](https://img.shields.io/badge/Read-Paper-blue)](https://arxiv.org/)
 [![View on GitHub](https://img.shields.io/badge/View_on-GitHub-black?logo=github)](https://github.com/Scarfbench/bench)
@@ -278,3 +282,4 @@ If you use this benchmark in your research, please cite our paper:
 ## License
 
 See [LICENSE](LICENSE) file for details.
+
