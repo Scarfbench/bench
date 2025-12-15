@@ -7,6 +7,13 @@ from playwright.sync_api import Page, expect
 BASE_URL = "http://localhost:9080/daytrader"
 
 
+def populate_database(page: Page) -> None:
+    """Best-effort DB population via the config 'buildDB' action."""
+    page.goto(f"{BASE_URL}/config?action=buildDB", wait_until="domcontentloaded")
+    # Do not assert strongly on content, just ensure the page rendered.
+    assert "daytrader" in page.content().lower()
+
+
 @pytest.mark.smoke
 def test_global_navigation_and_health(page: Page) -> None:
     # Home / welcome page
@@ -153,6 +160,7 @@ def test_render_login_page(page: Page) -> None:
 @pytest.mark.smoke
 def test_logged_in_nav_links(page: Page) -> None:
     """After login, verify all main account navigation links work."""
+    populate_database(page)
     # Log in via the welcome page form using known demo credentials.
     page.goto(f"{BASE_URL}/welcome.jsp", wait_until="domcontentloaded")
 
@@ -204,6 +212,7 @@ def test_logged_in_nav_links(page: Page) -> None:
 @pytest.mark.smoke
 def test_register_new_user(page: Page) -> None:
     """Register a new user with $10,000 and verify account summary."""
+    populate_database(page)
     page.goto(f"{BASE_URL}/welcome.jsp", wait_until="domcontentloaded")
 
     # Click the register link from the welcome page.
