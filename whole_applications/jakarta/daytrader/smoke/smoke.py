@@ -185,7 +185,6 @@ def test_logged_in_nav_links(page: Page) -> None:
             link = page.locator(f"a[href^='{href}']")
         else:
             link = page.locator(f"a[href='{href}']")
-
         assert link.count() > 0, (
             f"Navigation link with href '{href}' not found on logged-in page"
         )
@@ -200,6 +199,55 @@ def test_logged_in_nav_links(page: Page) -> None:
         else:
             # Logoff should send us back to a login/welcome experience.
             assert "welcome.jsp" in page.url or "Log in" in page.content()
+
+
+@pytest.mark.smoke
+def test_register_new_user(page: Page) -> None:
+    """Register a new user with $10,000 and verify account summary."""
+    page.goto(f"{BASE_URL}/welcome.jsp", wait_until="domcontentloaded")
+
+    # Click the register link from the welcome page.
+    register_link = page.locator("a[href='register.jsp']")
+    assert register_link.count() > 0, "Register link not found on welcome page"
+    register_link.first.click()
+    page.wait_for_load_state("domcontentloaded")
+
+    # Build a unique user id to avoid clashes across runs.
+    import time
+
+    user_suffix = int(time.time())
+    user_id = f"smoke_user_{user_suffix}"
+
+    # Fill required registration fields.
+    page.locator("input[name='Full Name']").fill("Smoke Test User")
+    page.locator("input[name='snail mail']").fill("123 Test Street")
+    page.locator("input[name='email']").fill(f"{user_id}@example.com")
+    page.locator("input[name='user id']").fill(user_id)
+    page.locator("input[name='passwd']").fill("smoke-pass")
+    page.locator("input[name='confirm passwd']").fill("smoke-pass")
+    money_field = page.locator("input[name='money']")
+    assert money_field.count() > 0, "Opening balance field 'money' not found"
+    money_field.first.fill("10000")
+
+    submit = page.locator("input[type='submit'][value='Submit Registration']")
+    assert submit.count() > 0, "Submit Registration button not found"
+    submit.first.click()
+    page.wait_for_load_state("domcontentloaded")
+
+    html = page.content()
+    # Basic sanity: welcome message includes username.
+    assert user_id in html, "Username not shown on post-registration page"
+
+    # Verify key account summary values for a fresh $10,000 account.
+    lowered = html.lower()
+    # The labels are rendered with linebreaks and extra spaces; use
+    # whitespace-tolerant regexes based on the actual markup.
+    assert re.search(r"cash\s*balance", lowered), "Cash balance section missing"
+    assert "$ 10000.00" in html, "Cash balance is not $ 10000.00"
+    assert re.search(r"number\s*of\s*holdings", lowered), "Holdings summary missing"
+    # Expect zero holdings value in the corresponding column.
+    assert re.search(r">\s*0\s*<", html), "Expected zero holdings for new account"
+    assert re.search(r"opening\s*balance", lowered), "Opening balance section missing"
 
 
 if __name__ == "__main__":
