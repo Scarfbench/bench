@@ -62,15 +62,11 @@ COPY smoke ./smoke
 # Optionally pre-resolve Python deps so 'uv run' is fast later:
 # RUN cd smoke && uv sync
 
-# Build the Quarkus app once during image build
-# (use -DskipTests if you want it faster)
-RUN chmod +x ./mvnw && \
-    ./mvnw -B -DskipTests package
-
 # --------------------------------------------------------------------
-# Default command: run the Quarkus app via Maven
+# Default command: run the Quarkus app via Maven in dev mode
 # Note: Quarkus requires an external database and Kafka broker
+# The build will happen at runtime when the container starts
 # You can then exec into the container to run:
 #   cd smoke && uv sync && uv run playwright install chromium && uv run smoke.py
 # --------------------------------------------------------------------
-CMD ["./mvnw", "quarkus:dev"]
+CMD ["./mvnw", "quarkus:dev", "-Dquarkus.analytics.disabled=true"]

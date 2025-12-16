@@ -64,12 +64,14 @@ COPY smoke ./smoke
 
 # Build the Jakarta EE app once during image build
 # (use -DskipTests if you want it faster)
-RUN mvn -B -DskipTests package
+# Install common module to local repo so it's available for liberty:dev
+RUN mvn -B -DskipTests install
 
 # --------------------------------------------------------------------
 # Default command: run the orders-service via Liberty
 # Note: This is a multi-service application, typically run via docker-compose
+# Install common module first, then run liberty:dev for orders-service
 # You can then exec into the container to run:
 #   cd smoke && uv sync && uv run playwright install chromium && uv run smoke.py
 # --------------------------------------------------------------------
-CMD ["mvn", "-pl", "orders-service", "liberty:dev"]
+CMD ["sh", "-c", "mvn -pl common install && mvn -pl orders-service liberty:dev"]

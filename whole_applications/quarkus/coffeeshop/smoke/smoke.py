@@ -29,7 +29,7 @@ def test_navigate_to_about_section(page: Page):
     page.locator("a").filter(has_text=re.compile(r"About", re.I)).first.click()
 
     # 3. Verify page scrolls to about section or URL changes
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("load")
     expect(page.locator("body")).to_be_visible()
 
 
@@ -42,7 +42,7 @@ def test_navigate_to_menu_section(page: Page):
     page.locator("a").filter(has_text=re.compile(r"Menu", re.I)).first.click()
 
     # 3. Verify page scrolls to menu section
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("load")
     expect(page.locator("body")).to_be_visible()
 
 
@@ -52,7 +52,7 @@ def test_homepage_banner_content(page: Page):
     page.goto("http://localhost:8080/")
 
     # 2. Wait for page to load
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("load")
 
     # 3. Verify the page loaded successfully
     expect(page.locator("body")).to_be_visible()
@@ -62,7 +62,7 @@ def test_navigation_menu_persistence(page: Page):
     """Test that navigation menu is present on the page."""
     # 1. Navigate to homepage
     page.goto("http://localhost:8080/")
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state("load")
 
     # 2. Verify navigation menu is present
     menu_items = page.locator("nav a").first

@@ -6,7 +6,7 @@ from playwright.sync_api import Page, expect
 def test_coffeeshop_homepage(page: Page):
     """Test the coffee shop homepage loads correctly."""
     # 1. Navigate to the coffee shop homepage
-    page.goto("http://localhost:9081/orders-service/")
+    page.goto("http://localhost:9080/")
 
     # 2. Verify page title contains expected text
     title = page.title()
@@ -23,7 +23,7 @@ def test_coffeeshop_homepage(page: Page):
 def test_navigate_to_about_section(page: Page):
     """Test navigating to the about section."""
     # 1. Navigate to home page
-    page.goto("http://localhost:9081/orders-service/")
+    page.goto("http://localhost:9080/")
 
     # 2. Click on "About" menu item
     page.locator("a").filter(has_text=re.compile(r"About", re.I)).first.click()
@@ -36,7 +36,7 @@ def test_navigate_to_about_section(page: Page):
 def test_navigate_to_menu_section(page: Page):
     """Test navigating to the menu section."""
     # 1. Navigate to home page
-    page.goto("http://localhost:9081/orders-service/")
+    page.goto("http://localhost:9080/")
 
     # 2. Click on "Menu" menu item
     page.locator("a").filter(has_text=re.compile(r"Menu", re.I)).first.click()
@@ -49,7 +49,7 @@ def test_navigate_to_menu_section(page: Page):
 def test_homepage_banner_content(page: Page):
     """Test that the homepage has banner content."""
     # 1. Navigate to homepage
-    page.goto("http://localhost:9081/orders-service/")
+    page.goto("http://localhost:9080/")
 
     # 2. Wait for page to load
     page.wait_for_load_state("networkidle")
@@ -61,7 +61,7 @@ def test_homepage_banner_content(page: Page):
 def test_navigation_menu_persistence(page: Page):
     """Test that navigation menu is present on the page."""
     # 1. Navigate to homepage
-    page.goto("http://localhost:9081/orders-service/")
+    page.goto("http://localhost:9080/")
     page.wait_for_load_state("networkidle")
 
     # 2. Verify navigation menu is present
