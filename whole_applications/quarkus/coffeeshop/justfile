@@ -83,21 +83,65 @@ dedeploy:
     docker network prune -f
     @echo "Dedeployment complete - all ports released!"
 
+# Run Playwright-based smoke tests inside the running container
+# This assumes the application is running via docker-compose
+# This does:
+#   cd smoke
+#   uv sync
+#   uv run playwright install chromium --only-shell
+#   uv run playwright install-deps chromium
+#   uv run smoke.py
+smoke:
+	@echo "[INFO] Running smoke tests inside container..."
+	@CONTAINER_NAME=$$(docker-compose ps -q coffeeshop-quarkus 2>/dev/null || echo ""); \
+	if [ -z "$$CONTAINER_NAME" ]; then \
+		echo "[ERROR] Container not running. Please run 'just up' first."; \
+		exit 1; \
+	fi; \
+	docker exec $$CONTAINER_NAME bash -lc "cd smoke && uv sync && uv run playwright install chromium --only-shell && uv run playwright install-deps chromium && uv run smoke.py"
+
+test: smoke
+
+# Build Docker image for smoke testing (single container mode)
+build:
+	docker build -f Dockerfile -t coffeeshop-quarkus:latest .
+	@echo "[INFO] Built image: coffeeshop-quarkus:latest"
+
+# Start single container for smoke testing
+up-single: build
+	- docker rm -f coffeeshop-quarkus-single 2>/dev/null || true
+	docker run -d --name coffeeshop-quarkus-single -p 8080:8080 coffeeshop-quarkus:latest
+	@echo "[INFO] Started coffeeshop-quarkus-single container..."
+	@echo "[INFO] Waiting for application to start..."
+	@while true; do \
+		if docker logs coffeeshop-quarkus-single 2>&1 | grep -q "started in"; then \
+			echo "[INFO] Application is ready!"; \
+			break; \
+		fi; \
+		sleep 1; \
+	done
+
+# Run smoke tests on single container
+smoke-single: up-single
+	@echo "[INFO] Running smoke tests inside container coffeeshop-quarkus-single..."
+	docker exec coffeeshop-quarkus-single bash -lc "cd smoke && uv sync && uv run playwright install chromium --only-shell && uv run playwright install-deps chromium && uv run smoke.py"
+	- docker rm -f coffeeshop-quarkus-single
+
 # Show project information
 info:
-    @echo "Quarkus Coffeeshop Project Information"
-    @echo "======================================"
-    @echo "Project: coffeeshop-quarkus (Quarkus Majestic Monolith)"
-    @echo "Version: 1.0.0-SNAPSHOT"
-    @echo "Java Version: 17"
-    @echo "Framework: Quarkus 2.14.1.Final"
-    @echo ""
-    @echo "URLs when running:"
-    @echo "  Application: http://localhost:9080/"
-    @echo "  PostgreSQL: localhost:5432"
-    @echo "  Redpanda: localhost:9092"
-    @echo ""
-    @echo "Key files:"
-    @echo "  JAR file: target/quarkuscoffeeshop-majestic-monolith-1.0.0-SNAPSHOT.jar"
-    @echo "  Source: src/main/java/"
-    @echo "  Resources: src/main/resources/"
+	@echo "Quarkus Coffeeshop Project Information"
+	@echo "======================================"
+	@echo "Project: coffeeshop-quarkus (Quarkus Majestic Monolith)"
+	@echo "Version: 1.0.0-SNAPSHOT"
+	@echo "Java Version: 17"
+	@echo "Framework: Quarkus 2.14.1.Final"
+	@echo ""
+	@echo "URLs when running:"
+	@echo "  Application: http://localhost:9080/"
+	@echo "  PostgreSQL: localhost:5432"
+	@echo "  Redpanda: localhost:9092"
+	@echo ""
+	@echo "Key files:"
+	@echo "  JAR file: target/quarkuscoffeeshop-majestic-monolith-1.0.0-SNAPSHOT.jar"
+	@echo "  Source: src/main/java/"
+	@echo "  Resources: src/main/resources/"

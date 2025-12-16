@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------
-# Base image: Maven + JDK 17 for Quarkus
+# Base image: Maven + JDK 21 for Quarkus
 # --------------------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-17
+FROM maven:3.9-eclipse-temurin-21
 
 # We'll work as root for package installs (this is the default in this image)
 USER root
@@ -59,18 +59,15 @@ COPY src ./src
 # Copy smoke test project (uv project with pyproject.toml)
 COPY smoke ./smoke
 
+# Make mvnw executable (build will happen when container runs)
+RUN chmod +x ./mvnw
+
 # Optionally pre-resolve Python deps so 'uv run' is fast later:
 # RUN cd smoke && uv sync
 
-# Build the Quarkus app once during image build
-# (use -DskipTests if you want it faster)
-RUN chmod +x ./mvnw && \
-    ./mvnw -B -DskipTests package
-
 # --------------------------------------------------------------------
 # Default command: run the Quarkus app via Maven
-# Note: Quarkus requires an external database and Kafka broker
 # You can then exec into the container to run:
 #   cd smoke && uv sync && uv run playwright install chromium && uv run smoke.py
 # --------------------------------------------------------------------
-CMD ["./mvnw", "quarkus:dev"]
+CMD ["./mvnw", "quarkus:dev", "-Dquarkus.analytics.disabled=true"]
