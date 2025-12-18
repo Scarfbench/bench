@@ -3,3 +3,10 @@
 !target/*-runner.jar
 !target/lib/*
 !target/quarkus-app/*
+# Allow files needed for building
+!pom.xml
+!mvnw
+!mvnw.cmd
+!.mvn
+!src
+!smoke

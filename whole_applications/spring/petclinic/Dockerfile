@@ -1,5 +1,5 @@
 # --------------------------------------------------------------------
-# Base image: Maven + JDK 17 for Quarkus
+# Base image: Maven + JDK 17 for Spring Boot
 # --------------------------------------------------------------------
 FROM maven:3.9-eclipse-temurin-17
 
@@ -49,24 +49,26 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 # --------------------------------------------------------------------
 WORKDIR /workspace
 
-# Copy Maven wrapper and project files
+# Copy Maven project
 COPY pom.xml ./
 COPY mvnw ./
 COPY mvnw.cmd ./
 COPY .mvn ./.mvn
 COPY src ./src
 
-# Copy smoke test project (uv project with pyproject.toml)
+# Copy smoke test project (assumed to be a uv project with pyproject.toml)
 COPY smoke ./smoke
+
+# Pre-download Maven deps and build once to warm the cache
+RUN chmod +x ./mvnw && \
+    ./mvnw -B -DskipTests package
 
 # Optionally pre-resolve Python deps so 'uv run' is fast later:
 # RUN cd smoke && uv sync
 
 # --------------------------------------------------------------------
-# Default command: run the Quarkus app via Maven in dev mode
-# Note: Quarkus requires an external database and Kafka broker
-# The build will happen at runtime when the container starts
+# Default command: run the Spring Boot app via Maven
 # You can then exec into the container to run:
 #   cd smoke && uv sync && uv run playwright install chromium && uv run smoke.py
 # --------------------------------------------------------------------
-CMD ["./mvnw", "quarkus:dev", "-Dquarkus.analytics.disabled=true"]
+CMD ["./mvnw", "spring-boot:run"]

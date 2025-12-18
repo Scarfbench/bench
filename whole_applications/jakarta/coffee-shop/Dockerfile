@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------
-# Base image: Maven + JDK 17 for Quarkus
+# Base image: Maven + JDK 21 for Jakarta EE
 # --------------------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-17
+FROM maven:3.9-eclipse-temurin-21
 
 # We'll work as root for package installs (this is the default in this image)
 USER root
@@ -49,12 +49,12 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 # --------------------------------------------------------------------
 WORKDIR /workspace
 
-# Copy Maven wrapper and project files
+# Copy Maven project (multi-module)
 COPY pom.xml ./
-COPY mvnw ./
-COPY mvnw.cmd ./
-COPY .mvn ./.mvn
-COPY src ./src
+COPY common ./common
+COPY orders-service ./orders-service
+COPY barista-service ./barista-service
+COPY kitchen-service ./kitchen-service
 
 # Copy smoke test project (uv project with pyproject.toml)
 COPY smoke ./smoke
@@ -62,11 +62,16 @@ COPY smoke ./smoke
 # Optionally pre-resolve Python deps so 'uv run' is fast later:
 # RUN cd smoke && uv sync
 
+# Build the Jakarta EE app once during image build
+# (use -DskipTests if you want it faster)
+# Install common module to local repo so it's available for liberty:dev
+RUN mvn -B -DskipTests install
+
 # --------------------------------------------------------------------
-# Default command: run the Quarkus app via Maven in dev mode
-# Note: Quarkus requires an external database and Kafka broker
-# The build will happen at runtime when the container starts
+# Default command: run the orders-service via Liberty
+# Note: This is a multi-service application, typically run via docker-compose
+# Install common module first, then run liberty:dev for orders-service
 # You can then exec into the container to run:
 #   cd smoke && uv sync && uv run playwright install chromium && uv run smoke.py
 # --------------------------------------------------------------------
-CMD ["./mvnw", "quarkus:dev", "-Dquarkus.analytics.disabled=true"]
+CMD ["sh", "-c", "mvn -pl common install && mvn -pl orders-service liberty:dev"]

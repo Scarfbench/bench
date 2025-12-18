@@ -1,7 +1,7 @@
 # --------------------------------------------------------------------
-# Base image: Maven + JDK 17 for Quarkus
+# Base image: Maven + JDK (will download/manage application server)
 # --------------------------------------------------------------------
-FROM maven:3.9-eclipse-temurin-17
+FROM maven:3.9-eclipse-temurin-11
 
 # We'll work as root for package installs (this is the default in this image)
 USER root
@@ -9,10 +9,7 @@ USER root
 # --------------------------------------------------------------------
 # System deps: Python, Chromium + driver, curl (for uv installer), and Playwright dependencies
 # --------------------------------------------------------------------
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get update && \
-    apt-get upgrade -y && \
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 python3-venv python3-pip \
     curl \
@@ -49,24 +46,26 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 # --------------------------------------------------------------------
 WORKDIR /workspace
 
-# Copy Maven wrapper and project files
-COPY pom.xml ./
-COPY mvnw ./
-COPY mvnw.cmd ./
+# Copy Maven project
+COPY pom.xml .
+COPY mvnw .
+COPY mvnw.cmd .
 COPY .mvn ./.mvn
 COPY src ./src
 
-# Copy smoke test project (uv project with pyproject.toml)
+# Copy smoke test project (assumed to be a uv project with pyproject.toml)
 COPY smoke ./smoke
+
+# Make mvnw executable (build will happen when container runs)
+RUN chmod +x ./mvnw
 
 # Optionally pre-resolve Python deps so 'uv run' is fast later:
 # RUN cd smoke && uv sync
 
 # --------------------------------------------------------------------
-# Default command: run the Quarkus app via Maven in dev mode
-# Note: Quarkus requires an external database and Kafka broker
-# The build will happen at runtime when the container starts
+# Default command: run the app via Maven with Liberty profile
+# The defaultGoal in pom.xml for liberty profile is "clean package liberty:dev"
 # You can then exec into the container to run:
-#   cd smoke && uv sync && uv run playwright install chromium && uv run smoke.py
+#   uv run pytest smoke/smoke.py
 # --------------------------------------------------------------------
-CMD ["./mvnw", "quarkus:dev", "-Dquarkus.analytics.disabled=true"]
+CMD ["./mvnw", "-Pliberty"]
