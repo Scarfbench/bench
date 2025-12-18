@@ -25,17 +25,15 @@ import jakarta.inject.Inject;
 
 @RequestScoped
 public class AsyncOrderSubmitter {
-  
-  
+
   @Resource
   private ManagedExecutorService mes;
 
   @Inject
   private AsyncOrder asyncOrder;
-  
-  
+
   public Future<?> submitOrder(Integer orderID, boolean twoPhase) {
-    asyncOrder.setProperties(orderID,twoPhase);
+    asyncOrder.setProperties(orderID, twoPhase);
     return mes.submit(asyncOrder);
   }
 }
